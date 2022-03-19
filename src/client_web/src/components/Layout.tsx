@@ -3,8 +3,7 @@ import { routes } from "../config/routes";
 import { Link, NavLink } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { StoreState } from "../config/ReduxStore";
-import { generateImgUrl } from "../config/utilities";
-import { RiShieldUserLine, RiUser2Line, RiUser3Line } from "react-icons/ri";
+import { RiBarChart2Fill, RiBarChart2Line, RiBarChartFill, RiBarChartLine, RiEditBoxFill, RiEditBoxLine, RiSettings3Line, RiTableLine, RiUser3Line } from "react-icons/ri";
 
 interface Props {
   children: JSX.Element | null;
@@ -13,48 +12,32 @@ interface Props {
 }
 
 export const Layout = (props: Props) => {
-  const user = useSelector((state: StoreState) => state.user);
   const config = useSelector((state: StoreState) => state.config);
   const dispatch = useDispatch();
 
-  const renderSignedInButtons = () => {
-    const { avatar } = user;
-
+  const renderNavButtons = () => {
     return (
       <div className="flex">
-        {/* {user.token ? (
-          <div className="flex relative">
-            <NavLink className="btn-circle ml-2" to={routes.ENQUIRIES_LIST}>
-              <RiMessage2Fill className="" size={32} />
-              {config.unseenEnquiries > 0 ? (
-                <div className="absolute -right-0.5 bottom-0 rounded-full bg-red-600 p-2 py-1 text-xs font-bold text-white flex justify-center items-center">
-                  {config.unseenEnquiries}
-                </div>
-              ) : null}
-            </NavLink>
+        <NavLink to={routes.HOME}>
+          <div className="h-12 w-12 flex items-center justify-center rounded-full ml-2 bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-10">
+            <RiBarChartLine className="h-6 w-6" />
           </div>
-        ) : null} */}
-        {user.token ? (
-          <div className="flex">
-            <NavLink to={routes.PROFILE}>
-              <div className="h-12 w-12 flex items-center justify-center rounded-full ml-2 bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-10">
-                {user.avatar ? (
-                  <div
-                    className="h-12 w-12 rounded-full bg-cover bg-center bg-transparent"
-                    style={{
-                      backgroundImage: `url(${generateImgUrl({
-                        id: avatar,
-                        canisterId: user.avatar_canister_id,
-                      })})`,
-                    }}
-                  />
-                ) : (
-                  <RiUser3Line className="h-8 w-8" />
-                )}
-              </div>
-            </NavLink>
+        </NavLink>
+        <NavLink to={routes.MODEL_TYPES}>
+          <div className="h-12 w-12 flex items-center justify-center rounded-full ml-2 bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-10">
+            <RiEditBoxLine className="h-6 w-6" />
           </div>
-        ) : null}
+        </NavLink>
+        <NavLink to={routes.MODEL_TABLE_LIST}>
+          <div className="h-12 w-12 flex items-center justify-center rounded-full ml-2 bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-10">
+            <RiTableLine className="h-6 w-6" />
+          </div>
+        </NavLink>
+        <NavLink to={routes.SETTINGS}>
+          <div className="h-12 w-12 flex items-center justify-center rounded-full ml-2 bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-10">
+            <RiSettings3Line className="h-6 w-6" />
+          </div>
+        </NavLink>
       </div>
     );
   };
@@ -68,7 +51,7 @@ export const Layout = (props: Props) => {
         <div className="w-24 h-16 flex items-center justify-start pl-4"></div>
         <div className="flex-1"></div>
         <div className="w-32 h-16 flex items-center justify-end pr-4">
-          {renderSignedInButtons()}
+          {renderNavButtons()}
         </div>
       </div>
     );
@@ -98,7 +81,7 @@ export const Layout = (props: Props) => {
         </div>
         <div className="flex-1"></div>
         <div className="h-16 flex items-center justify-end mr-2 flex-1">
-          {renderSignedInButtons()}
+          {renderNavButtons()}
         </div>
       </div>
     );

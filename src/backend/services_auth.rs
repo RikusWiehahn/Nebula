@@ -1,11 +1,25 @@
-
 use crate::helpers::*;
 use crate::main::*;
 use crate::types::*;
 use crate::utilities::*;
-use ic_cdk_macros::query;
 use ic_cdk_macros::update;
 
+//
+//    ##   #    # ##### #    #    #  ####      ####  ###### #####    #    # #####
+//   #  #  #    #   #   #    #    # #         #      #        #      #    # #    #
+//  #    # #    #   #   ######    #  ####      ####  #####    #      #    # #    #
+//  ###### #    #   #   #    #    #      #         # #        #      #    # #####
+//  #    # #    #   #   #    #    # #    #    #    # #        #      #    # #
+//  #    #  ####    #   #    #    #  ####      ####  ######   #       ####  #
+
+#[update(name = "isAuthSet")]
+pub async fn is_auth_set() -> bool {
+    let auth_info_res = get_auth_info();
+    if auth_info_res.is_err() {
+        return false;
+    }
+    return true;
+}
 
 //
 //   ####  ###### ##### #    # #####
@@ -15,8 +29,8 @@ use ic_cdk_macros::update;
 //  #    # #        #   #    # #
 //   ####  ######   #    ####  #
 
-#[update(name = "setupAuthentication")]
-pub async fn setup_authentication(password: String, password_check: String) -> BasicResponse {
+#[update(name = "setAuth")]
+pub async fn set_auth(password: String, password_check: String) -> BasicResponse {
     let mut res: BasicResponse = BasicResponse::default();
     if password.len() < 64 {
         res.err = "Password must be at least 64 characters".to_string();
@@ -27,6 +41,7 @@ pub async fn setup_authentication(password: String, password_check: String) -> B
         return res;
     }
 
+    let _ = init_jwt_key().await; // init jwt key if not already done
     let mut auth_info: Authentication = Authentication::default();
     STATE.with(|state: &GlobalState| {
         let auth = state.auth.borrow();
@@ -77,7 +92,7 @@ pub async fn setup_authentication(password: String, password_check: String) -> B
 //  #    # # #    # #   ##    # #   ##
 //   ####  #  ####  #    #    # #    #
 
-#[query(name = "signIn")]
+#[update(name = "signIn")]
 pub async fn sign_in(password: String) -> BasicResponse {
     let mut res: BasicResponse = BasicResponse::default();
     let auth_info_res = get_auth_info();
@@ -86,7 +101,7 @@ pub async fn sign_in(password: String) -> BasicResponse {
         return res;
     }
     let auth_info = auth_info_res.unwrap();
-    
+
     if password.is_empty() {
         res.err = "Password is required".to_string();
         return res;
@@ -131,7 +146,11 @@ pub async fn sign_in(password: String) -> BasicResponse {
 //   ####  #    # #    # #    #  ####  ######    #      #    #  ####   ####  #    #  ####  #    # #####
 
 #[update(name = "changePassword")]
-pub async fn change_password(old_password: String, password: String, password_check: String) -> BasicResponse {
+pub async fn change_password(
+    old_password: String,
+    password: String,
+    password_check: String,
+) -> BasicResponse {
     let mut res: BasicResponse = BasicResponse::default();
     let auth_info_res = get_auth_info();
     if auth_info_res.is_err() {
@@ -186,17 +205,16 @@ pub async fn change_password(old_password: String, password: String, password_ch
     return res;
 }
 
+//                                                                                    
+//   ####  #    # ######  ####  #    #     ####  ######  ####   ####  #  ####  #    # 
+//  #    # #    # #      #    # #   #     #      #      #      #      # #    # ##   # 
+//  #      ###### #####  #      ####       ####  #####   ####   ####  # #    # # #  # 
+//  #      #    # #      #      #  #           # #           #      # # #    # #  # # 
+//  #    # #    # #      #    # #   #     #    # #      #    # #    # # #    # #   ## 
+//   ####  #    # ######  ####  #    #     ####  ######  ####   ####  #  ####  #    # 
 
-//                                                                                
-//    ##   #####  #####      ####    ##   #      #      ###### #####     # #####  
-//   #  #  #    # #    #    #    #  #  #  #      #      #      #    #    # #    # 
-//  #    # #    # #    #    #      #    # #      #      #####  #    #    # #    # 
-//  ###### #    # #    #    #      ###### #      #      #      #####     # #    # 
-//  #    # #    # #    #    #    # #    # #      #      #      #   #     # #    # 
-//  #    # #####  #####      ####  #    # ###### ###### ###### #    #    # #####  
-
-#[update(name = "addTrustedCallerId")]
-pub async fn add_trusted_caller_id(token: String, caller_id: String) -> BasicResponse {
+#[update(name = "checkSession")]
+pub async fn check_session(token: String) -> BasicResponse {
     let mut res: BasicResponse = BasicResponse::default();
     let auth_res = authenticate_token(&token);
     if auth_res.is_err() {
@@ -204,30 +222,20 @@ pub async fn add_trusted_caller_id(token: String, caller_id: String) -> BasicRes
         return res;
     }
 
-    if caller_id.is_empty() {
-        res.err = "Caller ID is required".to_string();
-        return res;
-    }
-    
-    STATE.with(|state: &GlobalState| {
-        let mut auth = state.auth.borrow_mut();
-        auth.trusted_caller_ids.push(caller_id);
-    });
-    
-    res.ok = Some("Caller ID added".to_string());
+    res.ok = Some("Session is valid".to_string());
     return res;
 }
 
-//                                                                                                     
-//  #####  ###### #    #  ####  #    # ######     ####    ##   #      #      ###### #####     # #####  
-//  #    # #      ##  ## #    # #    # #         #    #  #  #  #      #      #      #    #    # #    # 
-//  #    # #####  # ## # #    # #    # #####     #      #    # #      #      #####  #    #    # #    # 
-//  #####  #      #    # #    # #    # #         #      ###### #      #      #      #####     # #    # 
-//  #   #  #      #    # #    #  #  #  #         #    # #    # #      #      #      #   #     # #    # 
-//  #    # ###### #    #  ####    ##   ######     ####  #    # ###### ###### ###### #    #    # #####  
+//
+//    ##   #####  #####      ####    ##   #      #      ###### #####     # #####
+//   #  #  #    # #    #    #    #  #  #  #      #      #      #    #    # #    #
+//  #    # #    # #    #    #      #    # #      #      #####  #    #    # #    #
+//  ###### #    # #    #    #      ###### #      #      #      #####     # #    #
+//  #    # #    # #    #    #    # #    # #      #      #      #   #     # #    #
+//  #    # #####  #####      ####  #    # ###### ###### ###### #    #    # #####
 
-#[update(name = "removeTrustedCallerId")]
-pub async fn remove_trusted_caller_id(token: String, caller_id: String) -> BasicResponse {
+#[update(name = "addTrustedCanisterId")]
+pub async fn add_trusted_canister_id(token: String, canister_id: String) -> BasicResponse {
     let mut res: BasicResponse = BasicResponse::default();
     let auth_res = authenticate_token(&token);
     if auth_res.is_err() {
@@ -235,28 +243,59 @@ pub async fn remove_trusted_caller_id(token: String, caller_id: String) -> Basic
         return res;
     }
 
-    if caller_id.is_empty() {
-        res.err = "Caller ID is required".to_string();
+    if canister_id.is_empty() {
+        res.err = "Canister ID is required".to_string();
         return res;
     }
-    
+
+    STATE.with(|state: &GlobalState| {
+        let mut auth = state.auth.borrow_mut();
+        auth.trusted_canister_ids.push(canister_id);
+    });
+
+    res.ok = Some("Canister ID added".to_string());
+    return res;
+}
+
+//
+//  #####  ###### #    #  ####  #    # ######     ####    ##   #      #      ###### #####     # #####
+//  #    # #      ##  ## #    # #    # #         #    #  #  #  #      #      #      #    #    # #    #
+//  #    # #####  # ## # #    # #    # #####     #      #    # #      #      #####  #    #    # #    #
+//  #####  #      #    # #    # #    # #         #      ###### #      #      #      #####     # #    #
+//  #   #  #      #    # #    #  #  #  #         #    # #    # #      #      #      #   #     # #    #
+//  #    # ###### #    #  ####    ##   ######     ####  #    # ###### ###### ###### #    #    # #####
+
+#[update(name = "removeTrustedCanisterId")]
+pub async fn remove_trusted_canister_id(token: String, canister_id: String) -> BasicResponse {
+    let mut res: BasicResponse = BasicResponse::default();
+    let auth_res = authenticate_token(&token);
+    if auth_res.is_err() {
+        res.err = auth_res.err().unwrap();
+        return res;
+    }
+
+    if canister_id.is_empty() {
+        res.err = "Canister ID is required".to_string();
+        return res;
+    }
+
     let mut found = false;
     STATE.with(|state: &GlobalState| {
         let mut auth = state.auth.borrow_mut();
-        for existing_caller_id in auth.trusted_caller_ids.iter() {
-            if existing_caller_id == &caller_id {
+        for existing_canister_id in auth.trusted_canister_ids.iter() {
+            if existing_canister_id == &canister_id {
                 found = true;
                 break;
             }
-        }   
-        auth.trusted_caller_ids.retain(|id| id != &caller_id);
+        }
+        auth.trusted_canister_ids.retain(|id| id != &canister_id);
     });
 
     if !found {
-        res.err = "Caller ID not found".to_string();
+        res.err = "Canister ID not found".to_string();
         return res;
     }
-    
-    res.ok = Some("Caller ID removed".to_string());
+
+    res.ok = Some("Canister ID removed".to_string());
     return res;
 }

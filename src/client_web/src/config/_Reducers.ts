@@ -1,14 +1,10 @@
 import {
   ConfigState,
   EMPTY_CONFIG_STATE,
-  EMPTY_FOLDER,
-  EMPTY_GROUP,
-  EMPTY_PAGE,
-  EMPTY_USER_ACCOUNT,
-  Folder,
-  Group,
-  Page,
-  UserAccount,
+  AuthSession,
+  EMPTY_AUTH_SESSION,
+  EMPTY_TELEMETRY,
+  Telemetry,
 } from "./_Interfaces";
 
 export const ConfigReducer = (
@@ -30,15 +26,15 @@ export const ConfigReducer = (
   }
 };
 
-export const UserAccountReducer = (
-  state: UserAccount = { ...EMPTY_USER_ACCOUNT },
+export const AuthSessionReducer = (
+  state: AuthSession = { ...EMPTY_AUTH_SESSION },
   action: {
-    type: "USER_ACCOUNT_REDUCER";
-    payload: UserAccount;
+    type: "AUTH_SESSION_REDUCER";
+    payload: AuthSession;
   }
 ) => {
   switch (action.type) {
-    case "USER_ACCOUNT_REDUCER": {
+    case "AUTH_SESSION_REDUCER": {
       return {
         ...state,
         ...action.payload,
@@ -49,53 +45,15 @@ export const UserAccountReducer = (
   }
 };
 
-export const GroupReducer = (
-  state: Group = { ...EMPTY_GROUP },
+export const TelemetryReducer = (
+  state: Telemetry = { ...EMPTY_TELEMETRY },
   action: {
-    type: "GROUP_REDUCER";
-    payload: Group;
+    type: "TELEMETRY_REDUCER";
+    payload: Telemetry;
   }
 ) => {
   switch (action.type) {
-    case "GROUP_REDUCER": {
-      return {
-        ...state,
-        ...action.payload,
-      };
-    }
-    default:
-      return state;
-  }
-};
-
-export const FolderReducer = (
-  state: Folder = { ...EMPTY_FOLDER },
-  action: {
-    type: "FOLDER_REDUCER";
-    payload: Folder;
-  }
-) => {
-  switch (action.type) {
-    case "FOLDER_REDUCER": {
-      return {
-        ...state,
-        ...action.payload,
-      };
-    }
-    default:
-      return state;
-  }
-};
-
-export const PageReducer = (
-  state: Page = { ...EMPTY_PAGE },
-  action: {
-    type: "PAGE_REDUCER";
-    payload: Page;
-  }
-) => {
-  switch (action.type) {
-    case "PAGE_REDUCER": {
+    case "TELEMETRY_REDUCER": {
       return {
         ...state,
         ...action.payload,

@@ -3,34 +3,28 @@ import autoMergeLevel2 from "redux-persist/es/stateReconciler/autoMergeLevel2";
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 // default reducers
-import { ConfigState, Folder, Group, Page, UserAccount } from "./_Interfaces";
+import { ConfigState, AuthSession, Telemetry } from "./_Interfaces";
 import {
   ConfigReducer,
-  FolderReducer,
-  GroupReducer,
-  PageReducer,
-  UserAccountReducer,
+  AuthSessionReducer,
+  TelemetryReducer,
 } from "./_Reducers";
 
 export interface StoreState {
   config: ConfigState;
-  user: UserAccount;
-  group: Group;
-  folder: Folder;
-  page: Page;
+  auth: AuthSession;
+  telemetry: Telemetry;
 }
 
 const reducers: any = combineReducers<StoreState>({
   config: ConfigReducer,
-  user: UserAccountReducer,
-  group: GroupReducer,
-  folder: FolderReducer,
-  page: PageReducer,
+  auth: AuthSessionReducer,
+  telemetry: TelemetryReducer,
 });
 
 const persistConfig = {
   key: "root",
-  whitelist: ["config", "user",],
+  whitelist: ["config", "auth"],
   storage,
   // There is an issue in the source code of redux-persist (default setTimeout does not cleaning)
   timeout: 0, // <-- code checks for falsey so this should disable it

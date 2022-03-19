@@ -1,7 +1,6 @@
 use crate::main::*;
 use crate::types::*;
 use crate::utilities::*;
-use ic_cdk::export::candid::{CandidType, Deserialize};
 
 //
 //   ####  ###### #####      ##   #    # ##### #    #

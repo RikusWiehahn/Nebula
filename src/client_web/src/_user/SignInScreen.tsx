@@ -1,42 +1,33 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { backend } from "../../../declarations/backend";
 import { LoadingIndicator } from "../components/LoadingIndicator";
 import { StoreState } from "../config/ReduxStore";
 import { ErrorToast, SuccessToast } from "../config/toast";
-import { updateUserAccount } from "../config/_Actions";
-import { CreateAccountUtility } from "./CreateAccountUtility";
+import { updateAuthSession } from "../config/_Actions";
 
 export const SignInScreen = () => {
   const [loading, setLoading] = React.useState(false);
-  const user = useSelector((s: StoreState) => s.user);
+  const auth = useSelector((s: StoreState) => s.auth);
   const config = useSelector((s: StoreState) => s.config);
+  const [isActivated, setIsActivated] = React.useState(false);
   const [state, setState] = React.useState({
-    email: "",
     password: "",
+    passwordCheck: "",
   });
   const dispatch = useDispatch();
-  const passwordInput: any = React.useRef(null);
 
-  const signInWithEmail = async () => {
+  useEffect(() => {
+    isAuthSet();
+  }, []);
+
+  const isAuthSet = async () => {
     try {
       setLoading(true);
-      const sign_in_res = await backend.signInWithEmail(
-        state.email,
-        state.password
-      );
-      if (sign_in_res.err) throw new Error(sign_in_res.err);
-      if (!sign_in_res.ok[0]) throw new Error("Failed to sign in, no token returned.");
-      const user_res = await backend.getUserWithToken(sign_in_res.ok[0]);
-      if (user_res.err) throw new Error(user_res.err);
-      dispatch(
-        updateUserAccount({
-          ...user,
-          ...user_res.ok[0],
-          token: sign_in_res.ok[0],
-        })
-      );
-      SuccessToast(`Welcome back, ${user.given_name}!`);
+      const is_auth_set = await backend.isAuthSet();
+      if (is_auth_set) {
+        setIsActivated(true);
+      }
       setLoading(false);
     } catch (e: any) {
       ErrorToast(e.message);
@@ -44,7 +35,52 @@ export const SignInScreen = () => {
     }
   };
 
-  const renderForm = () => {
+  const signIn = async () => {
+    try {
+      setLoading(true);
+      const sign_in_res = await backend.signIn(state.password);
+      if (sign_in_res.err) throw new Error(sign_in_res.err);
+      if (!sign_in_res.ok[0])
+        throw new Error("Failed to sign in, no token returned.");
+      dispatch(
+        updateAuthSession({
+          ...auth,
+          token: sign_in_res.ok[0],
+        })
+      );
+      SuccessToast(`Welcome back!`);
+      setLoading(false);
+    } catch (e: any) {
+      ErrorToast(e.message);
+      setLoading(false);
+    }
+  };
+
+  const setAuth = async () => {
+    try {
+      setLoading(true);
+      const set_auth_res = await backend.setAuth(
+        state.password,
+        state.passwordCheck
+      );
+      if (set_auth_res.err) throw new Error(set_auth_res.err);
+      if (!set_auth_res.ok[0])
+        throw new Error("Failed to sign in, no token returned.");
+      dispatch(
+        updateAuthSession({
+          ...auth,
+          token: set_auth_res.ok[0],
+        })
+      );
+      SuccessToast(`Welcome!`);
+      setLoading(false);
+    } catch (e: any) {
+      ErrorToast(e.message);
+      setLoading(false);
+    }
+  };
+
+  const renderSignInForm = () => {
     return (
       <div
         className="p-6 rounded-md bg-white dark:bg-gray-800"
@@ -56,52 +92,73 @@ export const SignInScreen = () => {
         <h2 className="text-2xl mb-2 mt-2 font-bold text-center">
           Welcome to Gondolin
         </h2>
-        <label className="input-label">email</label>
-        <input
-          id="email-input"
-          placeholder="turgon@email.com"
-          className="input-primary mb-4 mt-1"
-          name="email"
-          value={state.email}
-          onChange={({ target }) => setState({ ...state, email: target.value })}
-          onKeyPress={(ev: React.KeyboardEvent<HTMLInputElement>) => {
-            if (ev.key === "Enter") {
-              passwordInput.current?.focus();
-            }
-          }}
-        />
         <label className="input-label">Password</label>
         <input
           id="password-input"
           type="password"
-          placeholder="********"
+          placeholder="************************************************************"
           className="input-primary mb-4 mt-1"
           name="password"
           value={state.password}
-          ref={passwordInput}
           onChange={({ target }) =>
             setState({ ...state, password: target.value })
           }
           onKeyPress={(ev) => {
             if (ev.key === "Enter") {
-              signInWithEmail();
+              signIn();
             }
           }}
         />
-        <button onClick={signInWithEmail} className="btn-primary w-full">
+        <button onClick={signIn} className="btn-primary w-full">
           Sign in
         </button>
-        <div className="flex items-center">
-          <div className="flex-1 border-b-2" />
-          <div className="p-2">or</div>
-          <div className="flex-1 border-b-2" />
-        </div>
-        <CreateAccountUtility />
-        <button
-          // onClick={signInUser}
-          className="btn-menu justify-center w-full"
-        >
-          Forgot password?
+      </div>
+    );
+  };
+
+  const renderSetAuthForm = () => {
+    return (
+      <div
+        className="p-6 rounded-md bg-white dark:bg-gray-800"
+        style={{ maxWidth: "24rem" }}
+      >
+        <img
+          src={config.uiMode === "dark" ? "logo-white.png" : "logo-black.png"}
+        />
+        <h2 className="text-2xl mb-2 mt-2 font-bold text-center">
+          Welcome to Gondolin
+        </h2>
+        <label className="input-label">Password</label>
+        <input
+          id="password-input"
+          type="password"
+          placeholder="60 characters minimum"
+          className="input-primary mb-4 mt-1"
+          name="password"
+          value={state.password}
+          onChange={({ target }) =>
+            setState({ ...state, password: target.value })
+          }
+        />
+        <label className="input-label">Password Check</label>
+        <input
+          id="password-check-input"
+          type="password"
+          placeholder="60 characters minimum"
+          className="input-primary mb-4 mt-1"
+          name="password"
+          value={state.passwordCheck}
+          onChange={({ target }) =>
+            setState({ ...state, passwordCheck: target.value })
+          }
+          onKeyPress={(ev) => {
+            if (ev.key === "Enter") {
+              setAuth();
+            }
+          }}
+        />
+        <button onClick={setAuth} className="btn-primary w-full">
+          Activate
         </button>
       </div>
     );
@@ -109,7 +166,13 @@ export const SignInScreen = () => {
 
   return (
     <div className="min-h-screen w-screen flex justify-center items-center p-4 bg-gray-300 dark:bg-gray-900 text-gray-700 dark:text-white">
-      {loading ? <LoadingIndicator /> : renderForm()}
+      {loading ? (
+        <LoadingIndicator />
+      ) : isActivated ? (
+        renderSignInForm()
+      ) : (
+        renderSetAuthForm()
+      )}
     </div>
   );
 };

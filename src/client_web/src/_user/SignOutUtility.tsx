@@ -5,14 +5,12 @@ import { ModalWrapper } from "../components/ModalWrapper";
 import { routes } from "../config/routes";
 import { SuccessToast } from "../config/toast";
 import {
+  updateAuthSession,
   updateConfigState,
-  updateGroupState,
-  updateUserAccount,
 } from "../config/_Actions";
 import {
+  EMPTY_AUTH_SESSION,
   EMPTY_CONFIG_STATE,
-  EMPTY_GROUP,
-  EMPTY_USER_ACCOUNT,
 } from "../config/_Interfaces";
 
 export const SignOutUtility = () => {
@@ -21,11 +19,10 @@ export const SignOutUtility = () => {
   const navigate = useNavigate();
 
   const logout = async () => {
-    dispatch(updateUserAccount({ ...EMPTY_USER_ACCOUNT }));
+    dispatch(updateAuthSession({ ...EMPTY_AUTH_SESSION }));
     dispatch(updateConfigState({ ...EMPTY_CONFIG_STATE }));
-    dispatch(updateGroupState({ ...EMPTY_GROUP }));
     setShowModal(false);
-    SuccessToast("Logged out successfully");
+    SuccessToast("Signed out successfully");
     navigate(routes.HOME, { replace: true });
   };
 

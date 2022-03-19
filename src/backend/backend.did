@@ -1,223 +1,44 @@
-//                              
-//  #    #  ####  ###### #####  
-//  #    # #      #      #    # 
-//  #    #  ####  #####  #    # 
-//  #    #      # #      #####  
-//  #    # #    # #      #   #  
-//   ####   ####  ###### #    # 
-
-type User = record {
-    "id": text;
-    "given_name": text;
-    "family_name": text;
-    "email": text;
-    "email_verified": bool;
-    "last_active": float64;
-    "avatar": text;
-    "avatar_canister_id": text;
-    "password_hash": text;
-    "groups": vec text;
-};
-
-type CreateUser = record {
-    "invite_token": text;
-    "given_name": text;
-    "family_name": text;
-    "email": text;
-    "password": text;
-    "password_check": text;
-};
-
-type UserResponse = record {
-    "ok": opt User;
-    "err": text;
-};
-
-type UserListResponse = record {
-    "ok": vec User;
-    "err": text;
-};
-
 type BasicResponse = record {
     "ok": opt text;
     "err": text;
 };
 
-//                                     
-//   ####  #####   ####  #    # #####  
-//  #    # #    # #    # #    # #    # 
-//  #      #    # #    # #    # #    # 
-//  #  ### #####  #    # #    # #####  
-//  #    # #   #  #    # #    # #      
-//   ####  #    #  ####   ####  #      
+type DefiniteCanisterSettings = record {
+  controllers : vec principal;
+  compute_allocation : nat;
+  memory_allocation : nat;
+  freezing_threshold : nat;
+};
 
-type Group = record {
+type SubCanisterTelemetry = record {
+    "last_status_check": float64;
     "id": text;
-    "name": text;
-    "avatar": text;
-    "avatar_canister_id": text;
-    "members": vec text;
-    "admins": vec text;
-    "folders": vec text;
-    "succession_timer_duration": float64;
-    "proposals": vec text;
-    "proposal_vote_threshold": float64;
+    "settings": DefiniteCanisterSettings;
+    "status": text;
+    "module_hash": text;
+    "memory_size": float64;
+    "cycles": float64;
 };
 
-type CreateGroup = record {
-    "name": text;
-    "succession_timer_duration": float64;
-    "proposal_vote_threshold": float64;
+type Telemetry = record {
+    "last_status_check": float64;
+    "main_id": text;
+    "main_memory_size": float64;
+    "main_memory_used": float64;
+    "main_cycles": float64;
+    "sub_canisters": vec SubCanisterTelemetry;
 };
 
-type GroupResponse = record {
-    "ok": opt Group;
-    "err": text;
-};
-
-type GroupListResponse = record {
-    "ok": vec Group;
-    "err": text;
-};
-
-//                                                          
-//  #####  #####   ####  #####   ####   ####    ##   #      
-//  #    # #    # #    # #    # #    # #       #  #  #      
-//  #    # #    # #    # #    # #    #  ####  #    # #      
-//  #####  #####  #    # #####  #    #      # ###### #      
-//  #      #   #  #    # #      #    # #    # #    # #      
-//  #      #    #  ####  #       ####   ####  #    # ###### 
-
-type Proposal = record {
-    "id": text;
-    "group_id": text;
-    "proposal_type": text;
-    "proposed_by": text;
-    "created_at": float64;
-    "payload": text;
-    "votes_for": vec text;
-    "votes_against": vec text;
-    "proposal_resolution_count": float64;
-    "adopted": bool;
-    "pending": bool;
-    "result_message": text;
-};
-
-type CreateProposal = record {
-    "group_id": text;
-    "proposal_type": text;
-    "payload": text;
-};
-
-type Vote = record {
-    "proposal_id": text;
-    "is_for": bool;
-};
-
-type ProposalListResponse = record {
-    "ok": vec Proposal;
-    "err": text;
-};
-
-//                                            
-//  ######  ####  #      #####  ###### #####  
-//  #      #    # #      #    # #      #    # 
-//  #####  #    # #      #    # #####  #    # 
-//  #      #    # #      #    # #      #####  
-//  #      #    # #      #    # #      #   #  
-//  #       ####  ###### #####  ###### #    # 
-
-type Folder = record {
-    "id": text;
-    "group_id": text;
-    "name": text;
-    "owners": vec text;
-    "viewers": vec text;
-    "successors": vec text;
-    "pages": vec text;
-    "succession_time_from": float64;
-};
-
-type CreateFolder = record {
-    "group_id": text;
-    "name": text;
-    "viewers": vec text;
-    "owners": vec text;
-    "successors": vec text;
-};
-
-type ChangeFolderUsers = record {
-    "folder_id": text;
-    "viewers": vec text;
-    "owners": vec text;
-    "successors": vec text;
-};
-
-type FolderResponse = record {
-    "ok": opt Folder;
-    "err": text;
-};
-
-type FolderListResponse = record {
-    "ok": vec Folder;
-    "err": text;
-};
-
-//                              
-//  #####    ##    ####  ###### 
-//  #    #  #  #  #    # #      
-//  #    # #    # #      #####  
-//  #####  ###### #  ### #      
-//  #      #    # #    # #      
-//  #      #    #  ####  ###### 
-
-type Page = record {
-    "id": text;
-    "folder_id": text;
-    "name": text;
-    "created_at": float64;
-    "updated_at": float64;
-    "content": vec text;
-};
-
-type CreatePage = record {
-    "folder_id": text;
-    "name": text;
-};
-
-
-type PageResponse = record {
-    "ok": opt Page;
-    "err": text;
-};
-
-type PageListResponse = record {
-     "ok": vec Page;
+type TelemetryResponse = record {
+    "ok": opt Telemetry;
     "err": text;
 };
 
 service : {
-    "createUser": (CreateUser) -> (BasicResponse);
-    "getUserWithToken": (text) -> (UserResponse) query;
-    "getUserGroups": (text) -> (GroupListResponse) query;
-    "signInWithEmail": (text, text) -> (BasicResponse);
-    "editUser": (text, User) -> (UserResponse);
-    "editUserEmail": (text, text) -> (UserResponse);
-    "verifyUserEmail": (text) -> (BasicResponse);
-    "createGroup": (text, CreateGroup) -> (BasicResponse);
-    "getGroup": (text, text) -> (GroupResponse) query;
-    "getGroupMembers": (text, text) -> (UserListResponse) query;
-    "getGroupFolders": (text, text) -> (FolderListResponse) query;
-    "getGroupProposals": (text, text) -> (ProposalListResponse) query;
-    "createProposal": (text, CreateProposal) -> (GroupResponse);
-    "voteOnProposal": (text, Vote) -> (BasicResponse);
-    "createFolder": (text, CreateFolder) -> (GroupResponse);
-    "getFolder": (text, text) -> (FolderResponse) query;
-    "deleteFolder": (text, text) -> (GroupResponse);
-    "changeFolderUsers": (text, ChangeFolderUsers) -> (FolderResponse);
-    "getFolderPages": (text, text) -> (PageListResponse) query;
-    "createPage": (text, CreatePage) -> (BasicResponse);
-    "getPage": (text, text) -> (PageResponse) query;
-    "updatePage": (text, Page) -> (PageResponse);
-    "deletePage": (text, text) -> (BasicResponse);
+    "isAuthSet": () -> (bool);
+    "setAuth": (text, text) -> (BasicResponse);
+    "signIn": (text) -> (BasicResponse);
+    "changePassword": (text, text,text) -> (BasicResponse);
+    "checkSession": (text) -> (BasicResponse);
+    "getSystemTelemetry": (text) -> (TelemetryResponse);
 }
