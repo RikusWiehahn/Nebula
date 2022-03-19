@@ -1,0 +1,65 @@
+{
+  "name": "client_web",
+  "version": "0.1.0",
+  "description": "Internet Computer starter application",
+  "keywords": [
+    "Internet Computer",
+    "Motoko",
+    "JavaScript",
+    "Canister"
+  ],
+  "scripts": {
+    "build": "webpack",
+    "prebuild": "npm run copy:types",
+    "start": "webpack serve --mode development --env development",
+    "prestart": "npm run copy:types",
+    "copy:types": "rsync -avr .dfx/$(echo ${DFX_NETWORK:-'**'})/canisters/** --exclude='assets/' --exclude='idl/' --exclude='*.wasm' --delete src/declarations"
+  },
+  "devDependencies": {
+    "@dfinity/agent": "0.10.3",
+    "@dfinity/candid": "0.10.3",
+    "@dfinity/principal": "0.10.3",
+    "@types/react-dom": "^17.0.11",
+    "assert": "2.0.0",
+    "autoprefixer": "^10.4.2",
+    "buffer": "6.0.3",
+    "copy-webpack-plugin": "^9.0.1",
+    "css-loader": "^6.6.0",
+    "events": "3.3.0",
+    "html-webpack-plugin": "5.5.0",
+    "mini-css-extract-plugin": "^2.5.3",
+    "postcss": "^8.4.7",
+    "postcss-loader": "^6.2.1",
+    "process": "0.11.10",
+    "redux-logger": "^3.0.6",
+    "stream-browserify": "3.0.0",
+    "style-loader": "^3.3.1",
+    "tailwindcss": "^3.0.23",
+    "terser-webpack-plugin": "5.2.5",
+    "ts-loader": "^9.2.6",
+    "typescript": "^4.5.5",
+    "util": "0.12.4",
+    "webpack": "5.63.0",
+    "webpack-cli": "4.9.1",
+    "webpack-dev-server": "^4.4.0"
+  },
+  "browserslist": [
+    "last 2 chrome version",
+    "last 2 firefox version",
+    "last 2 safari version",
+    "last 2 edge version"
+  ],
+  "dependencies": {
+    "@emotion/react": "^11.8.1",
+    "@emotion/styled": "^11.8.1",
+    "@mui/material": "^5.4.3",
+    "dayjs": "^1.10.8",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-icons": "^4.3.1",
+    "react-redux": "^7.2.6",
+    "react-router-dom": "^6.2.1",
+    "react-toastify": "^8.2.0",
+    "redux-persist": "^6.0.0"
+  }
+}
