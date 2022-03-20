@@ -5,6 +5,11 @@
       "package": "backend",
       "type": "rust"
     },
+    "bucket": {
+      "candid": "src/bucket/bucket.did",
+      "package": "bucket",
+      "type": "rust"
+    },
     "client_web": {
       "dependencies": [
         "backend"
@@ -25,7 +30,7 @@
       "packtool": ""
     }
   },
-  "dfx": "0.8.4",
+  "dfx": "0.9.2",
   "networks": {
     "local": {
       "bind": "127.0.0.1:8000",

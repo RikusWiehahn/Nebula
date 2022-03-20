@@ -4,6 +4,7 @@ use ic_cdk::api::*;
 use ic_cdk_macros::update;
 
 
+
 // // get management canister
 // let management_canister = Principal::from_text("aaaaa-aa").unwrap();
 //   let canister_id_record = CanisterIdRecord {
@@ -65,3 +66,4 @@ pub async fn get_telemetry() -> TelemetryResponse {
     res.ok = Some(telemetry);
     return res;
 }
+

@@ -170,6 +170,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "bucket"
+version = "0.1.0"
+dependencies = [
+ "getrandom",
+ "hmac",
+ "ic-cdk",
+ "ic-cdk-macros",
+ "jwt",
+ "rust-argon2",
+ "serde",
+ "serde_bytes",
+ "serde_json",
+ "sha2 0.10.2",
+ "uuid",
+]
+
+[[package]]
 name = "bumpalo"
 version = "3.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"

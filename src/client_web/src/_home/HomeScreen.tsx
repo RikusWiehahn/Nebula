@@ -69,7 +69,7 @@ export const HomeScreen = () => {
             `${(telemetry.main_memory_size / 1000).toFixed(2)} kB`
           )}
           {renderStat(
-            "Main canister total memory used",
+            "Main canister memory used",
             `${(telemetry.main_memory_used / 1000).toFixed(2)} kB`
           )}
         </div>

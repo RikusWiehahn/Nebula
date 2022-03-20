@@ -178,7 +178,6 @@ pub fn decode_id_from_token(token: &str) -> Result<String, String> {
         return Err("Failed to decode token".to_string());
     }
     let payload: Payload = payload_res.unwrap();
-    println!("{:?}", payload);
     if payload.id.len() == 0 {
         return Err("Invalid token".to_string());
     }

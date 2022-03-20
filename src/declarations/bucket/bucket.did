@@ -1,0 +1,36 @@
+type BasicResponse = record {
+    "ok": opt text;
+    "err": text;
+};
+
+type ModelDataFieldType = record {
+    "field_name": text;
+    "data_type": text;
+    "default_json_value": text;
+};
+
+/* 
+    Data Types:
+    "STRING"
+    "NUMBER"
+    "BOOLEAN"
+    "STRING_ARRAY"
+    "NUMBER_ARRAY"
+*/
+
+type ModelInstanceResponse = record {
+    "json": opt string;
+    "err": text;
+};
+
+service : {
+    "setAdminCanister": (record { canister_id: text }) -> (BasicResponse);
+    "checkIfAdminCanister": () -> (BasicResponse);
+    "initModel": (record { model_name: text }) -> (BasicResponse);
+    "addField": (ModelDataFieldType) -> (BasicResponse);
+    "removeField": (record { field_name: text }) -> (BasicResponse);
+    "createInstance": (record { id: text; json: text; }) -> (ModelInstanceResponse);
+    "updateInstance": (record { id: text; json: text; }) -> (ModelInstanceResponse);
+    "getInstance": (record { id: text }) -> (ModelInstanceResponse);
+    "deleteInstance": (record { id: text }) -> (BasicResponse);
+}
