@@ -48,6 +48,27 @@ pub fn find_data_field(field_name: &str) -> Result<ModelDataFieldType, String> {
 }
 
 //
+//  #    #   ##   #      # #####    ##   ##### ######    ###### # ###### #      #####     ##### #   # #####  ######
+//  #    #  #  #  #      # #    #  #  #    #   #         #      # #      #      #    #      #    # #  #    # #
+//  #    # #    # #      # #    # #    #   #   #####     #####  # #####  #      #    #      #     #   #    # #####
+//  #    # ###### #      # #    # ######   #   #         #      # #      #      #    #      #     #   #####  #
+//   #  #  #    # #      # #    # #    #   #   #         #      # #      #      #    #      #     #   #      #
+//    ##   #    # ###### # #####  #    #   #   ######    #      # ###### ###### #####       #     #   #      ######
+
+pub fn validate_data_field_type(data_type: &str) -> Result<(), String> {
+    // validate data field type
+    if data_type != "BOOLEAN".to_string()
+        && data_type != "STRING".to_string()
+        && data_type != "NUMBER".to_string()
+        && data_type != "NUMBER_ARRAY".to_string()
+        && data_type != "STRING_ARRAY".to_string()
+    {
+        return Err("Data field type not valid".to_string());
+    }
+    return Ok(());
+}
+
+//
 //  #    #   ##   #      # #####    ##   ##### ######    #    #   ##   #      #    # ######
 //  #    #  #  #  #      # #    #  #  #    #   #         #    #  #  #  #      #    # #
 //  #    # #    # #      # #    # #    #   #   #####     #    # #    # #      #    # #####
@@ -161,9 +182,10 @@ pub fn get_instance_as_json(instance_id: &str) -> Result<String, String> {
 
         if data_field_opt.is_some() {
             let data_field = data_field_opt.unwrap();
-            let data_field_value: serde_json::Result<Value> = serde_json::from_str(&data_field.json_value);
-            if data_field_value.is_ok() {  
-              instance_json[data_field_name.as_str()] = data_field_value.unwrap();
+            let data_field_value: serde_json::Result<Value> =
+                serde_json::from_str(&data_field.json_value);
+            if data_field_value.is_ok() {
+                instance_json[data_field_name.as_str()] = data_field_value.unwrap();
             }
         }
     }

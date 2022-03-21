@@ -30,7 +30,12 @@ pub async fn is_auth_set() -> bool {
 //   ####  ######   #    ####  #
 
 #[update(name = "setAuth")]
-pub async fn set_auth(password: String, password_check: String) -> BasicResponse {
+pub async fn set_auth(
+    SetAuth {
+        password,
+        password_check,
+    }: SetAuth,
+) -> BasicResponse {
     let mut res: BasicResponse = BasicResponse::default();
     if password.len() < 64 {
         res.err = "Password must be at least 64 characters".to_string();
@@ -93,7 +98,7 @@ pub async fn set_auth(password: String, password_check: String) -> BasicResponse
 //   ####  #  ####  #    #    # #    #
 
 #[update(name = "signIn")]
-pub async fn sign_in(password: String) -> BasicResponse {
+pub async fn sign_in(SignIn { password }: SignIn) -> BasicResponse {
     let mut res: BasicResponse = BasicResponse::default();
     let auth_info_res = get_auth_info();
     if auth_info_res.is_err() {
@@ -147,9 +152,11 @@ pub async fn sign_in(password: String) -> BasicResponse {
 
 #[update(name = "changePassword")]
 pub async fn change_password(
-    old_password: String,
-    password: String,
-    password_check: String,
+    ChangePassword {
+        old_password,
+        password,
+        password_check,
+    }: ChangePassword,
 ) -> BasicResponse {
     let mut res: BasicResponse = BasicResponse::default();
     let auth_info_res = get_auth_info();
@@ -205,16 +212,16 @@ pub async fn change_password(
     return res;
 }
 
-//                                                                                    
-//   ####  #    # ######  ####  #    #     ####  ######  ####   ####  #  ####  #    # 
-//  #    # #    # #      #    # #   #     #      #      #      #      # #    # ##   # 
-//  #      ###### #####  #      ####       ####  #####   ####   ####  # #    # # #  # 
-//  #      #    # #      #      #  #           # #           #      # # #    # #  # # 
-//  #    # #    # #      #    # #   #     #    # #      #    # #    # # #    # #   ## 
-//   ####  #    # ######  ####  #    #     ####  ######  ####   ####  #  ####  #    # 
+//
+//   ####  #    # ######  ####  #    #     ####  ######  ####   ####  #  ####  #    #
+//  #    # #    # #      #    # #   #     #      #      #      #      # #    # ##   #
+//  #      ###### #####  #      ####       ####  #####   ####   ####  # #    # # #  #
+//  #      #    # #      #      #  #           # #           #      # # #    # #  # #
+//  #    # #    # #      #    # #   #     #    # #      #    # #    # # #    # #   ##
+//   ####  #    # ######  ####  #    #     ####  ######  ####   ####  #  ####  #    #
 
 #[update(name = "checkSession")]
-pub async fn check_session(token: String) -> BasicResponse {
+pub async fn check_session(TokenRecord { token }: TokenRecord) -> BasicResponse {
     let mut res: BasicResponse = BasicResponse::default();
     let auth_res = authenticate_token(&token);
     if auth_res.is_err() {
@@ -227,16 +234,44 @@ pub async fn check_session(token: String) -> BasicResponse {
 }
 
 //
-//    ##   #####  #####      ####    ##   #      #      ###### #####     # #####
-//   #  #  #    # #    #    #    #  #  #  #      #      #      #    #    # #    #
-//  #    # #    # #    #    #      #    # #      #      #####  #    #    # #    #
-//  ###### #    # #    #    #      ###### #      #      #      #####     # #    #
-//  #    # #    # #    #    #    # #    # #      #      #      #   #     # #    #
-//  #    # #####  #####      ####  #    # ###### ###### ###### #    #    # #####
+//   ####  ###### #####    ##### #####  #    #  ####  ##### ###### #####      ####    ##   #    # #  ####  ##### ###### #####   ####
+//  #    # #        #        #   #    # #    # #        #   #      #    #    #    #  #  #  ##   # # #        #   #      #    # #
+//  #      #####    #        #   #    # #    #  ####    #   #####  #    #    #      #    # # #  # #  ####    #   #####  #    #  ####
+//  #  ### #        #        #   #####  #    #      #   #   #      #    #    #      ###### #  # # #      #   #   #      #####       #
+//  #    # #        #        #   #   #  #    # #    #   #   #      #    #    #    # #    # #   ## # #    #   #   #      #   #  #    #
+//   ####  ######   #        #   #    #  ####   ####    #   ###### #####      ####  #    # #    # #  ####    #   ###### #    #  ####
+
+#[update(name = "getTrustedCanisters")]
+pub async fn get_trusted_canisters(TokenRecord { token }: TokenRecord) -> TrustedCanistersResponse {
+    let mut res: TrustedCanistersResponse = TrustedCanistersResponse::default();
+    let auth_res = authenticate_token(&token);
+    if auth_res.is_err() {
+        res.err = auth_res.err().unwrap();
+        return res;
+    }
+
+    let trusted_canisters_res = find_trusted_canisters();
+    if trusted_canisters_res.is_err() {
+        res.err = trusted_canisters_res.err().unwrap();
+        return res;
+    }
+    res.ok = trusted_canisters_res.unwrap();
+    return res;
+}
+
+//
+//    ##   #####  #####  ###### #####     ##### #####  #    #  ####  ##### ###### #####      ####    ##   #    # #  ####  ##### ###### #####
+//   #  #  #    # #    # #      #    #      #   #    # #    # #        #   #      #    #    #    #  #  #  ##   # # #        #   #      #    #
+//  #    # #    # #    # #####  #    #      #   #    # #    #  ####    #   #####  #    #    #      #    # # #  # #  ####    #   #####  #    #
+//  ###### #    # #    # #      #    #      #   #####  #    #      #   #   #      #    #    #      ###### #  # # #      #   #   #      #####
+//  #    # #    # #    # #      #    #      #   #   #  #    # #    #   #   #      #    #    #    # #    # #   ## # #    #   #   #      #   #
+//  #    # #####  #####  ###### #####       #   #    #  ####   ####    #   ###### #####      ####  #    # #    # #  ####    #   ###### #    #
 
 #[update(name = "addTrustedCanisterId")]
-pub async fn add_trusted_canister_id(token: String, canister_id: String) -> BasicResponse {
-    let mut res: BasicResponse = BasicResponse::default();
+pub async fn add_trusted_canister_id(
+    AddOrRemoveTrustedCanister { token, canister_id }: AddOrRemoveTrustedCanister,
+) -> TrustedCanistersResponse {
+    let mut res: TrustedCanistersResponse = TrustedCanistersResponse::default();
     let auth_res = authenticate_token(&token);
     if auth_res.is_err() {
         res.err = auth_res.err().unwrap();
@@ -253,21 +288,28 @@ pub async fn add_trusted_canister_id(token: String, canister_id: String) -> Basi
         auth.trusted_canister_ids.push(canister_id);
     });
 
-    res.ok = Some("Canister ID added".to_string());
+    let trusted_canisters_res = find_trusted_canisters();
+    if trusted_canisters_res.is_err() {
+        res.err = trusted_canisters_res.err().unwrap();
+        return res;
+    }
+    res.ok = trusted_canisters_res.unwrap();
     return res;
 }
 
 //
-//  #####  ###### #    #  ####  #    # ######     ####    ##   #      #      ###### #####     # #####
-//  #    # #      ##  ## #    # #    # #         #    #  #  #  #      #      #      #    #    # #    #
-//  #    # #####  # ## # #    # #    # #####     #      #    # #      #      #####  #    #    # #    #
-//  #####  #      #    # #    # #    # #         #      ###### #      #      #      #####     # #    #
-//  #   #  #      #    # #    #  #  #  #         #    # #    # #      #      #      #   #     # #    #
-//  #    # ###### #    #  ####    ##   ######     ####  #    # ###### ###### ###### #    #    # #####
+//  #####  ###### #    #  ####  #    # ######    ##### #####  #    #  ####  ##### ###### #####      ####    ##   #    # #  ####  ##### ###### #####
+//  #    # #      ##  ## #    # #    # #           #   #    # #    # #        #   #      #    #    #    #  #  #  ##   # # #        #   #      #    #
+//  #    # #####  # ## # #    # #    # #####       #   #    # #    #  ####    #   #####  #    #    #      #    # # #  # #  ####    #   #####  #    #
+//  #####  #      #    # #    # #    # #           #   #####  #    #      #   #   #      #    #    #      ###### #  # # #      #   #   #      #####
+//  #   #  #      #    # #    #  #  #  #           #   #   #  #    # #    #   #   #      #    #    #    # #    # #   ## # #    #   #   #      #   #
+//  #    # ###### #    #  ####    ##   ######      #   #    #  ####   ####    #   ###### #####      ####  #    # #    # #  ####    #   ###### #    #
 
 #[update(name = "removeTrustedCanisterId")]
-pub async fn remove_trusted_canister_id(token: String, canister_id: String) -> BasicResponse {
-    let mut res: BasicResponse = BasicResponse::default();
+pub async fn remove_trusted_canister_id(
+    AddOrRemoveTrustedCanister { token, canister_id }: AddOrRemoveTrustedCanister,
+) -> TrustedCanistersResponse {
+    let mut res: TrustedCanistersResponse = TrustedCanistersResponse::default();
     let auth_res = authenticate_token(&token);
     if auth_res.is_err() {
         res.err = auth_res.err().unwrap();
@@ -296,6 +338,11 @@ pub async fn remove_trusted_canister_id(token: String, canister_id: String) -> B
         return res;
     }
 
-    res.ok = Some("Canister ID removed".to_string());
+    let trusted_canisters_res = find_trusted_canisters();
+    if trusted_canisters_res.is_err() {
+        res.err = trusted_canisters_res.err().unwrap();
+        return res;
+    }
+    res.ok = trusted_canisters_res.unwrap();
     return res;
 }

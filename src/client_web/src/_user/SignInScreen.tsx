@@ -38,7 +38,7 @@ export const SignInScreen = () => {
   const signIn = async () => {
     try {
       setLoading(true);
-      const sign_in_res = await backend.signIn(state.password);
+      const sign_in_res = await backend.signIn({ password: state.password });
       if (sign_in_res.err) throw new Error(sign_in_res.err);
       if (!sign_in_res.ok[0])
         throw new Error("Failed to sign in, no token returned.");
@@ -59,10 +59,10 @@ export const SignInScreen = () => {
   const setAuth = async () => {
     try {
       setLoading(true);
-      const set_auth_res = await backend.setAuth(
-        state.password,
-        state.passwordCheck
-      );
+      const set_auth_res = await backend.setAuth({
+        password: state.password,
+        password_check: state.passwordCheck,
+      });
       if (set_auth_res.err) throw new Error(set_auth_res.err);
       if (!set_auth_res.ok[0])
         throw new Error("Failed to sign in, no token returned.");

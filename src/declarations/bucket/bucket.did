@@ -19,7 +19,7 @@ type ModelDataFieldType = record {
 */
 
 type ModelInstanceResponse = record {
-    "json": opt string;
+    "json": opt text;
     "err": text;
 };
 

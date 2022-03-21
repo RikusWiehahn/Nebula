@@ -25,7 +25,7 @@ export const HomeScreen = () => {
     try {
       const { token } = auth;
       setLoading(true);
-      const telemetry_res = await backend.getSystemTelemetry(token);
+      const telemetry_res = await backend.getSystemTelemetry({ token });
       if (telemetry_res.err) throw new Error(telemetry_res.err);
       if (!telemetry_res.ok?.[0]) throw new Error("Failed to get telemetry.");
       dispatch(

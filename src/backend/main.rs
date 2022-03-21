@@ -5,6 +5,7 @@ use ic_cdk::export::candid::{CandidType, Deserialize};
 use ic_cdk::storage;
 use ic_cdk_macros::*;
 use std::cell::RefCell;
+use std::collections::HashMap;
 
 //
 //   ####  #####   ##   ##### ######
@@ -14,12 +15,15 @@ use std::cell::RefCell;
 //  #    #   #   #    #   #   #
 //   ####    #   #    #   #   ######
 
+pub type ModelMap = HashMap<String, Model>;
+
 #[derive(Clone, Debug, Default, CandidType, Deserialize)]
 pub struct GlobalState {
     pub jwt_secret: RefCell<String>,
     pub auth: RefCell<Authentication>,
     pub last_status_update: RefCell<u64>,
     pub telemetry: RefCell<Telemetry>,
+    pub models: RefCell<ModelMap>,
 }
 
 thread_local! {
@@ -28,6 +32,7 @@ thread_local! {
         auth: RefCell::new(Authentication::default()),
         last_status_update: RefCell::new(0),
         telemetry: RefCell::new(Telemetry::default()),
+        models: RefCell::new(ModelMap::new()),
     }
 }
 
@@ -46,12 +51,14 @@ fn save_data() {
         let auth = state.auth.borrow();
         let last_status_update = state.last_status_update.borrow();
         let telemetry = state.telemetry.borrow();
+        let models = state.models.borrow();
 
         let res = storage::stable_save((
             jwt_secret.clone(),
             auth.clone(),
             last_status_update.clone(),
             telemetry.clone(),
+            models.clone(),
         ));
         if res.is_err() {
             println!("Error saving data: {:?}", res.err().unwrap());
@@ -67,11 +74,12 @@ fn retrieve_data() {
             println!("Error retrieving data: {:?}", res.err().unwrap());
             return;
         } else {
-            let (jwt_secret, auth, last_status_update, telemetry) = res.unwrap();
+            let (jwt_secret, auth, last_status_update, telemetry, models) = res.unwrap();
             state.jwt_secret.replace(jwt_secret);
             state.auth.replace(auth);
             state.last_status_update.replace(last_status_update);
             state.telemetry.replace(telemetry);
+            state.models.replace(models);
         }
     });
 }

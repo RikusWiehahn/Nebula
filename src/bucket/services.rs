@@ -115,14 +115,9 @@ pub async fn add_data_field(input: ModelDataFieldType) -> BasicResponse {
         return res;
     }
 
-    // validate data field type
-    if input.data_type != "BOOLEAN".to_string()
-        && input.data_type != "STRING".to_string()
-        && input.data_type != "NUMBER".to_string()
-        && input.data_type != "NUMBER_ARRAY".to_string()
-        && input.data_type != "STRING_ARRAY".to_string()
-    {
-        res.err = "Invalid data field type".to_string();
+    let data_field_valid_res = validate_data_field_type(&input.data_type);
+    if data_field_valid_res.is_err() {
+        res.err = data_field_valid_res.err().unwrap();
         return res;
     }
 

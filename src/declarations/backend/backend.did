@@ -3,6 +3,11 @@ type BasicResponse = record {
     "err": text;
 };
 
+type TrustedCanistersResponse = record {
+    "ok": vec text;
+    "err": text;
+};
+
 type DefiniteCanisterSettings = record {
   controllers : vec principal;
   compute_allocation : nat;
@@ -34,11 +39,70 @@ type TelemetryResponse = record {
     "err": text;
 };
 
+type ModelDataFieldType = record {
+    "field_name": text;
+    "data_type": text;
+    "default_json_value": text;
+};
+
+/* 
+    Data Types:
+    "STRING"
+    "NUMBER"
+    "BOOLEAN"
+    "STRING_ARRAY"
+    "NUMBER_ARRAY"
+*/
+
+type Model = record {
+    "model_name": text;
+    "data_fields": vec ModelDataFieldType;
+};
+
+type ModelResponse = record {
+    "ok": opt Model;
+    "err": text;
+};
+
+type ModelListResponse = record {
+    "ok": vec Model;
+    "err": text;
+};
+
+type ModelInstanceResponse = record {
+    "json": opt text;
+    "err": text;
+};
+
 service : {
+    // Setup and authentication via the web client app.
+    "setAuth": (record { password: text; password_check: text }) -> (BasicResponse);
     "isAuthSet": () -> (bool);
-    "setAuth": (text, text) -> (BasicResponse);
-    "signIn": (text) -> (BasicResponse);
-    "changePassword": (text, text,text) -> (BasicResponse);
-    "checkSession": (text) -> (BasicResponse);
-    "getSystemTelemetry": (text) -> (TelemetryResponse);
+    "signIn": (record { password: text }) -> (BasicResponse);
+    "checkSession": (record { token: text }) -> (BasicResponse);
+    "changePassword": (record { old_password: text; password: text; password_check: text }) -> (BasicResponse);
+
+    // View status of main canister and data storage sub-canisters.
+    "getSystemTelemetry": (record { token: text }) -> (TelemetryResponse);
+
+    // Manage which external canisters are allowed to Create/Read/Update/Delete model instances.
+    "getTrustedCanisters": (record { token: text }) -> (TrustedCanistersResponse);
+    "addTrustedCanister": (record { token: text; canister_id: text }) -> (TrustedCanistersResponse);
+    "removeTrustedCanister": (record { token: text; canister_id: text}) -> (TrustedCanistersResponse);
+
+    // Manage the data models
+    // Performed via client app only
+    "createModel": (record { token: text; model_name: text }) -> (BasicResponse);
+    "getModels": (record { token: text }) -> (ModelListResponse);
+    "getModel": (record { token: text; model_name: text }) -> (ModelResponse);
+    "addModelField": (record { token: text; model_name: text }, ModelDataFieldType) -> (ModelResponse);
+    "removeModelField": (record {token: text; model_name: text; field_name: text }) -> (ModelResponse);
+    "deleteModel": (record { token: text; model_name: text }) -> (BasicResponse);
+    
+    // Create/Read/Update/Delete instances of the data models. 
+    // Performable via client ap and external canisters in the trusted canister list
+    "createModelInstance": (record { token: text; json: text; }) -> (ModelInstanceResponse);
+    "updateModelInstance": (record { token: text; id: text; json: text; }) -> (ModelInstanceResponse);
+    "getModelInstance": (record { token: text; id: text }) -> (ModelInstanceResponse);
+    "deleteModelInstance": (record { token: text; id: text }) -> (BasicResponse);
 }

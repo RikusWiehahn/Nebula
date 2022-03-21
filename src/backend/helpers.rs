@@ -1,10 +1,9 @@
 use crate::main::*;
 use crate::types::*;
 use crate::utilities::*;
-use ic_cdk::export::Principal;
-use ic_cdk::export::candid::CandidType;
-use serde::Deserialize;
-use ic_cdk::export::candid::Nat;
+use serde_json;
+use serde_json::{Value};
+
 
 //
 //   ####  ###### #####      ##   #    # ##### #    #
@@ -60,7 +59,9 @@ pub fn authenticate_token(token: &str) -> Result<(), String> {
     if auth_info_res.is_err() {
         return Err(auth_info_res.err().unwrap());
     }
-
+    if token == "" {
+        return Err("No token provided".to_string());
+    }
     let token_res = decode_id_from_token(&token);
     if token_res.is_err() {
         return Err(token_res.err().unwrap());
@@ -74,115 +75,113 @@ pub fn authenticate_token(token: &str) -> Result<(), String> {
     return Ok(());
 }
 
-//                                                                                                
-//   ####  #####  ######   ##   ##### ######     ####    ##   #    # #  ####  ##### ###### #####  
-//  #    # #    # #       #  #    #   #         #    #  #  #  ##   # # #        #   #      #    # 
-//  #      #    # #####  #    #   #   #####     #      #    # # #  # #  ####    #   #####  #    # 
-//  #      #####  #      ######   #   #         #      ###### #  # # #      #   #   #      #####  
-//  #    # #   #  #      #    #   #   #         #    # #    # #   ## # #    #   #   #      #   #  
-//   ####  #    # ###### #    #   #   ######     ####  #    # #    # #  ####    #   ###### #    # 
 
-pub async fn create_and_install(
-    wasm_module: Vec<u8>,
-    cycles_to_use: u64,
-) -> Result<String, String> {
-    let create_res = create_canister(cycles_to_use).await;
-    
+//                                                                                                                                    
+//   ####  ###### #####    ##### #####  #    #  ####  ##### ###### #####      ####    ##   #    # #  ####  ##### ###### #####   ####  
+//  #    # #        #        #   #    # #    # #        #   #      #    #    #    #  #  #  ##   # # #        #   #      #    # #      
+//  #      #####    #        #   #    # #    #  ####    #   #####  #    #    #      #    # # #  # #  ####    #   #####  #    #  ####  
+//  #  ### #        #        #   #####  #    #      #   #   #      #    #    #      ###### #  # # #      #   #   #      #####       # 
+//  #    # #        #        #   #   #  #    # #    #   #   #      #    #    #    # #    # #   ## # #    #   #   #      #   #  #    # 
+//   ####  ######   #        #   #    #  ####   ####    #   ###### #####      ####  #    # #    # #  ####    #   ###### #    #  ####  
 
-    match install(canister_id, wasm_module, wasm_arg).await {
-        Err(error) => Err(CreateAndInstallError::InstallFailed((error, canister_id))),
-        Ok(_) => Ok(canister_id),
-    }
+pub fn find_trusted_canisters() -> Result<Vec<String>, String> {
+    let mut trusted_canisters: Vec<String> = Vec::new();
+    STATE.with(|state: &GlobalState| {
+        let auth = state.auth.borrow();
+        trusted_canisters = auth.trusted_canister_ids.clone();
+    });
+    Ok(trusted_canisters)
 }
 
-pub async fn create_canister(cycles_to_use: u64) -> Result<Principal, String> {
-    #[derive(CandidType, Clone, Deserialize)]
-    struct CanisterSettings {
-        controller: Option<Principal>,
-        compute_allocation: Option<Nat>,
-        memory_allocation: Option<Nat>,
-        freezing_threshold: Option<Nat>,
+//                                                               
+//  ###### # #    # #####     #    #  ####  #####  ###### #      
+//  #      # ##   # #    #    ##  ## #    # #    # #      #      
+//  #####  # # #  # #    #    # ## # #    # #    # #####  #      
+//  #      # #  # # #    #    #    # #    # #    # #      #      
+//  #      # #   ## #    #    #    # #    # #    # #      #      
+//  #      # #    # #####     #    #  ####  #####  ###### ###### 
+
+pub fn find_model(model_name: &str) -> Result<Model, String> {
+    let mut model_opt: Option<Model> = None;
+    STATE.with(|state: &GlobalState| {
+        let models = state.models.borrow();
+        if let Some(model_found) = models.get(model_name) {
+            let model_to_return = model_found.clone();
+            model_opt = Some(model_to_return);
+        }
+    });
+    if model_opt.is_none() {
+        return Err("Data model not found".to_string());
     }
+    Ok(model_opt.unwrap())
+}
 
-    #[derive(CandidType)]
-    struct In {
-        settings: Option<CanisterSettings>,
-    }
+//
+//  #    #   ##   #      # #####    ##   ##### ######    ###### # ###### #      #####     ##### #   # #####  ######
+//  #    #  #  #  #      # #    #  #  #    #   #         #      # #      #      #    #      #    # #  #    # #
+//  #    # #    # #      # #    # #    #   #   #####     #####  # #####  #      #    #      #     #   #    # #####
+//  #    # ###### #      # #    # ######   #   #         #      # #      #      #    #      #     #   #####  #
+//   #  #  #    # #      # #    # #    #   #   #         #      # #      #      #    #      #     #   #      #
+//    ##   #    # ###### # #####  #    #   #   ######    #      # ###### ###### #####       #     #   #      ######
 
-    #[derive(CandidType, Deserialize)]
-    struct CreateResult {
-        canister_id: Principal,
-    }
-
-    let in_arg = In {
-        settings: Some(CanisterSettings {
-            controller: Some(ic_cdk::id()),
-            compute_allocation: None,
-            memory_allocation: None,
-            freezing_threshold: None,
-        }),
-    };
-
-    let (create_result,): (CreateResult,) = match api::call::call_with_payment(
-        Principal::management_canister(),
-        "create_canister",
-        (in_arg,),
-        cycles_to_use.try_into().unwrap(),
-    )
-    .await
+pub fn validate_data_field_type(data_type: &str) -> Result<(), String> {
+    // validate data field type
+    if data_type != "BOOLEAN".to_string()
+        && data_type != "STRING".to_string()
+        && data_type != "NUMBER".to_string()
+        && data_type != "NUMBER_ARRAY".to_string()
+        && data_type != "STRING_ARRAY".to_string()
     {
-        Ok(x) => x,
-        Err((code, msg)) => {
-            let code = code as u8;
-            error!(
-                error_code = code,
-                error_message = msg.as_str(),
-                "Error calling create_canister"
-            );
-
-            return Err(canister::Error { code, msg });
-        }
-    };
-
-    Ok(create_result.canister_id)
+        return Err("Data field type not valid".to_string());
+    }
+    return Ok(());
 }
 
-pub async fn install(canister_id: CanisterId, wasm_module: Vec<u8>, wasm_arg: Vec<u8>) -> Result<(), canister::Error> {
-    #[derive(CandidType, Deserialize)]
-    enum InstallMode {
-        #[serde(rename = "install")]
-        Install,
-        #[serde(rename = "reinstall")]
-        Reinstall,
-        #[serde(rename = "upgrade")]
-        Upgrade,
-    }
+//
+//  #    #   ##   #      # #####    ##   ##### ######    #    #   ##   #      #    # ######
+//  #    #  #  #  #      # #    #  #  #    #   #         #    #  #  #  #      #    # #
+//  #    # #    # #      # #    # #    #   #   #####     #    # #    # #      #    # #####
+//  #    # ###### #      # #    # ######   #   #         #    # ###### #      #    # #
+//   #  #  #    # #      # #    # #    #   #   #          #  #  #    # #      #    # #
+//    ##   #    # ###### # #####  #    #   #   ######      ##   #    # ######  ####  ######
 
-    #[derive(CandidType, Deserialize)]
-    struct CanisterInstall {
-        mode: InstallMode,
-        canister_id: Principal,
-        #[serde(with = "serde_bytes")]
-        wasm_module: Vec<u8>,
-        #[serde(with = "serde_bytes")]
-        arg: Vec<u8>,
-    }
-
-    let install_config = CanisterInstall {
-        mode: InstallMode::Install,
-        canister_id,
-        wasm_module,
-        arg: wasm_arg,
-    };
-
-    let (_,): ((),) = match api::call::call(Principal::management_canister(), "install_code", (install_config,)).await {
-        Ok(x) => x,
-        Err((code, msg)) => {
-            let code = code as u8;
-            error!(error_code = code, error_message = msg.as_str(), "Error calling install_code");
-            return Err(canister::Error { code, msg });
+pub fn validate_json_field_value(json_value: Value, data_type: String) -> Result<(), String> {
+    if data_type == "BOOLEAN".to_string() {
+        if !json_value.is_boolean() {
+            return Err("Provided JSON value is not a boolean".to_string());
         }
-    };
-
-    Ok(())
+    } else if data_type == "STRING".to_string() {
+        if !json_value.is_string() {
+            return Err("Provided JSON value is not a string".to_string());
+        }
+    } else if data_type == "NUMBER".to_string() {
+        if !json_value.is_number() {
+            return Err("Provided JSON value is not a number".to_string());
+        }
+    } else if data_type == "NUMBER_ARRAY".to_string() {
+        if !json_value.is_array() {
+            return Err("Provided JSON value is not an array".to_string());
+        }
+        if json_value
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|x| !x.is_number())
+        {
+            return Err("Provided JSON value is not an array of numbers".to_string());
+        }
+    } else if data_type == "STRING_ARRAY".to_string() {
+        if !json_value.is_array() {
+            return Err("Provided JSON value is not an array".to_string());
+        }
+        if json_value
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|x| !x.is_string())
+        {
+            return Err("Provided JSON value is not an array of strings".to_string());
+        }
+    }
+    return Ok(());
 }

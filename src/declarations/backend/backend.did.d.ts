@@ -6,6 +6,21 @@ export interface DefiniteCanisterSettings {
   'memory_allocation' : bigint,
   'compute_allocation' : bigint,
 }
+export interface Model {
+  'model_name' : string,
+  'data_fields' : Array<ModelDataFieldType>,
+}
+export interface ModelDataFieldType {
+  'field_name' : string,
+  'data_type' : string,
+  'default_json_value' : string,
+}
+export interface ModelInstanceResponse {
+  'err' : string,
+  'json' : [] | [string],
+}
+export interface ModelListResponse { 'ok' : Array<Model>, 'err' : string }
+export interface ModelResponse { 'ok' : [] | [Model], 'err' : string }
 export interface SubCanisterTelemetry {
   'id' : string,
   'status' : string,
@@ -24,13 +39,63 @@ export interface Telemetry {
   'main_cycles' : number,
 }
 export interface TelemetryResponse { 'ok' : [] | [Telemetry], 'err' : string }
+export interface TrustedCanistersResponse {
+  'ok' : Array<string>,
+  'err' : string,
+}
 export interface _SERVICE {
-  'changePassword' : (arg_0: string, arg_1: string, arg_2: string) => Promise<
-      BasicResponse
+  'addModelField' : (
+      arg_0: { 'token' : string, 'model_name' : string },
+      arg_1: ModelDataFieldType,
+    ) => Promise<ModelResponse>,
+  'addTrustedCanister' : (
+      arg_0: { 'token' : string, 'canister_id' : string },
+    ) => Promise<TrustedCanistersResponse>,
+  'changePassword' : (
+      arg_0: {
+        'password' : string,
+        'old_password' : string,
+        'password_check' : string,
+      },
+    ) => Promise<BasicResponse>,
+  'checkSession' : (arg_0: { 'token' : string }) => Promise<BasicResponse>,
+  'createModel' : (
+      arg_0: { 'token' : string, 'model_name' : string },
+    ) => Promise<BasicResponse>,
+  'createModelInstance' : (
+      arg_0: { 'token' : string, 'json' : string },
+    ) => Promise<ModelInstanceResponse>,
+  'deleteModel' : (
+      arg_0: { 'token' : string, 'model_name' : string },
+    ) => Promise<BasicResponse>,
+  'deleteModelInstance' : (
+      arg_0: { 'id' : string, 'token' : string },
+    ) => Promise<BasicResponse>,
+  'getModel' : (arg_0: { 'token' : string, 'model_name' : string }) => Promise<
+      ModelResponse
     >,
-  'checkSession' : (arg_0: string) => Promise<BasicResponse>,
-  'getSystemTelemetry' : (arg_0: string) => Promise<TelemetryResponse>,
+  'getModelInstance' : (arg_0: { 'id' : string, 'token' : string }) => Promise<
+      ModelInstanceResponse
+    >,
+  'getModels' : (arg_0: { 'token' : string }) => Promise<ModelListResponse>,
+  'getSystemTelemetry' : (arg_0: { 'token' : string }) => Promise<
+      TelemetryResponse
+    >,
+  'getTrustedCanisters' : (arg_0: { 'token' : string }) => Promise<
+      TrustedCanistersResponse
+    >,
   'isAuthSet' : () => Promise<boolean>,
-  'setAuth' : (arg_0: string, arg_1: string) => Promise<BasicResponse>,
-  'signIn' : (arg_0: string) => Promise<BasicResponse>,
+  'removeModelField' : (
+      arg_0: { 'token' : string, 'field_name' : string, 'model_name' : string },
+    ) => Promise<ModelResponse>,
+  'removeTrustedCanister' : (
+      arg_0: { 'token' : string, 'canister_id' : string },
+    ) => Promise<TrustedCanistersResponse>,
+  'setAuth' : (
+      arg_0: { 'password' : string, 'password_check' : string },
+    ) => Promise<BasicResponse>,
+  'signIn' : (arg_0: { 'password' : string }) => Promise<BasicResponse>,
+  'updateModelInstance' : (
+      arg_0: { 'id' : string, 'token' : string, 'json' : string },
+    ) => Promise<ModelInstanceResponse>,
 }

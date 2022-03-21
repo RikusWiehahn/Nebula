@@ -1,27 +1,16 @@
 use crate::main::*;
 use crate::types::*;
+use crate::helpers::*;
 use ic_cdk::api::*;
 use ic_cdk_macros::update;
 
-
-
-// // get management canister
-// let management_canister = Principal::from_text("aaaaa-aa").unwrap();
-//   let canister_id_record = CanisterIdRecord {
-//     canister_id: main_canister.clone(),
-//   };
-//   let self_status_res: Result<(String,), _> =
-//       call::call(management_canister, "canister_status", (canister_id_record,)).await;
-//   let self_res_string = format!("{:?}", self_status_res);
-//   ic_cdk::println!("{}", self_res_string);
-
-//                                                                         
-//    ##   #    # #####  ####     #    # #####  #####    ##   ##### ###### 
-//   #  #  #    #   #   #    #    #    # #    # #    #  #  #    #   #      
-//  #    # #    #   #   #    #    #    # #    # #    # #    #   #   #####  
-//  ###### #    #   #   #    #    #    # #####  #    # ######   #   #      
-//  #    # #    #   #   #    #    #    # #      #    # #    #   #   #      
-//  #    #  ####    #    ####      ####  #      #####  #    #   #   ###### 
+//
+//    ##   #    # #####  ####     #    # #####  #####    ##   ##### ######
+//   #  #  #    #   #   #    #    #    # #    # #    #  #  #    #   #
+//  #    # #    #   #   #    #    #    # #    # #    # #    #   #   #####
+//  ###### #    #   #   #    #    #    # #####  #    # ######   #   #
+//  #    # #    #   #   #    #    #    # #      #    # #    #   #   #
+//  #    #  ####    #    ####      ####  #      #####  #    #   #   ######
 
 pub async fn auto_update_telemetry() {
     // get own identity
@@ -48,22 +37,24 @@ pub async fn auto_update_telemetry() {
     });
 }
 
-
-//                                                                 
-//   ####  ###### #####     ####  #####   ##   ##### #    #  ####  
-//  #    # #        #      #        #    #  #    #   #    # #      
-//  #      #####    #       ####    #   #    #   #   #    #  ####  
-//  #  ### #        #           #   #   ######   #   #    #      # 
-//  #    # #        #      #    #   #   #    #   #   #    # #    # 
-//   ####  ######   #       ####    #   #    #   #    ####   ####  
-
+//
+//   ####  ###### #####     ####  #####   ##   ##### #    #  ####
+//  #    # #        #      #        #    #  #    #   #    # #
+//  #      #####    #       ####    #   #    #   #   #    #  ####
+//  #  ### #        #           #   #   ######   #   #    #      #
+//  #    # #        #      #    #   #   #    #   #   #    # #    #
+//   ####  ######   #       ####    #   #    #   #    ####   ####
 
 #[update(name = "getSystemTelemetry")]
-pub async fn get_telemetry() -> TelemetryResponse {
+pub async fn get_telemetry(TokenRecord { token }: TokenRecord) -> TelemetryResponse {
     let mut res = TelemetryResponse::default();
+    let auth_res = authenticate_token(&token);
+    if auth_res.is_err() {
+        res.err = auth_res.err().unwrap();
+        return res;
+    }
     let telemetry = STATE.with(|s: &GlobalState| s.telemetry.borrow().clone());
 
     res.ok = Some(telemetry);
     return res;
 }
-

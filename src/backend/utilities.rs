@@ -1,16 +1,22 @@
 use crate::main::*;
+use crate::types::*;
+extern crate argon2;
+extern crate serde_json;
+use argon2::Config;
+use hmac::{Hmac, Mac};
+use ic_cdk::api::call::RejectionCode;
+use ic_cdk::export::candid::CandidType;
 use ic_cdk::export::Principal;
 use ic_cdk::{api::time, println};
-use serde::{Deserialize, Serialize};
-extern crate serde_json;
-use hmac::{Hmac, Mac};
 use jwt::{SignWithKey, VerifyWithKey};
+use serde::{Deserialize, Serialize};
 use sha2::Sha256;
+use std::fs::File;
+use std::io::Read;
+use std::path::{PathBuf};
 use std::result::Result;
 use std::vec::Vec;
 use uuid::{Builder, Variant, Version};
-extern crate argon2;
-use argon2::Config;
 
 //
 //  #    # #    # # #####
@@ -38,12 +44,12 @@ pub async fn generate_uuid() -> Result<String, String> {
 }
 
 //
-//       # #    # #####    #    # ###### #   #  ####  ###### #    #
-//       # #    #   #      #   #  #       # #  #    # #      ##   #
-//       # #    #   #      ####   #####    #   #      #####  # #  #
-//       # # ## #   #      #  #   #        #   #  ### #      #  # #
-//  #    # ##  ##   #      #   #  #        #   #    # #      #   ##
-//   ####  #    #   #      #    # ######   #    ####  ###### #    #
+//  # #    # # #####         # #    # #####     ####  ######  ####  #####  ###### #####
+//  # ##   # #   #           # #    #   #      #      #      #    # #    # #        #
+//  # # #  # #   #           # #    #   #       ####  #####  #      #    # #####    #
+//  # #  # # #   #           # # ## #   #           # #      #      #####  #        #
+//  # #   ## #   #      #    # ##  ##   #      #    # #      #    # #   #  #        #
+//  # #    # #   #       ####  #    #   #       ####  ######  ####  #    # ######   #
 
 pub async fn init_jwt_key() {
     let uuid_res_1 = generate_uuid().await;
@@ -112,6 +118,14 @@ pub async fn hash_password(password: &str) -> Result<String, String> {
     Ok(hash)
 }
 
+//
+//  #    # ###### #####  # ###### #   #    #####    ##    ####   ####  #    #  ####  #####  #####
+//  #    # #      #    # # #       # #     #    #  #  #  #      #      #    # #    # #    # #    #
+//  #    # #####  #    # # #####    #      #    # #    #  ####   ####  #    # #    # #    # #    #
+//  #    # #      #####  # #        #      #####  ######      #      # # ## # #    # #####  #    #
+//   #  #  #      #   #  # #        #      #      #    # #    # #    # ##  ## #    # #   #  #    #
+//    ##   ###### #    # # #        #      #      #    #  ####   ####  #    #  ####  #    # #####
+
 pub async fn verify_password(password: &str, hash: &str) -> Result<(), String> {
     let matches_res = argon2::verify_encoded(&hash, password.as_bytes());
     if matches_res.is_err() {
@@ -130,6 +144,7 @@ pub async fn verify_password(password: &str, hash: &str) -> Result<(), String> {
 //  #      #  # # #      #    # #    # #              # # ## #   #
 //  #      #   ## #    # #    # #    # #         #    # ##  ##   #
 //  ###### #    #  ####   ####  #####  ######     ####  #    #   #
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Payload {
     pub id: String,
@@ -185,4 +200,149 @@ pub fn decode_id_from_token(token: &str) -> Result<String, String> {
         return Err("Token expired".to_string());
     }
     Ok(payload.id)
+}
+
+//
+//   ####  ###### #####    #    #   ##    ####  #    #
+//  #    # #        #      #    #  #  #  #      ##  ##
+//  #      #####    #      #    # #    #  ####  # ## #
+//  #  ### #        #      # ## # ######      # #    #
+//  #    # #        #      ##  ## #    # #    # #    #
+//   ####  ######   #      #    # #    #  ####  #    #
+
+pub fn get_canister_wasm() -> CanisterWasm {
+    let file_name = "bucket-opt.wasm".to_string();
+    let bytes = read_file_from_local_bin(&file_name);
+
+    CanisterWasm { module: bytes }
+}
+
+//
+//  #####  ######   ##   #####     ###### # #      ######
+//  #    # #       #  #  #    #    #      # #      #
+//  #    # #####  #    # #    #    #####  # #      #####
+//  #####  #      ###### #    #    #      # #      #
+//  #   #  #      #    # #    #    #      # #      #
+//  #    # ###### #    # #####     #      # ###### ######
+
+pub fn read_file_from_local_bin(file_name: &str) -> Vec<u8> {
+    let mut file_path = PathBuf::from(
+        std::env::var("CARGO_MANIFEST_DIR")
+            .expect("Failed to read CARGO_MANIFEST_DIR env variable"),
+    );
+    file_path.push(&file_name);
+
+    let mut file = File::open(&file_path)
+        .unwrap_or_else(|_| panic!("Failed to open file: {}", file_path.to_str().unwrap()));
+    let mut bytes = Vec::new();
+    file.read_to_end(&mut bytes).expect("Failed to read file");
+    bytes
+}
+
+//
+//  #####  ###### #        ##   #   #
+//  #    # #      #       #  #   # #
+//  #    # #####  #      #    #   #
+//  #    # #      #      ######   #
+//  #    # #      #      #    #   #
+//  #####  ###### ###### #    #   #
+
+pub fn delay() -> garcon::Delay {
+    garcon::Delay::builder()
+        .throttle(std::time::Duration::from_millis(500))
+        .timeout(std::time::Duration::from_secs(60 * 5))
+        .build()
+}
+
+//
+//   ####  #####  ######   ##   ##### ######     ####    ##   #    # #  ####  ##### ###### #####
+//  #    # #    # #       #  #    #   #         #    #  #  #  ##   # # #        #   #      #    #
+//  #      #    # #####  #    #   #   #####     #      #    # # #  # #  ####    #   #####  #    #
+//  #      #####  #      ######   #   #         #      ###### #  # # #      #   #   #      #####
+//  #    # #   #  #      #    #   #   #         #    # #    # #   ## # #    #   #   #      #   #
+//   ####  #    # ###### #    #   #   ######     ####  #    # #    # #  ####    #   ###### #    #
+
+pub async fn create_canister(cycles: u64) -> Result<Principal, String> {
+    #[derive(CandidType)]
+    struct In {
+        settings: Option<CanisterSettings>,
+    }
+
+    let in_arg = In {
+        settings: Some(CanisterSettings {
+            controllers: Some(vec![ic_cdk::id()]),
+            compute_allocation: None,
+            memory_allocation: None,
+            freezing_threshold: None,
+        }),
+    };
+
+    let create_call_res: Result<(CanisterId,), (RejectionCode, String)> =
+        ic_cdk::api::call::call_with_payment(
+            Principal::management_canister(),
+            "create_canister",
+            (in_arg,),
+            cycles,
+        )
+        .await;
+
+    if create_call_res.is_err() {
+        return Err(create_call_res.err().unwrap().1);
+    }
+    let create_res = create_call_res.unwrap();
+
+    return Ok(create_res.0.canister_id);
+}
+
+//
+//  # #    #  ####  #####   ##   #      #
+//  # ##   # #        #    #  #  #      #
+//  # # #  #  ####    #   #    # #      #
+//  # #  # #      #   #   ###### #      #
+//  # #   ## #    #   #   #    # #      #
+//  # #    #  ####    #   #    # ###### ######
+
+pub async fn install_wasm(
+    canister_id: Principal,
+    wasm_module: Vec<u8>,
+    wasm_arg: Vec<u8>,
+) -> Result<(), String> {
+    #[derive(CandidType, Deserialize)]
+    enum InstallMode {
+        #[serde(rename = "install")]
+        Install,
+        #[serde(rename = "reinstall")]
+        Reinstall,
+        #[serde(rename = "upgrade")]
+        Upgrade,
+    }
+
+    #[derive(CandidType, Deserialize)]
+    struct CanisterInstall {
+        mode: InstallMode,
+        canister_id: Principal,
+        #[serde(with = "serde_bytes")]
+        wasm_module: Vec<u8>,
+        #[serde(with = "serde_bytes")]
+        arg: Vec<u8>,
+    }
+
+    let install_config = CanisterInstall {
+        mode: InstallMode::Install,
+        canister_id,
+        wasm_module,
+        arg: wasm_arg,
+    };
+
+    let install_res: Result<((),), (RejectionCode, String)> = ic_cdk::api::call::call(
+        Principal::management_canister(),
+        "install_code",
+        (install_config,),
+    )
+    .await;
+    if install_res.is_err() {
+        return Err(install_res.err().unwrap().1);
+    }
+
+    return Ok(())
 }

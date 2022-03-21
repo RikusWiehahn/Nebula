@@ -1,6 +1,28 @@
 export const idlFactory = ({ IDL }) => {
+  const ModelDataFieldType = IDL.Record({
+    'field_name' : IDL.Text,
+    'data_type' : IDL.Text,
+    'default_json_value' : IDL.Text,
+  });
+  const Model = IDL.Record({
+    'model_name' : IDL.Text,
+    'data_fields' : IDL.Vec(ModelDataFieldType),
+  });
+  const ModelResponse = IDL.Record({ 'ok' : IDL.Opt(Model), 'err' : IDL.Text });
+  const TrustedCanistersResponse = IDL.Record({
+    'ok' : IDL.Vec(IDL.Text),
+    'err' : IDL.Text,
+  });
   const BasicResponse = IDL.Record({
     'ok' : IDL.Opt(IDL.Text),
+    'err' : IDL.Text,
+  });
+  const ModelInstanceResponse = IDL.Record({
+    'err' : IDL.Text,
+    'json' : IDL.Opt(IDL.Text),
+  });
+  const ModelListResponse = IDL.Record({
+    'ok' : IDL.Vec(Model),
     'err' : IDL.Text,
   });
   const DefiniteCanisterSettings = IDL.Record({
@@ -31,16 +53,118 @@ export const idlFactory = ({ IDL }) => {
     'err' : IDL.Text,
   });
   return IDL.Service({
+    'addModelField' : IDL.Func(
+        [
+          IDL.Record({ 'token' : IDL.Text, 'model_name' : IDL.Text }),
+          ModelDataFieldType,
+        ],
+        [ModelResponse],
+        [],
+      ),
+    'addTrustedCanister' : IDL.Func(
+        [IDL.Record({ 'token' : IDL.Text, 'canister_id' : IDL.Text })],
+        [TrustedCanistersResponse],
+        [],
+      ),
     'changePassword' : IDL.Func(
-        [IDL.Text, IDL.Text, IDL.Text],
+        [
+          IDL.Record({
+            'password' : IDL.Text,
+            'old_password' : IDL.Text,
+            'password_check' : IDL.Text,
+          }),
+        ],
         [BasicResponse],
         [],
       ),
-    'checkSession' : IDL.Func([IDL.Text], [BasicResponse], []),
-    'getSystemTelemetry' : IDL.Func([IDL.Text], [TelemetryResponse], []),
+    'checkSession' : IDL.Func(
+        [IDL.Record({ 'token' : IDL.Text })],
+        [BasicResponse],
+        [],
+      ),
+    'createModel' : IDL.Func(
+        [IDL.Record({ 'token' : IDL.Text, 'model_name' : IDL.Text })],
+        [BasicResponse],
+        [],
+      ),
+    'createModelInstance' : IDL.Func(
+        [IDL.Record({ 'token' : IDL.Text, 'json' : IDL.Text })],
+        [ModelInstanceResponse],
+        [],
+      ),
+    'deleteModel' : IDL.Func(
+        [IDL.Record({ 'token' : IDL.Text, 'model_name' : IDL.Text })],
+        [BasicResponse],
+        [],
+      ),
+    'deleteModelInstance' : IDL.Func(
+        [IDL.Record({ 'id' : IDL.Text, 'token' : IDL.Text })],
+        [BasicResponse],
+        [],
+      ),
+    'getModel' : IDL.Func(
+        [IDL.Record({ 'token' : IDL.Text, 'model_name' : IDL.Text })],
+        [ModelResponse],
+        [],
+      ),
+    'getModelInstance' : IDL.Func(
+        [IDL.Record({ 'id' : IDL.Text, 'token' : IDL.Text })],
+        [ModelInstanceResponse],
+        [],
+      ),
+    'getModels' : IDL.Func(
+        [IDL.Record({ 'token' : IDL.Text })],
+        [ModelListResponse],
+        [],
+      ),
+    'getSystemTelemetry' : IDL.Func(
+        [IDL.Record({ 'token' : IDL.Text })],
+        [TelemetryResponse],
+        [],
+      ),
+    'getTrustedCanisters' : IDL.Func(
+        [IDL.Record({ 'token' : IDL.Text })],
+        [TrustedCanistersResponse],
+        [],
+      ),
     'isAuthSet' : IDL.Func([], [IDL.Bool], []),
-    'setAuth' : IDL.Func([IDL.Text, IDL.Text], [BasicResponse], []),
-    'signIn' : IDL.Func([IDL.Text], [BasicResponse], []),
+    'removeModelField' : IDL.Func(
+        [
+          IDL.Record({
+            'token' : IDL.Text,
+            'field_name' : IDL.Text,
+            'model_name' : IDL.Text,
+          }),
+        ],
+        [ModelResponse],
+        [],
+      ),
+    'removeTrustedCanister' : IDL.Func(
+        [IDL.Record({ 'token' : IDL.Text, 'canister_id' : IDL.Text })],
+        [TrustedCanistersResponse],
+        [],
+      ),
+    'setAuth' : IDL.Func(
+        [IDL.Record({ 'password' : IDL.Text, 'password_check' : IDL.Text })],
+        [BasicResponse],
+        [],
+      ),
+    'signIn' : IDL.Func(
+        [IDL.Record({ 'password' : IDL.Text })],
+        [BasicResponse],
+        [],
+      ),
+    'updateModelInstance' : IDL.Func(
+        [
+          IDL.Record({
+            'id' : IDL.Text,
+            'token' : IDL.Text,
+            'json' : IDL.Text,
+          }),
+        ],
+        [ModelInstanceResponse],
+        [],
+      ),
   });
 };
 export const init = ({ IDL }) => { return []; };

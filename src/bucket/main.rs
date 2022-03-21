@@ -13,7 +13,7 @@ use std::collections::HashMap;
 //  #    #   #   #    #   #   #
 //   ####    #   #    #   #   ######
 
-pub type ModelMap = HashMap<String, ModelInstance>;
+pub type ModelInstanceMap = HashMap<String, ModelInstance>;
 pub type DataFieldTypeMap = HashMap<String, ModelDataFieldType>;
 
 #[derive(Clone, Debug, Default, CandidType, Deserialize)]
@@ -21,7 +21,7 @@ pub struct GlobalState {
     pub admin_canister_id: RefCell<String>,
     pub model_name: RefCell<String>,
     pub model_data_fields: RefCell<DataFieldTypeMap>,
-    pub instances: RefCell<ModelMap>,
+    pub instances: RefCell<ModelInstanceMap>,
 }
 
 thread_local! {
@@ -29,7 +29,7 @@ thread_local! {
         admin_canister_id: RefCell::new(String::new()),
         model_name: RefCell::new(String::new()),
         model_data_fields: RefCell::new(DataFieldTypeMap::new()),
-        instances: RefCell::new(ModelMap::new()),
+        instances: RefCell::new(ModelInstanceMap::new()),
     }
 }
 
