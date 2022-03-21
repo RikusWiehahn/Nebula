@@ -1,9 +1,23 @@
 use crate::types::*;
+use crate::utilities::accept_cycles;
 use ic_cdk::export::candid::{CandidType, Deserialize};
 use ic_cdk::storage;
 use ic_cdk_macros::*;
 use std::cell::RefCell;
 use std::collections::HashMap;
+
+//                                                   
+//  #####    ##   #        ##   #    #  ####  ###### 
+//  #    #  #  #  #       #  #  ##   # #    # #      
+//  #####  #    # #      #    # # #  # #      #####  
+//  #    # ###### #      ###### #  # # #      #      
+//  #    # #    # #      #    # #   ## #    # #      
+//  #####  #    # ###### #    # #    #  ####  ###### 
+
+#[update]
+fn wallet_receive() {
+    accept_cycles();
+}
 
 //
 //   ####  #####   ##   ##### ######

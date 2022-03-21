@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 use sha2::Sha256;
 use std::fs::File;
 use std::io::Read;
-use std::path::PathBuf;
+use std::path::Path;
 use std::result::Result;
 use std::vec::Vec;
 use uuid::{Builder, Variant, Version};
@@ -214,7 +214,7 @@ pub fn get_canister_wasm() -> Result<CanisterWasm, String> {
     let file_name = "bucket-opt.wasm".to_string();
     let bytes_res = read_file_from_local_bin(&file_name);
     if bytes_res.is_err() {
-        panic!("Failed to read wasm file");
+        return Err(bytes_res.unwrap_err());
     }
     let bytes = bytes_res.unwrap();
     Ok(CanisterWasm { module: bytes })
@@ -229,19 +229,13 @@ pub fn get_canister_wasm() -> Result<CanisterWasm, String> {
 //  #    # ###### #    # #####     #      # ###### ######
 
 pub fn read_file_from_local_bin(file_name: &str) -> Result<Vec<u8>, String> {
-    let dir_res = std::env::var("CARGO_MANIFEST_DIR");
-    if dir_res.is_err() {
-        return Err("Failed to read CARGO_MANIFEST_DIR env variable".to_string());
-    }
 
-    let mut file_path = PathBuf::from(dir_res.unwrap());
-    file_path.push(&file_name);
-
-    let file_res = File::open(&file_path);
+    let path = Path::new(file_name);
+    let file_res = File::open(&path);
     if file_res.is_err() {
         return Err(format!(
             "Failed to open file: {}",
-            file_path.to_str().unwrap()
+            file_name
         ));
     }
     let mut file = file_res.unwrap();
@@ -251,7 +245,7 @@ pub fn read_file_from_local_bin(file_name: &str) -> Result<Vec<u8>, String> {
     if read_res.is_err() {
         return Err(format!(
             "Failed to read file: {}",
-            file_path.to_str().unwrap()
+            file_name
         ));
     }
 
@@ -364,4 +358,25 @@ pub async fn install_wasm(
     }
 
     return Ok(());
+}
+
+//                                                                                       
+//    ##    ####   ####  ###### #####  #####     ####  #   #  ####  #      ######  ####  
+//   #  #  #    # #    # #      #    #   #      #    #  # #  #    # #      #      #      
+//  #    # #      #      #####  #    #   #      #        #   #      #      #####   ####  
+//  ###### #      #      #      #####    #      #        #   #      #      #           # 
+//  #    # #    # #    # #      #        #      #    #   #   #    # #      #      #    # 
+//  #    #  ####   ####  ###### #        #       ####    #    ####  ###### ######  ####  
+
+pub fn accept_cycles() -> u64 {
+    let cycles_available = ic_cdk::api::call::msg_cycles_available();
+    let cycles_accepted = ic_cdk::api::call::msg_cycles_accept(cycles_available);
+
+    STATE.with(|state: &GlobalState| {
+        let mut telemetry = state.telemetry.borrow_mut();
+        let new_balance = telemetry.main_cycles + cycles_accepted as f64;
+        telemetry.main_cycles = new_balance;
+    });
+
+    return cycles_accepted;
 }

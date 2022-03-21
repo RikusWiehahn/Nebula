@@ -165,6 +165,7 @@ export const idlFactory = ({ IDL }) => {
         [ModelInstanceResponse],
         [],
       ),
+    'wallet_receive' : IDL.Func([IDL.Nat], [], []),
   });
 };
 export const init = ({ IDL }) => { return []; };

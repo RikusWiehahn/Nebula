@@ -98,4 +98,5 @@ export interface _SERVICE {
   'updateModelInstance' : (
       arg_0: { 'id' : string, 'token' : string, 'json' : string },
     ) => Promise<ModelInstanceResponse>,
+  'wallet_receive' : (arg_0: bigint) => Promise<undefined>,
 }

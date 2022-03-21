@@ -105,4 +105,7 @@ service : {
     "updateModelInstance": (record { token: text; id: text; json: text; }) -> (ModelInstanceResponse);
     "getModelInstance": (record { token: text; id: text }) -> (ModelInstanceResponse);
     "deleteModelInstance": (record { token: text; id: text }) -> (BasicResponse);
+
+    // wallet
+    "wallet_receive": (nat) -> ();
 }
