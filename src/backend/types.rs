@@ -27,13 +27,13 @@ impl Default for BasicResponse {
     }
 }
 
-//                             
-//    ##   #    # ##### #    # 
-//   #  #  #    #   #   #    # 
-//  #    # #    #   #   ###### 
-//  ###### #    #   #   #    # 
-//  #    # #    #   #   #    # 
-//  #    #  ####    #   #    # 
+//
+//    ##   #    # ##### #    #
+//   #  #  #    #   #   #    #
+//  #    # #    #   #   ######
+//  ###### #    #   #   #    #
+//  #    # #    #   #   #    #
+//  #    #  ####    #   #    #
 
 #[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
 pub struct Authentication {
@@ -96,8 +96,6 @@ pub struct AddOrRemoveTrustedCanister {
     pub canister_id: String,
 }
 
-
-
 //
 //   ####    ##   #    # #  ####  ##### ###### #####      ####  ###### ##### ##### # #    #  ####   ####
 //  #    #  #  #  ##   # # #        #   #      #    #    #      #        #     #   # ##   # #    # #
@@ -110,6 +108,7 @@ pub struct AddOrRemoveTrustedCanister {
 pub struct CanisterId {
     pub canister_id: Principal,
 }
+
 #[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
 pub struct CanisterSettings {
     pub controllers: Option<Vec<Principal>>,
@@ -219,14 +218,13 @@ impl Default for TelemetryResponse {
     }
 }
 
-
-//                                            
-//  #    #  ####  #####  ###### #       ####  
-//  ##  ## #    # #    # #      #      #      
-//  # ## # #    # #    # #####  #       ####  
-//  #    # #    # #    # #      #           # 
-//  #    # #    # #    # #      #      #    # 
-//  #    #  ####  #####  ###### ######  ####  
+//
+//  #    #  ####  #####  ###### #       ####
+//  ##  ## #    # #    # #      #      #
+//  # ## # #    # #    # #####  #       ####
+//  #    # #    # #    # #      #           #
+//  #    # #    # #    # #      #      #    #
+//  #    #  ####  #####  ###### ######  ####
 
 #[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
 pub struct CreateOrGetModel {
@@ -285,17 +283,28 @@ impl Default for ModelListResponse {
     }
 }
 
-//                                             
-//  # #    #  ####  #####   ##   #      #      
-//  # ##   # #        #    #  #  #      #      
-//  # # #  #  ####    #   #    # #      #      
-//  # #  # #      #   #   ###### #      #      
-//  # #   ## #    #   #   #    # #      #      
-//  # #    #  ####    #   #    # ###### ###### 
+//
+//  # #    #  ####  #####   ##   #      #
+//  # ##   # #        #    #  #  #      #
+//  # # #  #  ####    #   #    # #      #
+//  # #  # #      #   #   ###### #      #
+//  # #   ## #    #   #   #    # #      #
+//  # #    #  ####    #   #    # ###### ######
 
 #[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
 pub struct CanisterWasm {
     pub module: Vec<u8>,
 }
 
+//
+//  #####  #    #  ####  #    # ###### #####  ####
+//  #    # #    # #    # #   #  #        #   #
+//  #####  #    # #      ####   #####    #    ####
+//  #    # #    # #      #  #   #        #        #
+//  #    # #    # #    # #   #  #        #   #    #
+//  #####   ####   ####  #    # ######   #    ####
 
+#[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
+pub struct InitModel {
+    pub model_name: String,
+}

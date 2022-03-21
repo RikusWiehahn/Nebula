@@ -2,6 +2,7 @@ use crate::services_telemetry::*;
 use crate::types::*;
 use ic_cdk::api::time;
 use ic_cdk::export::candid::{CandidType, Deserialize};
+use ic_cdk::println;
 use ic_cdk::storage;
 use ic_cdk_macros::*;
 use std::cell::RefCell;
@@ -98,6 +99,7 @@ fn heartbeat() {
     let prev = STATE.with(|s| s.last_status_update.borrow().clone());
 
     if t - duration > prev {
+        println!("Update telemetry");
         STATE.with(|s| {
             let mut last_status_update = s.last_status_update.borrow_mut();
             *last_status_update = t;

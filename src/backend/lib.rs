@@ -5,3 +5,4 @@ mod helpers;
 mod services_auth;
 mod services_telemetry;
 mod services_models;
+mod services_bucket;

@@ -10,11 +10,13 @@ import { routes } from "./config/routes";
 import { HomeScreen } from "./_home/HomeScreen";
 import { UIModeProvider } from "./config/UIModeProvider";
 import { ProfileScreen } from "./_user/ProfileScreen";
+import { ModelListScreen } from "./_models/ModelListScreen";
 
 const App = () => {
   const renderRoutes = () => {
     return (
       <Routes>
+        <Route path={routes.MODEL_TYPES} element={<ModelListScreen />} />
         <Route path={routes.SETTINGS} element={<ProfileScreen />} />
         <Route path={routes.HOME} element={<HomeScreen />} />
       </Routes>

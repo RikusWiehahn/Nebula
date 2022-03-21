@@ -19,7 +19,7 @@ export interface _SERVICE {
   'getInstance' : (arg_0: { 'id' : string }) => Promise<ModelInstanceResponse>,
   'initModel' : (arg_0: { 'model_name' : string }) => Promise<BasicResponse>,
   'removeField' : (arg_0: { 'field_name' : string }) => Promise<BasicResponse>,
-  'setAdminCanister' : (arg_0: { 'canister_id' : string }) => Promise<
+  'setAdminCanister' : (arg_0: { 'canister_id' : Principal }) => Promise<
       BasicResponse
     >,
   'updateInstance' : (arg_0: { 'id' : string, 'json' : string }) => Promise<

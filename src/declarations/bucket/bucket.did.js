@@ -41,7 +41,7 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'setAdminCanister' : IDL.Func(
-        [IDL.Record({ 'canister_id' : IDL.Text })],
+        [IDL.Record({ 'canister_id' : IDL.Principal })],
         [BasicResponse],
         [],
       ),

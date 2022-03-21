@@ -3,23 +3,35 @@ import autoMergeLevel2 from "redux-persist/es/stateReconciler/autoMergeLevel2";
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 // default reducers
-import { ConfigState, AuthSession, Telemetry } from "./_Interfaces";
+import {
+  ConfigState,
+  AuthSession,
+  Telemetry,
+  ModelList,
+  Model,
+} from "./_Interfaces";
 import {
   ConfigReducer,
   AuthSessionReducer,
   TelemetryReducer,
+  ModelListReducer,
+  ModelReducer,
 } from "./_Reducers";
 
 export interface StoreState {
   config: ConfigState;
   auth: AuthSession;
   telemetry: Telemetry;
+  model_list: ModelList;
+  model: Model;
 }
 
 const reducers: any = combineReducers<StoreState>({
   config: ConfigReducer,
   auth: AuthSessionReducer,
   telemetry: TelemetryReducer,
+  model_list: ModelListReducer,
+  model: ModelReducer,
 });
 
 const persistConfig = {

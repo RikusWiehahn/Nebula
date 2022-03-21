@@ -17,7 +17,8 @@ use serde_json::{Result, Value};
 #[update(name = "setAdminCanister")]
 pub async fn set_admin_canister(CanisterId { canister_id }: CanisterId) -> BasicResponse {
     let mut res = BasicResponse::default();
-    if canister_id.is_empty() {
+    let canister_id_str = canister_id.to_string();
+    if canister_id_str.is_empty() {
         res.err = "Provided canister ID is empty".to_string();
         return res;
     }
@@ -25,7 +26,7 @@ pub async fn set_admin_canister(CanisterId { canister_id }: CanisterId) -> Basic
     STATE.with(|state: &GlobalState| {
         let mut admin_canister_id = state.admin_canister_id.borrow_mut();
         if admin_canister_id.is_empty() {
-            *admin_canister_id = canister_id.clone();
+            *admin_canister_id = canister_id_str.clone();
             res.ok = Some("Admin canister successfully set".to_string());
         } else {
             res.err = "Admin canister already set".to_string();

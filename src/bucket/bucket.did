@@ -25,7 +25,7 @@ type ModelInstanceResponse = record {
 
 service : {
     // Auth & setup
-    "setAdminCanister": (record { canister_id: text }) -> (BasicResponse);
+    "setAdminCanister": (record { canister_id: principal }) -> (BasicResponse);
     "checkIfAdminCanister": () -> (BasicResponse);
     "initModel": (record { model_name: text }) -> (BasicResponse);
 

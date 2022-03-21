@@ -5,6 +5,10 @@ import {
   EMPTY_AUTH_SESSION,
   EMPTY_TELEMETRY,
   Telemetry,
+  EMPTY_MODEL_LIST,
+  ModelList,
+  Model,
+  EMPTY_MODEL,
 } from "./_Interfaces";
 
 export const ConfigReducer = (
@@ -54,6 +58,44 @@ export const TelemetryReducer = (
 ) => {
   switch (action.type) {
     case "TELEMETRY_REDUCER": {
+      return {
+        ...state,
+        ...action.payload,
+      };
+    }
+    default:
+      return state;
+  }
+};
+
+export const ModelListReducer = (
+  state: ModelList = { ...EMPTY_MODEL_LIST },
+  action: {
+    type: "MODEL_LIST_REDUCER";
+    payload: ModelList;
+  }
+) => {
+  switch (action.type) {
+    case "MODEL_LIST_REDUCER": {
+      return {
+        ...state,
+        ...action.payload,
+      };
+    }
+    default:
+      return state;
+  }
+};
+
+export const ModelReducer = (
+  state: Model = { ...EMPTY_MODEL },
+  action: {
+    type: "MODEL_REDUCER";
+    payload: ModelList;
+  }
+) => {
+  switch (action.type) {
+    case "MODEL_REDUCER": {
       return {
         ...state,
         ...action.payload,

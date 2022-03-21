@@ -28,6 +28,7 @@ export const HomeScreen = () => {
       const telemetry_res = await backend.getSystemTelemetry({ token });
       if (telemetry_res.err) throw new Error(telemetry_res.err);
       if (!telemetry_res.ok?.[0]) throw new Error("Failed to get telemetry.");
+      console.log(telemetry_res);
       dispatch(
         updateTelemetryState({
           ...telemetry,

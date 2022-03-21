@@ -1,4 +1,4 @@
-use ic_cdk::export::candid::{CandidType, Deserialize};
+use ic_cdk::export::{candid::{CandidType, Deserialize}, Principal};
 
 //  #####    ##    ####  #  ####
 //  #    #  #  #  #      # #    #
@@ -32,7 +32,7 @@ impl Default for BasicResponse {
 
 #[derive(Clone, Debug, CandidType, Deserialize)]
 pub struct CanisterId {
-    pub canister_id: String,
+    pub canister_id: Principal
 }
 
 #[derive(Clone, Debug, CandidType, Deserialize)]

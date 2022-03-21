@@ -34,17 +34,17 @@ export const EMPTY_AUTH_SESSION: AuthSession = {
   token: "",
 };
 
-//                                                              
-//  ##### ###### #      ###### #    # ###### ##### #####  #   # 
-//    #   #      #      #      ##  ## #        #   #    #  # #  
-//    #   #####  #      #####  # ## # #####    #   #    #   #   
-//    #   #      #      #      #    # #        #   #####    #   
-//    #   #      #      #      #    # #        #   #   #    #   
-//    #   ###### ###### ###### #    # ######   #   #    #   #   
+//
+//  ##### ###### #      ###### #    # ###### ##### #####  #   #
+//    #   #      #      #      ##  ## #        #   #    #  # #
+//    #   #####  #      #####  # ## # #####    #   #    #   #
+//    #   #      #      #      #    # #        #   #####    #
+//    #   #      #      #      #    # #        #   #   #    #
+//    #   ###### ###### ###### #    # ######   #   #    #   #
 
 export interface DefiniteCanisterSettings {
   controllers: Principal[];
-  compute_allocation:BigInt;
+  compute_allocation: BigInt;
   memory_allocation: BigInt;
   freezing_threshold: BigInt;
 }
@@ -76,3 +76,42 @@ export const EMPTY_TELEMETRY = {
   main_cycles: 0,
   sub_canisters: [],
 };
+
+//
+//  #    #  ####  #####  ###### #       ####
+//  ##  ## #    # #    # #      #      #
+//  # ## # #    # #    # #####  #       ####
+//  #    # #    # #    # #      #           #
+//  #    # #    # #    # #      #      #    #
+//  #    #  ####  #####  ###### ######  ####
+
+export interface Model {
+  model_name: string;
+  data_fields: Array<ModelDataFieldType>;
+}
+
+export const EMPTY_MODEL = {
+  model_name: "",
+  data_fields: [],
+};
+export interface ModelDataFieldType {
+  field_name: string;
+  data_type: string;
+  default_json_value: string;
+}
+
+export interface ModelList {
+  models: Model[];
+}
+
+export const EMPTY_MODEL_LIST = {
+  models: [],
+};
+
+export const dataFieldTypesList = [
+  { label: "String", value: "STRING", default_value: "" },
+  { label: "Boolean", value: "BOOLEAN", default_value: "false" },
+  { label: "Number", value: "NUMBER", default_value: "0" },
+  { label: "String Array", value: "STRING_ARRAY", default_value: "[]" },
+  { label: "Number Array", value: "NUMBER_ARRAY", default_value: "[]" },
+]

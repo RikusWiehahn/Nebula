@@ -24,11 +24,16 @@ type ModelInstanceResponse = record {
 };
 
 service : {
-    "setAdminCanister": (record { canister_id: text }) -> (BasicResponse);
+    // Auth & setup
+    "setAdminCanister": (record { canister_id: principal }) -> (BasicResponse);
     "checkIfAdminCanister": () -> (BasicResponse);
     "initModel": (record { model_name: text }) -> (BasicResponse);
+
+    // Manage model fields
     "addField": (ModelDataFieldType) -> (BasicResponse);
     "removeField": (record { field_name: text }) -> (BasicResponse);
+
+    // Create/Read/Update/Delete model instances
     "createInstance": (record { id: text; json: text; }) -> (ModelInstanceResponse);
     "updateInstance": (record { id: text; json: text; }) -> (ModelInstanceResponse);
     "getInstance": (record { id: text }) -> (ModelInstanceResponse);

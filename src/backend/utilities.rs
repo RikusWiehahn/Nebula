@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 use sha2::Sha256;
 use std::fs::File;
 use std::io::Read;
-use std::path::{PathBuf};
+use std::path::PathBuf;
 use std::result::Result;
 use std::vec::Vec;
 use uuid::{Builder, Variant, Version};
@@ -210,11 +210,14 @@ pub fn decode_id_from_token(token: &str) -> Result<String, String> {
 //  #    # #        #      ##  ## #    # #    # #    #
 //   ####  ######   #      #    # #    #  ####  #    #
 
-pub fn get_canister_wasm() -> CanisterWasm {
+pub fn get_canister_wasm() -> Result<CanisterWasm, String> {
     let file_name = "bucket-opt.wasm".to_string();
-    let bytes = read_file_from_local_bin(&file_name);
-
-    CanisterWasm { module: bytes }
+    let bytes_res = read_file_from_local_bin(&file_name);
+    if bytes_res.is_err() {
+        panic!("Failed to read wasm file");
+    }
+    let bytes = bytes_res.unwrap();
+    Ok(CanisterWasm { module: bytes })
 }
 
 //
@@ -225,18 +228,34 @@ pub fn get_canister_wasm() -> CanisterWasm {
 //  #   #  #      #    # #    #    #      # #      #
 //  #    # ###### #    # #####     #      # ###### ######
 
-pub fn read_file_from_local_bin(file_name: &str) -> Vec<u8> {
-    let mut file_path = PathBuf::from(
-        std::env::var("CARGO_MANIFEST_DIR")
-            .expect("Failed to read CARGO_MANIFEST_DIR env variable"),
-    );
+pub fn read_file_from_local_bin(file_name: &str) -> Result<Vec<u8>, String> {
+    let dir_res = std::env::var("CARGO_MANIFEST_DIR");
+    if dir_res.is_err() {
+        return Err("Failed to read CARGO_MANIFEST_DIR env variable".to_string());
+    }
+
+    let mut file_path = PathBuf::from(dir_res.unwrap());
     file_path.push(&file_name);
 
-    let mut file = File::open(&file_path)
-        .unwrap_or_else(|_| panic!("Failed to open file: {}", file_path.to_str().unwrap()));
+    let file_res = File::open(&file_path);
+    if file_res.is_err() {
+        return Err(format!(
+            "Failed to open file: {}",
+            file_path.to_str().unwrap()
+        ));
+    }
+    let mut file = file_res.unwrap();
+
     let mut bytes = Vec::new();
-    file.read_to_end(&mut bytes).expect("Failed to read file");
-    bytes
+    let read_res = file.read_to_end(&mut bytes);
+    if read_res.is_err() {
+        return Err(format!(
+            "Failed to read file: {}",
+            file_path.to_str().unwrap()
+        ));
+    }
+
+    Ok(bytes)
 }
 
 //
@@ -344,5 +363,5 @@ pub async fn install_wasm(
         return Err(install_res.err().unwrap().1);
     }
 
-    return Ok(())
+    return Ok(());
 }

@@ -1,6 +1,11 @@
 use crate::helpers::*;
 use crate::main::*;
+use crate::services_bucket::initialize_canister_model;
+use crate::services_bucket::set_admin_canister;
 use crate::types::*;
+use crate::utilities::create_canister;
+use crate::utilities::get_canister_wasm;
+use crate::utilities::install_wasm;
 use ic_cdk_macros::update;
 use serde_json;
 use serde_json::{Result, Value};
@@ -34,6 +39,45 @@ pub async fn create_model(
         return res;
     }
 
+    // TODO: create first model bucket canister
+
+    // create canister
+    const TEN_TRILLION: u64 = 10_000_000_000_000;
+    let create_canister_res = create_canister(TEN_TRILLION).await;
+    if create_canister_res.is_err() {
+        res.err = create_canister_res.err().unwrap();
+        return res;
+    }
+    let new_canister_id = create_canister_res.ok().unwrap();
+    // install code
+    let get_wasm_res = get_canister_wasm();
+    if get_wasm_res.is_err() {
+        res.err = get_wasm_res.err().unwrap();
+        return res;
+    }
+    let wasm = get_wasm_res.ok().unwrap();
+    let install_res = install_wasm(new_canister_id.clone(), wasm.module, vec![]).await;
+    if install_res.is_err() {
+        res.err = install_res.err().unwrap();
+        return res;
+    }
+
+    // set this canister as the admin canister
+    let set_admin_res = set_admin_canister(new_canister_id.clone()).await;
+    if set_admin_res.is_err() {
+        res.err = set_admin_res.err().unwrap();
+        return res;
+    }
+
+    // initialize model
+    let init_model_res =
+        initialize_canister_model(new_canister_id.clone(), model_name.clone()).await;
+    if init_model_res.is_err() {
+        res.err = init_model_res.err().unwrap();
+        return res;
+    }
+
+    // save model to models
     STATE.with(|state: &GlobalState| {
         let mut models = state.models.borrow_mut();
         models.insert(
@@ -41,13 +85,11 @@ pub async fn create_model(
             Model {
                 model_name: model_name.clone(),
                 data_fields: vec![],
-                canisters: vec![],
+                canisters: vec![new_canister_id.clone().to_string()],
             },
         );
     });
-
-    // TODO: create first model bucket canister
-
+    
     res.ok = Some("Model created".to_string());
     return res;
 }
@@ -143,6 +185,10 @@ pub async fn add_model_field(
         res.err = "No field name provided".to_string();
         return res;
     }
+    if field_name == "id" || field_name == "model_name" {
+        res.err = "Provided field name cannot be 'id' or 'model_name'".to_string();
+        return res;
+    }
 
     // makes sure model exists
     let model_res = find_model(&model_name);
@@ -193,7 +239,7 @@ pub async fn add_model_field(
         }
     });
 
-    // TODO - update model in all it's sub-canisters
+    // TODO - update model in all it's canisters
 
     res.ok = model_to_return;
     return res;
@@ -227,6 +273,10 @@ pub async fn remove_model_field(
     }
     if field_name == "" {
         res.err = "No field name provided".to_string();
+        return res;
+    }
+    if field_name == "id" || field_name == "model_name" {
+        res.err = "Provided field name cannot be 'id' or 'model_name'".to_string();
         return res;
     }
 
