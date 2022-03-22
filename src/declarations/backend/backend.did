@@ -8,20 +8,11 @@ type TrustedCanistersResponse = record {
     "err": text;
 };
 
-type DefiniteCanisterSettings = record {
-  controllers : vec principal;
-  compute_allocation : nat;
-  memory_allocation : nat;
-  freezing_threshold : nat;
-};
-
 type SubCanisterTelemetry = record {
-    "last_status_check": float64;
     "id": text;
-    "settings": DefiniteCanisterSettings;
-    "status": text;
-    "module_hash": text;
+    "model_name": text;
     "memory_size": float64;
+    "memory_used": float64;
     "cycles": float64;
 };
 
@@ -31,6 +22,7 @@ type Telemetry = record {
     "main_memory_size": float64;
     "main_memory_used": float64;
     "main_cycles": float64;
+    "bucket_wasm_size": float64;
     "sub_canisters": vec SubCanisterTelemetry;
 };
 
@@ -76,8 +68,8 @@ type ModelInstanceResponse = record {
 
 service : {
     // Setup and authentication via the web client app.
-    "setAuth": (record { password: text; password_check: text }) -> (BasicResponse);
-    "isAuthSet": () -> (bool);
+    "activate": (record { password: text; password_check: text; bucket_wasm: blob }) -> (BasicResponse);
+    "isActivated": () -> (bool);
     "signIn": (record { password: text }) -> (BasicResponse);
     "checkSession": (record { token: text }) -> (BasicResponse);
     "changePassword": (record { old_password: text; password: text; password_check: text }) -> (BasicResponse);

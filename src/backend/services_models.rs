@@ -41,6 +41,13 @@ pub async fn create_model(
 
     // TODO: create first model bucket canister
 
+    // get wasm file
+    let get_wasm_res = get_canister_wasm();
+    if get_wasm_res.is_err() {
+        res.err = get_wasm_res.err().unwrap();
+        return res;
+    }
+    let wasm = get_wasm_res.ok().unwrap();
     // create canister
     const TEN_TRILLION: u64 = 10_000_000_000_000;
     let create_canister_res = create_canister(TEN_TRILLION).await;
@@ -50,12 +57,6 @@ pub async fn create_model(
     }
     let new_canister_id = create_canister_res.ok().unwrap();
     // install code
-    let get_wasm_res = get_canister_wasm();
-    if get_wasm_res.is_err() {
-        res.err = get_wasm_res.err().unwrap();
-        return res;
-    }
-    let wasm = get_wasm_res.ok().unwrap();
     let install_res = install_wasm(new_canister_id.clone(), wasm.module, vec![]).await;
     if install_res.is_err() {
         res.err = install_res.err().unwrap();

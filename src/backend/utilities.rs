@@ -11,9 +11,7 @@ use ic_cdk::{api::time, println};
 use jwt::{SignWithKey, VerifyWithKey};
 use serde::{Deserialize, Serialize};
 use sha2::Sha256;
-use std::fs::File;
-use std::io::Read;
-use std::path::Path;
+use std::io::Bytes;
 use std::result::Result;
 use std::vec::Vec;
 use uuid::{Builder, Variant, Version};
@@ -211,45 +209,19 @@ pub fn decode_id_from_token(token: &str) -> Result<String, String> {
 //   ####  ######   #      #    # #    #  ####  #    #
 
 pub fn get_canister_wasm() -> Result<CanisterWasm, String> {
-    let file_name = "bucket-opt.wasm".to_string();
-    let bytes_res = read_file_from_local_bin(&file_name);
-    if bytes_res.is_err() {
-        return Err(bytes_res.unwrap_err());
+    let mut wasm_opt: Option<Vec<u8>> = None;
+    STATE.with(|state: &GlobalState| {
+        let wasm = state.bucket_wasm.borrow();
+        if wasm.len() == 0 {
+            return;
+        }
+        wasm_opt = Some(wasm.clone());
+    });
+    if wasm_opt.is_none() {
+        return Err("WASM not set".to_string());
     }
-    let bytes = bytes_res.unwrap();
+    let bytes = wasm_opt.unwrap();
     Ok(CanisterWasm { module: bytes })
-}
-
-//
-//  #####  ######   ##   #####     ###### # #      ######
-//  #    # #       #  #  #    #    #      # #      #
-//  #    # #####  #    # #    #    #####  # #      #####
-//  #####  #      ###### #    #    #      # #      #
-//  #   #  #      #    # #    #    #      # #      #
-//  #    # ###### #    # #####     #      # ###### ######
-
-pub fn read_file_from_local_bin(file_name: &str) -> Result<Vec<u8>, String> {
-
-    let path = Path::new(file_name);
-    let file_res = File::open(&path);
-    if file_res.is_err() {
-        return Err(format!(
-            "Failed to open file: {}",
-            file_name
-        ));
-    }
-    let mut file = file_res.unwrap();
-
-    let mut bytes = Vec::new();
-    let read_res = file.read_to_end(&mut bytes);
-    if read_res.is_err() {
-        return Err(format!(
-            "Failed to read file: {}",
-            file_name
-        ));
-    }
-
-    Ok(bytes)
 }
 
 //
@@ -360,13 +332,13 @@ pub async fn install_wasm(
     return Ok(());
 }
 
-//                                                                                       
-//    ##    ####   ####  ###### #####  #####     ####  #   #  ####  #      ######  ####  
-//   #  #  #    # #    # #      #    #   #      #    #  # #  #    # #      #      #      
-//  #    # #      #      #####  #    #   #      #        #   #      #      #####   ####  
-//  ###### #      #      #      #####    #      #        #   #      #      #           # 
-//  #    # #    # #    # #      #        #      #    #   #   #    # #      #      #    # 
-//  #    #  ####   ####  ###### #        #       ####    #    ####  ###### ######  ####  
+//
+//    ##    ####   ####  ###### #####  #####     ####  #   #  ####  #      ######  ####
+//   #  #  #    # #    # #      #    #   #      #    #  # #  #    # #      #      #
+//  #    # #      #      #####  #    #   #      #        #   #      #      #####   ####
+//  ###### #      #      #      #####    #      #        #   #      #      #           #
+//  #    # #    # #    # #      #        #      #    #   #   #    # #      #      #    #
+//  #    #  ####   ####  ###### #        #       ####    #    ####  ###### ######  ####
 
 pub fn accept_cycles() -> u64 {
     let cycles_available = ic_cdk::api::call::msg_cycles_available();
@@ -380,3 +352,5 @@ pub fn accept_cycles() -> u64 {
 
     return cycles_accepted;
 }
+
+

@@ -12,6 +12,17 @@ export const idlFactory = ({ IDL }) => {
     'err' : IDL.Text,
     'json' : IDL.Opt(IDL.Text),
   });
+  const SubCanisterTelemetry = IDL.Record({
+    'id' : IDL.Text,
+    'memory_size' : IDL.Float64,
+    'memory_used' : IDL.Float64,
+    'model_name' : IDL.Text,
+    'cycles' : IDL.Float64,
+  });
+  const SubCanisterTelemetryResponse = IDL.Record({
+    'ok' : IDL.Opt(SubCanisterTelemetry),
+    'err' : IDL.Text,
+  });
   return IDL.Service({
     'addField' : IDL.Func([ModelDataFieldType], [BasicResponse], []),
     'checkIfAdminCanister' : IDL.Func([], [BasicResponse], []),
@@ -30,6 +41,7 @@ export const idlFactory = ({ IDL }) => {
         [ModelInstanceResponse],
         [],
       ),
+    'getTelemetry' : IDL.Func([], [SubCanisterTelemetryResponse], []),
     'initModel' : IDL.Func(
         [IDL.Record({ 'model_name' : IDL.Text })],
         [BasicResponse],

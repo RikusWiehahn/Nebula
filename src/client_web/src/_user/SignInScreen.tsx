@@ -24,7 +24,7 @@ export const SignInScreen = () => {
   const isAuthSet = async () => {
     try {
       setLoading(true);
-      const is_auth_set = await backend.isAuthSet();
+      const is_auth_set = await backend.isActivated();
       if (is_auth_set) {
         setIsActivated(true);
       }
@@ -57,24 +57,37 @@ export const SignInScreen = () => {
   };
 
   const setAuth = async () => {
+
     try {
       setLoading(true);
-      const set_auth_res = await backend.setAuth({
+      const path = "bucket-opt.wasm"
+      const wasm_file = await fetch(path);
+      const bytes_array = new Uint8Array(await wasm_file.arrayBuffer());
+      const number_array: number[] = [];
+      for (let i = 0; i < bytes_array.length; i++) {
+        number_array.push(bytes_array[i]);
+      }
+      console.log(number_array);
+      
+      const activate_res = await backend.activate({
         password: state.password,
         password_check: state.passwordCheck,
+        bucket_wasm: number_array,
       });
-      if (set_auth_res.err) throw new Error(set_auth_res.err);
-      if (!set_auth_res.ok[0])
+      console.log(activate_res);
+      if (activate_res.err) throw new Error(activate_res.err);
+      if (!activate_res.ok[0])
         throw new Error("Failed to sign in, no token returned.");
       dispatch(
         updateAuthSession({
           ...auth,
-          token: set_auth_res.ok[0],
+          token: activate_res.ok[0],
         })
       );
       SuccessToast(`Welcome!`);
       setLoading(false);
     } catch (e: any) {
+      console.log({e});
       ErrorToast(e.message);
       setLoading(false);
     }

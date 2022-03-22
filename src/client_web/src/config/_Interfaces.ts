@@ -42,29 +42,22 @@ export const EMPTY_AUTH_SESSION: AuthSession = {
 //    #   #      #      #      #    # #        #   #   #    #
 //    #   ###### ###### ###### #    # ######   #   #    #   #
 
-export interface DefiniteCanisterSettings {
-  controllers: Principal[];
-  compute_allocation: BigInt;
-  memory_allocation: BigInt;
-  freezing_threshold: BigInt;
-}
 
 export interface Telemetry {
   last_status_check: number;
-  main_id: String;
+  main_id: string;
   main_memory_size: number;
   main_memory_used: number;
   main_cycles: number;
+  bucket_wasm_size: number;
   sub_canisters: SubCanisterTelemetry[];
 }
 
 export interface SubCanisterTelemetry {
-  last_status_check: number;
-  id: String;
-  settings: DefiniteCanisterSettings;
-  status: String;
-  module_hash: String;
+  id: string;
   memory_size: number;
+  memory_used: number;
+  model_name: string;
   cycles: number;
 }
 
@@ -74,6 +67,7 @@ export const EMPTY_TELEMETRY = {
   main_memory_size: 0,
   main_memory_used: 0,
   main_cycles: 0,
+  bucket_wasm_size: 0,
   sub_canisters: [],
 };
 
@@ -114,4 +108,4 @@ export const dataFieldTypesList = [
   { label: "Number", value: "NUMBER", default_value: "0" },
   { label: "String Array", value: "STRING_ARRAY", default_value: "[]" },
   { label: "Number Array", value: "NUMBER_ARRAY", default_value: "[]" },
-]
+];

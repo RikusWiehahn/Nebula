@@ -9,6 +9,19 @@ type ModelDataFieldType = record {
     "default_json_value": text;
 };
 
+type SubCanisterTelemetry = record {
+    "id": text;
+    "model_name": text;
+    "memory_size": float64;
+    "memory_used": float64;
+    "cycles": float64;
+};
+
+type SubCanisterTelemetryResponse = record {
+    "ok": opt SubCanisterTelemetry;
+    "err": text;
+};
+
 /* 
     Data Types:
     "STRING"
@@ -28,6 +41,7 @@ service : {
     "setAdminCanister": (record { canister_id: principal }) -> (BasicResponse);
     "checkIfAdminCanister": () -> (BasicResponse);
     "initModel": (record { model_name: text }) -> (BasicResponse);
+    "getTelemetry": () -> (SubCanisterTelemetryResponse);
 
     // Manage model fields
     "addField": (ModelDataFieldType) -> (BasicResponse);

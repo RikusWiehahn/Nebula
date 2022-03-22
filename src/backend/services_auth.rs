@@ -12,7 +12,7 @@ use ic_cdk_macros::update;
 //  #    # #    #   #   #    #    # #    #    #    # #        #      #    # #
 //  #    #  ####    #   #    #    #  ####      ####  ######   #       ####  #
 
-#[update(name = "isAuthSet")]
+#[update(name = "isActivated")]
 pub async fn is_auth_set() -> bool {
     let auth_info_res = get_auth_info();
     if auth_info_res.is_err() {
@@ -29,12 +29,13 @@ pub async fn is_auth_set() -> bool {
 //  #    # #        #   #    # #
 //   ####  ######   #    ####  #
 
-#[update(name = "setAuth")]
+#[update(name = "activate")]
 pub async fn set_auth(
-    SetAuth {
+    Activate {
         password,
         password_check,
-    }: SetAuth,
+        bucket_wasm,
+    }: Activate,
 ) -> BasicResponse {
     let mut res: BasicResponse = BasicResponse::default();
     if password.len() < 64 {
@@ -43,6 +44,10 @@ pub async fn set_auth(
     }
     if password != password_check {
         res.err = "Passwords do not match".to_string();
+        return res;
+    }
+    if bucket_wasm.len() == 0 {
+        res.err = "Bucket wasm is empty".to_string();
         return res;
     }
 
@@ -74,8 +79,11 @@ pub async fn set_auth(
 
     STATE.with(|state: &GlobalState| {
         let mut auth = state.auth.borrow_mut();
+        let mut wasm = state.bucket_wasm.borrow_mut();
         auth.password_hash = hash;
         auth.session_id = session_id.clone();
+        *wasm = bucket_wasm;
+
     });
 
     // generate a token

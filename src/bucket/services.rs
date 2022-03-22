@@ -74,7 +74,7 @@ pub async fn init_model(InitModel { model_name }: InitModel) -> BasicResponse {
 
     STATE.with(|state: &GlobalState| {
         let mut saved_model_name = state.model_name.borrow_mut();
-        if model_name.is_empty() {
+        if saved_model_name.is_empty() {
             *saved_model_name = model_name.clone();
             res.ok = Some("Model successfully initialized".to_string());
         } else {
@@ -465,7 +465,6 @@ pub async fn update_instance(input: CreateOrUpdateInstance) -> ModelInstanceResp
 //  #    # #      #      #        #   #         # #   ## #    #   #   #    # #   ## #    # #
 //  #####  ###### ###### ######   #   ######    # #    #  ####    #   #    # #    #  ####  ######
 
-// deleteInstance: (record { id: text }) -> (BasicResponse);
 #[update(name = "deleteInstance")]
 pub async fn delete_instance(input: Id) -> BasicResponse {
     let mut res = BasicResponse::default();
@@ -491,5 +490,64 @@ pub async fn delete_instance(input: Id) -> BasicResponse {
     });
 
     res.ok = Some("Instance deleted".to_string());
+    return res;
+}
+
+//
+//    ##   #    # #####  ####     ##### ###### #      ###### #    # ###### ##### #####  #   #
+//   #  #  #    #   #   #    #      #   #      #      #      ##  ## #        #   #    #  # #
+//  #    # #    #   #   #    #      #   #####  #      #####  # ## # #####    #   #    #   #
+//  ###### #    #   #   #    #      #   #      #      #      #    # #        #   #####    #
+//  #    # #    #   #   #    #      #   #      #      #      #    # #        #   #   #    #
+//  #    #  ####    #    ####       #   ###### ###### ###### #    # ######   #   #    #   #
+
+pub async fn auto_update_telemetry() {
+    let mut model_name = "".to_string();
+    STATE.with(|state: &GlobalState| {
+        let saved_model_name = state.model_name.borrow();
+        model_name = saved_model_name.clone();
+    });
+    ic_cdk::println!("{:?}", model_name);
+
+    let cycles = ic_cdk::api::canister_balance();
+
+    let new_telemetry = SubCanisterTelemetry {
+        id: ic_cdk::id().to_string(),
+        model_name: model_name.clone(),
+        memory_size: 0.0,
+        memory_used: get_heap_size() as f64,
+        cycles: cycles as f64,
+    };
+
+    ic_cdk::println!("{:?}", new_telemetry);
+
+    STATE.with(|state: &GlobalState| {
+        let mut telemetry = state.telemetry.borrow_mut();
+        *telemetry = new_telemetry;
+    });
+}
+
+//
+//   ####  ###### #####    ##### ###### #      ###### #    # ###### ##### #####  #   #
+//  #    # #        #        #   #      #      #      ##  ## #        #   #    #  # #
+//  #      #####    #        #   #####  #      #####  # ## # #####    #   #    #   #
+//  #  ### #        #        #   #      #      #      #    # #        #   #####    #
+//  #    # #        #        #   #      #      #      #    # #        #   #   #    #
+//   ####  ######   #        #   ###### ###### ###### #    # ######   #   #    #   #
+
+#[update(name = "getTelemetry")]
+pub async fn get_telemetry() -> SubCanisterTelemetryResponse {
+    let mut res = SubCanisterTelemetryResponse::default();
+    let is_admin_res = caller_is_admin();
+    if is_admin_res.is_err() {
+        res.err = is_admin_res.err().unwrap();
+        return res;
+    }
+
+    let telemetry = STATE.with(|s: &GlobalState| s.telemetry.borrow().clone());
+
+    ic_cdk::println!("{:?}", telemetry);
+
+    res.ok = Some(telemetry);
     return res;
 }

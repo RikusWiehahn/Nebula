@@ -3,12 +3,16 @@
     "backend": {
       "candid": "src/backend/backend.did",
       "package": "backend",
-      "type": "rust"
+      "type": "custom",
+      "wasm": "target/wasm32-unknown-unknown/release/backend-opt.wasm",
+      "build": "./generate-wasm.sh backend"
     },
     "bucket": {
       "candid": "src/bucket/bucket.did",
       "package": "bucket",
-      "type": "rust"
+      "type": "custom",
+      "wasm": "target/wasm32-unknown-unknown/release/bucket-opt.wasm",
+      "build": "./generate-wasm.sh bucket"
     },
     "client_web": {
       "dependencies": [

@@ -1,11 +1,5 @@
 import type { Principal } from '@dfinity/principal';
 export interface BasicResponse { 'ok' : [] | [string], 'err' : string }
-export interface DefiniteCanisterSettings {
-  'freezing_threshold' : bigint,
-  'controllers' : Array<Principal>,
-  'memory_allocation' : bigint,
-  'compute_allocation' : bigint,
-}
 export interface Model {
   'model_name' : string,
   'data_fields' : Array<ModelDataFieldType>,
@@ -23,16 +17,15 @@ export interface ModelListResponse { 'ok' : Array<Model>, 'err' : string }
 export interface ModelResponse { 'ok' : [] | [Model], 'err' : string }
 export interface SubCanisterTelemetry {
   'id' : string,
-  'status' : string,
-  'last_status_check' : number,
   'memory_size' : number,
+  'memory_used' : number,
+  'model_name' : string,
   'cycles' : number,
-  'settings' : DefiniteCanisterSettings,
-  'module_hash' : string,
 }
 export interface Telemetry {
   'last_status_check' : number,
   'main_id' : string,
+  'bucket_wasm_size' : number,
   'sub_canisters' : Array<SubCanisterTelemetry>,
   'main_memory_size' : number,
   'main_memory_used' : number,
@@ -44,6 +37,13 @@ export interface TrustedCanistersResponse {
   'err' : string,
 }
 export interface _SERVICE {
+  'activate' : (
+      arg_0: {
+        'password' : string,
+        'bucket_wasm' : Array<number>,
+        'password_check' : string,
+      },
+    ) => Promise<BasicResponse>,
   'addModelField' : (
       arg_0: { 'token' : string, 'model_name' : string },
       arg_1: ModelDataFieldType,
@@ -84,16 +84,13 @@ export interface _SERVICE {
   'getTrustedCanisters' : (arg_0: { 'token' : string }) => Promise<
       TrustedCanistersResponse
     >,
-  'isAuthSet' : () => Promise<boolean>,
+  'isActivated' : () => Promise<boolean>,
   'removeModelField' : (
       arg_0: { 'token' : string, 'field_name' : string, 'model_name' : string },
     ) => Promise<ModelResponse>,
   'removeTrustedCanister' : (
       arg_0: { 'token' : string, 'canister_id' : string },
     ) => Promise<TrustedCanistersResponse>,
-  'setAuth' : (
-      arg_0: { 'password' : string, 'password_check' : string },
-    ) => Promise<BasicResponse>,
   'signIn' : (arg_0: { 'password' : string }) => Promise<BasicResponse>,
   'updateModelInstance' : (
       arg_0: { 'id' : string, 'token' : string, 'json' : string },

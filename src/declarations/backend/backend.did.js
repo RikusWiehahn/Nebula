@@ -1,4 +1,8 @@
 export const idlFactory = ({ IDL }) => {
+  const BasicResponse = IDL.Record({
+    'ok' : IDL.Opt(IDL.Text),
+    'err' : IDL.Text,
+  });
   const ModelDataFieldType = IDL.Record({
     'field_name' : IDL.Text,
     'data_type' : IDL.Text,
@@ -13,10 +17,6 @@ export const idlFactory = ({ IDL }) => {
     'ok' : IDL.Vec(IDL.Text),
     'err' : IDL.Text,
   });
-  const BasicResponse = IDL.Record({
-    'ok' : IDL.Opt(IDL.Text),
-    'err' : IDL.Text,
-  });
   const ModelInstanceResponse = IDL.Record({
     'err' : IDL.Text,
     'json' : IDL.Opt(IDL.Text),
@@ -25,24 +25,17 @@ export const idlFactory = ({ IDL }) => {
     'ok' : IDL.Vec(Model),
     'err' : IDL.Text,
   });
-  const DefiniteCanisterSettings = IDL.Record({
-    'freezing_threshold' : IDL.Nat,
-    'controllers' : IDL.Vec(IDL.Principal),
-    'memory_allocation' : IDL.Nat,
-    'compute_allocation' : IDL.Nat,
-  });
   const SubCanisterTelemetry = IDL.Record({
     'id' : IDL.Text,
-    'status' : IDL.Text,
-    'last_status_check' : IDL.Float64,
     'memory_size' : IDL.Float64,
+    'memory_used' : IDL.Float64,
+    'model_name' : IDL.Text,
     'cycles' : IDL.Float64,
-    'settings' : DefiniteCanisterSettings,
-    'module_hash' : IDL.Text,
   });
   const Telemetry = IDL.Record({
     'last_status_check' : IDL.Float64,
     'main_id' : IDL.Text,
+    'bucket_wasm_size' : IDL.Float64,
     'sub_canisters' : IDL.Vec(SubCanisterTelemetry),
     'main_memory_size' : IDL.Float64,
     'main_memory_used' : IDL.Float64,
@@ -53,6 +46,17 @@ export const idlFactory = ({ IDL }) => {
     'err' : IDL.Text,
   });
   return IDL.Service({
+    'activate' : IDL.Func(
+        [
+          IDL.Record({
+            'password' : IDL.Text,
+            'bucket_wasm' : IDL.Vec(IDL.Nat8),
+            'password_check' : IDL.Text,
+          }),
+        ],
+        [BasicResponse],
+        [],
+      ),
     'addModelField' : IDL.Func(
         [
           IDL.Record({ 'token' : IDL.Text, 'model_name' : IDL.Text }),
@@ -127,7 +131,7 @@ export const idlFactory = ({ IDL }) => {
         [TrustedCanistersResponse],
         [],
       ),
-    'isAuthSet' : IDL.Func([], [IDL.Bool], []),
+    'isActivated' : IDL.Func([], [IDL.Bool], []),
     'removeModelField' : IDL.Func(
         [
           IDL.Record({
@@ -142,11 +146,6 @@ export const idlFactory = ({ IDL }) => {
     'removeTrustedCanister' : IDL.Func(
         [IDL.Record({ 'token' : IDL.Text, 'canister_id' : IDL.Text })],
         [TrustedCanistersResponse],
-        [],
-      ),
-    'setAuth' : IDL.Func(
-        [IDL.Record({ 'password' : IDL.Text, 'password_check' : IDL.Text })],
-        [BasicResponse],
         [],
       ),
     'signIn' : IDL.Func(
