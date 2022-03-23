@@ -96,14 +96,14 @@ export const SignInScreen = () => {
   const renderSignInForm = () => {
     return (
       <div
-        className="p-6 rounded-md bg-white dark:bg-gray-800"
+        className="p-6 bg-white dark:bg-gray-800"
         style={{ maxWidth: "24rem" }}
       >
         <img
           src={config.uiMode === "dark" ? "logo-white.png" : "logo-black.png"}
         />
         <h2 className="text-2xl mb-2 mt-2 font-bold text-center">
-          Welcome to Gondolin
+          Welcome to Nebula
         </h2>
         <label className="input-label">Password</label>
         <input
@@ -132,14 +132,14 @@ export const SignInScreen = () => {
   const renderSetAuthForm = () => {
     return (
       <div
-        className="p-6 rounded-md bg-white dark:bg-gray-800"
+        className="p-6 bg-white dark:bg-gray-800"
         style={{ maxWidth: "24rem" }}
       >
         <img
           src={config.uiMode === "dark" ? "logo-white.png" : "logo-black.png"}
         />
         <h2 className="text-2xl mb-2 mt-2 font-bold text-center">
-          Welcome to Gondolin
+          Welcome to Nebula
         </h2>
         <label className="input-label">Password</label>
         <input

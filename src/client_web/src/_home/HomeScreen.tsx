@@ -70,8 +70,8 @@ export const HomeScreen = () => {
                   )} trillion cycles`
                 )}
                 {renderStat(
-                  "Memory size",
-                  `${(sub_canister.memory_size / 1000).toFixed(2)} kB`
+                  "Memory used",
+                  `${(sub_canister.memory_used / 1000).toFixed(2)} kB`
                 )}
               </div>
             </div>
