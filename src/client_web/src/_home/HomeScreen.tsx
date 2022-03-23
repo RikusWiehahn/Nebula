@@ -90,8 +90,7 @@ export const HomeScreen = () => {
     );
     const last_status = dayjs(telemetry.last_status_check / 1000000);
     return (
-      <div className="py-4">
-        <h1 className="text-xl font-bold mt-4 mb-4">{`Main Canister ID: ${telemetry.main_id}`}</h1>
+      <div className="">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-white dark:bg-gray-800">
           {renderStat(
             "Last Status Check",
@@ -123,6 +122,7 @@ export const HomeScreen = () => {
       <AuthGate>
         <Layout>
           <div className="mx-auto container px-4">
+            <h1 className="text-xl font-bold mt-8 mb-4">{`Main Canister ID: ${telemetry.main_id}`}</h1>
             {loading ? <LoadingIndicator /> : renderMainCanisterTelemetry()}
           </div>
         </Layout>

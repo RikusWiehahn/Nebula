@@ -97,7 +97,7 @@ export const ModelListScreen = () => {
 
   const renderModels = () => {
     return (
-      <div className="pt-4">
+      <div className="">
         <div className="">
           <CreateDatModelUtility />
         </div>
@@ -111,6 +111,7 @@ export const ModelListScreen = () => {
       <AuthGate>
         <Layout>
           <div className="mx-auto container px-4">
+            <h1 className="text-xl mb-4 mt-8 font-bold">Data models</h1>
             {loading ? <LoadingIndicator /> : renderModels()}
           </div>
         </Layout>
