@@ -93,7 +93,7 @@ pub async fn init_model(InitModel { model_name }: InitModel) -> BasicResponse {
 //  #    # #    # #    #    #      # #      #      #    #
 //  #    # #####  #####     #      # ###### ###### #####
 
-#[update(name = "addDataField")]
+#[update(name = "addField")]
 pub async fn add_data_field(input: ModelDataFieldType) -> BasicResponse {
     let mut res = BasicResponse::default();
     let is_admin_res = caller_is_admin();
@@ -165,7 +165,7 @@ pub async fn add_data_field(input: ModelDataFieldType) -> BasicResponse {
 //  #   #  #      #    # #    #  #  #  #         #      # #      #      #    #
 //  #    # ###### #    #  ####    ##   ######    #      # ###### ###### #####
 
-#[update(name = "removeDataField")]
+#[update(name = "removeField")]
 pub async fn remove_data_field(input: RemoveField) -> BasicResponse {
     let mut res = BasicResponse::default();
     let is_admin_res = caller_is_admin();

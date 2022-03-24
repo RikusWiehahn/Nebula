@@ -28,11 +28,19 @@ export const EMPTY_CONFIG_STATE: ConfigState = {
 //  #    #  ####    #   #    #
 export interface AuthSession {
   token: string;
+  trusted_canisters: TrustedCanister[];
 }
 
 export const EMPTY_AUTH_SESSION: AuthSession = {
   token: "",
+  trusted_canisters: [],
+
 };
+
+export interface TrustedCanister {
+  name: string;
+  canister_id: string;
+}
 
 //
 //  ##### ###### #      ###### #    # ###### ##### #####  #   #

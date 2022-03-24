@@ -37,5 +37,6 @@ export interface _SERVICE {
   'updateInstance' : (arg_0: { 'id' : string, 'json' : string }) => Promise<
       ModelInstanceResponse
     >,
+  'wallet_drain' : () => Promise<undefined>,
   'wallet_receive' : (arg_0: bigint) => Promise<undefined>,
 }

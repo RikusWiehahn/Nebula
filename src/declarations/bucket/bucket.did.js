@@ -62,6 +62,7 @@ export const idlFactory = ({ IDL }) => {
         [ModelInstanceResponse],
         [],
       ),
+    'wallet_drain' : IDL.Func([], [], []),
     'wallet_receive' : IDL.Func([IDL.Nat], [], []),
   });
 };

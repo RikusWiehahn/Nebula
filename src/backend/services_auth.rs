@@ -83,7 +83,6 @@ pub async fn set_auth(
         auth.password_hash = hash;
         auth.session_id = session_id.clone();
         *wasm = bucket_wasm;
-
     });
 
     // generate a token
@@ -268,16 +267,20 @@ pub async fn get_trusted_canisters(TokenRecord { token }: TokenRecord) -> Truste
 }
 
 //
-//    ##   #####  #####  ###### #####     ##### #####  #    #  ####  ##### ###### #####      ####    ##   #    # #  ####  ##### ###### #####
-//   #  #  #    # #    # #      #    #      #   #    # #    # #        #   #      #    #    #    #  #  #  ##   # # #        #   #      #    #
-//  #    # #    # #    # #####  #    #      #   #    # #    #  ####    #   #####  #    #    #      #    # # #  # #  ####    #   #####  #    #
-//  ###### #    # #    # #      #    #      #   #####  #    #      #   #   #      #    #    #      ###### #  # # #      #   #   #      #####
-//  #    # #    # #    # #      #    #      #   #   #  #    # #    #   #   #      #    #    #    # #    # #   ## # #    #   #   #      #   #
-//  #    # #####  #####  ###### #####       #   #    #  ####   ####    #   ###### #####      ####  #    # #    # #  ####    #   ###### #    #
+//    ##   #####  #####     ##### #####  #    #  ####  ##### ###### #####      ####    ##   #    # #  ####  ##### ###### #####
+//   #  #  #    # #    #      #   #    # #    # #        #   #      #    #    #    #  #  #  ##   # # #        #   #      #    #
+//  #    # #    # #    #      #   #    # #    #  ####    #   #####  #    #    #      #    # # #  # #  ####    #   #####  #    #
+//  ###### #    # #    #      #   #####  #    #      #   #   #      #    #    #      ###### #  # # #      #   #   #      #####
+//  #    # #    # #    #      #   #   #  #    # #    #   #   #      #    #    #    # #    # #   ## # #    #   #   #      #   #
+//  #    # #####  #####       #   #    #  ####   ####    #   ###### #####      ####  #    # #    # #  ####    #   ###### #    #
 
-#[update(name = "addTrustedCanisterId")]
+#[update(name = "addTrustedCanister")]
 pub async fn add_trusted_canister_id(
-    AddOrRemoveTrustedCanister { token, canister_id }: AddOrRemoveTrustedCanister,
+    AddTrustedCanister {
+        token,
+        name,
+        canister_id,
+    }: AddTrustedCanister,
 ) -> TrustedCanistersResponse {
     let mut res: TrustedCanistersResponse = TrustedCanistersResponse::default();
     let auth_res = authenticate_token(&token);
@@ -286,14 +289,33 @@ pub async fn add_trusted_canister_id(
         return res;
     }
 
+    if name.is_empty() {
+        res.err = "A canister name is required".to_string();
+        return res;
+    }
     if canister_id.is_empty() {
         res.err = "Canister ID is required".to_string();
         return res;
     }
 
+    let to_check_res = find_trusted_canisters();
+    if to_check_res.is_err() {
+        res.err = to_check_res.err().unwrap();
+        return res;
+    }
+    let to_check = to_check_res.unwrap();
+    let already_exists = to_check.iter().any(|x| x.canister_id == canister_id);
+    if already_exists {
+        res.err = "Canister ID already added".to_string();
+        return res;
+    }
+
     STATE.with(|state: &GlobalState| {
         let mut auth = state.auth.borrow_mut();
-        auth.trusted_canister_ids.push(canister_id);
+        auth.trusted_canisters.push(TrustedCanister {
+            name: name.clone(),
+            canister_id: canister_id.clone(),
+        });
     });
 
     let trusted_canisters_res = find_trusted_canisters();
@@ -313,9 +335,9 @@ pub async fn add_trusted_canister_id(
 //  #   #  #      #    # #    #  #  #  #           #   #   #  #    # #    #   #   #      #    #    #    # #    # #   ## # #    #   #   #      #   #
 //  #    # ###### #    #  ####    ##   ######      #   #    #  ####   ####    #   ###### #####      ####  #    # #    # #  ####    #   ###### #    #
 
-#[update(name = "removeTrustedCanisterId")]
-pub async fn remove_trusted_canister_id(
-    AddOrRemoveTrustedCanister { token, canister_id }: AddOrRemoveTrustedCanister,
+#[update(name = "removeTrustedCanister")]
+pub async fn remove_trusted_canister(
+    RemoveTrustedCanister { token, canister_id }: RemoveTrustedCanister,
 ) -> TrustedCanistersResponse {
     let mut res: TrustedCanistersResponse = TrustedCanistersResponse::default();
     let auth_res = authenticate_token(&token);
@@ -332,13 +354,14 @@ pub async fn remove_trusted_canister_id(
     let mut found = false;
     STATE.with(|state: &GlobalState| {
         let mut auth = state.auth.borrow_mut();
-        for existing_canister_id in auth.trusted_canister_ids.iter() {
-            if existing_canister_id == &canister_id {
+        for existing_canister in auth.trusted_canisters.iter() {
+            if existing_canister.canister_id == canister_id {
                 found = true;
                 break;
             }
         }
-        auth.trusted_canister_ids.retain(|id| id != &canister_id);
+        auth.trusted_canisters
+            .retain(|canister| canister.canister_id != canister_id);
     });
 
     if !found {

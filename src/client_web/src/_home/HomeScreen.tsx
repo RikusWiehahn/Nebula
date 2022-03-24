@@ -114,6 +114,9 @@ export const HomeScreen = () => {
           )}
         </div>
         <h1 className="text-xl font-bold mt-8 mb-4">Sub Canisters</h1>
+        {telemetry.sub_canisters.length === 0 ? (
+          <div>No sub canisters found. Create a data model to get started.</div>
+        ) : null}
         {renderSubCanisterTelemetry()}
       </div>
     );

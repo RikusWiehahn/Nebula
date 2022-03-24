@@ -82,11 +82,11 @@ pub fn authenticate_token(token: &str) -> Result<(), String> {
 //  #    # #        #        #   #   #  #    # #    #   #   #      #    #    #    # #    # #   ## # #    #   #   #      #   #  #    #
 //   ####  ######   #        #   #    #  ####   ####    #   ###### #####      ####  #    # #    # #  ####    #   ###### #    #  ####
 
-pub fn find_trusted_canisters() -> Result<Vec<String>, String> {
-    let mut trusted_canisters: Vec<String> = Vec::new();
+pub fn find_trusted_canisters() -> Result<Vec<TrustedCanister>, String> {
+    let mut trusted_canisters: Vec<TrustedCanister> = Vec::new();
     STATE.with(|state: &GlobalState| {
         let auth = state.auth.borrow();
-        trusted_canisters = auth.trusted_canister_ids.clone();
+        trusted_canisters = auth.trusted_canisters.clone();
     });
     Ok(trusted_canisters)
 }

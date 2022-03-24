@@ -3,8 +3,13 @@ type BasicResponse = record {
     "err": text;
 };
 
+type TrustedCanister = record {
+    "name": text;
+    "canister_id": text;
+};
+
 type TrustedCanistersResponse = record {
-    "ok": vec text;
+    "ok": vec TrustedCanister;
     "err": text;
 };
 
@@ -77,9 +82,9 @@ service : {
     // View status of main canister and data storage sub-canisters.
     "getSystemTelemetry": (record { token: text }) -> (TelemetryResponse);
 
-    // Manage which external canisters are allowed to Create/Read/Update/Delete model instances.
+    // Manage which external entities are allowed to Create/Read/Update/Delete model instances.
     "getTrustedCanisters": (record { token: text }) -> (TrustedCanistersResponse);
-    "addTrustedCanister": (record { token: text; canister_id: text }) -> (TrustedCanistersResponse);
+    "addTrustedCanister": (record { token: text; name: text; canister_id: text }) -> (TrustedCanistersResponse);
     "removeTrustedCanister": (record { token: text; canister_id: text}) -> (TrustedCanistersResponse);
 
     // Manage the data models

@@ -1,6 +1,6 @@
 use crate::services::auto_update_telemetry;
 use crate::types::*;
-use crate::utilities::accept_cycles;
+use crate::utilities::{accept_cycles, drain_cycles};
 use ic_cdk::export::candid::{CandidType, Deserialize};
 use ic_cdk::storage;
 use ic_cdk::api::time;
@@ -20,6 +20,11 @@ use std::collections::HashMap;
 #[update]
 fn wallet_receive() {
     accept_cycles();
+}
+
+#[update]
+async fn wallet_drain() {
+    let _ = drain_cycles().await;
 }
 
 //

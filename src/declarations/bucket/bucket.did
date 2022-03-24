@@ -55,4 +55,5 @@ service : {
 
     // wallet
     "wallet_receive": (nat) -> ();
+    "wallet_drain": () -> ();
 }

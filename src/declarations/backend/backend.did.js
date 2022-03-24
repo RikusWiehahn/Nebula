@@ -13,8 +13,12 @@ export const idlFactory = ({ IDL }) => {
     'data_fields' : IDL.Vec(ModelDataFieldType),
   });
   const ModelResponse = IDL.Record({ 'ok' : IDL.Opt(Model), 'err' : IDL.Text });
+  const TrustedCanister = IDL.Record({
+    'name' : IDL.Text,
+    'canister_id' : IDL.Text,
+  });
   const TrustedCanistersResponse = IDL.Record({
-    'ok' : IDL.Vec(IDL.Text),
+    'ok' : IDL.Vec(TrustedCanister),
     'err' : IDL.Text,
   });
   const ModelInstanceResponse = IDL.Record({
@@ -66,7 +70,13 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'addTrustedCanister' : IDL.Func(
-        [IDL.Record({ 'token' : IDL.Text, 'canister_id' : IDL.Text })],
+        [
+          IDL.Record({
+            'token' : IDL.Text,
+            'name' : IDL.Text,
+            'canister_id' : IDL.Text,
+          }),
+        ],
         [TrustedCanistersResponse],
         [],
       ),

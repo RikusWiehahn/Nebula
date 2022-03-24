@@ -1,11 +1,8 @@
 use crate::helpers::*;
 use crate::main::*;
-use crate::services_bucket::initialize_canister_model;
-use crate::services_bucket::set_admin_canister;
+use crate::services_bucket::*;
 use crate::types::*;
-use crate::utilities::create_canister;
-use crate::utilities::get_canister_wasm;
-use crate::utilities::install_wasm;
+use crate::utilities::*;
 use ic_cdk_macros::update;
 use serde_json;
 use serde_json::{Result, Value};
@@ -49,7 +46,7 @@ pub async fn create_model(
     }
     let wasm = get_wasm_res.ok().unwrap();
     // create canister
-    const TEN_TRILLION: u64 = 10_000_000_000_000;
+    const TEN_TRILLION: u64 = 5_000_000_000_000;
     let create_canister_res = create_canister(TEN_TRILLION).await;
     if create_canister_res.is_err() {
         res.err = create_canister_res.err().unwrap();
@@ -90,7 +87,7 @@ pub async fn create_model(
             },
         );
     });
-    
+
     res.ok = Some("Model created".to_string());
     return res;
 }
@@ -240,7 +237,22 @@ pub async fn add_model_field(
         }
     });
 
-    // TODO - update model in all it's canisters
+    // update model in all it's canisters
+    for sub_canister_id in model.canisters {
+        let sub_canister_res = add_field_to_sub_canister(
+            sub_canister_id,
+            ModelDataFieldType {
+                field_name: field_name.clone(),
+                data_type: data_type.clone(),
+                default_json_value: default_json_value.clone(),
+            },
+        )
+        .await;
+        if sub_canister_res.is_err() {
+            res.err = sub_canister_res.err().unwrap();
+            return res;
+        }
+    }
 
     res.ok = model_to_return;
     return res;
@@ -313,7 +325,15 @@ pub async fn remove_model_field(
         }
     });
 
-    // TODO - update model in all it's sub-canisters
+    // update model in all it's sub-canisters
+    for sub_canister_id in model.canisters {
+        let sub_canister_res =
+            remove_field_from_sub_canister(sub_canister_id, field_name.clone()).await;
+        if sub_canister_res.is_err() {
+            res.err = sub_canister_res.err().unwrap();
+            return res;
+        }
+    }
 
     res.ok = model_to_return;
     return res;
@@ -327,7 +347,7 @@ pub async fn remove_model_field(
 //  #    # #      #      #        #   #         #    # #    # #    # #      #
 //  #####  ###### ###### ######   #   ######    #    #  ####  #####  ###### ######
 
-// "deleteModel": (record { token: text; model_name: text }) -> (BasicResponse);
+
 #[update(name = "deleteModel")]
 pub async fn delete_model(
     CreateOrGetModel { token, model_name }: CreateOrGetModel,
@@ -349,13 +369,31 @@ pub async fn delete_model(
         res.err = model_res.err().unwrap();
         return res;
     }
+    let model = model_res.ok().unwrap();
+
+    // TODO - delete all of this model's canisters
+    for sub_canister_id in model.canisters {
+        // drain cycles
+        let drain_res = drain_sub_canister_cycles(&sub_canister_id).await;
+        if drain_res.is_err() {
+            res.err = drain_res.err().unwrap();
+            return res;
+        }
+
+        delay();
+
+        // destroy canister
+        let destroy_res = destroy_sub_canister(&sub_canister_id).await;
+        if destroy_res.is_err() {
+            res.err = destroy_res.err().unwrap();
+            return res;
+        }
+    }
 
     STATE.with(|state: &GlobalState| {
         let mut models = state.models.borrow_mut();
         models.retain(|key, _| key != &model_name);
     });
-
-    // TODO - delete all of this model's canisters
 
     res.ok = Some("Model deleted".to_string());
     return res;

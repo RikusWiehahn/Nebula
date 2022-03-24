@@ -39,7 +39,7 @@ impl Default for BasicResponse {
 pub struct Authentication {
     pub session_id: String,
     pub password_hash: String,
-    pub trusted_canister_ids: Vec<String>,
+    pub trusted_canisters: Vec<TrustedCanister>,
 }
 
 impl Default for Authentication {
@@ -47,7 +47,7 @@ impl Default for Authentication {
         Authentication {
             session_id: "".to_string(),
             password_hash: "".to_string(),
-            trusted_canister_ids: vec![],
+            trusted_canisters: vec![],
         }
     }
 }
@@ -74,27 +74,6 @@ pub struct ChangePassword {
 #[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
 pub struct TokenRecord {
     pub token: String,
-}
-
-#[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
-pub struct TrustedCanistersResponse {
-    pub ok: Vec<String>,
-    pub err: String,
-}
-
-impl Default for TrustedCanistersResponse {
-    fn default() -> Self {
-        TrustedCanistersResponse {
-            ok: vec![],
-            err: "".to_string(),
-        }
-    }
-}
-
-#[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
-pub struct AddOrRemoveTrustedCanister {
-    pub token: String,
-    pub canister_id: String,
 }
 
 //
@@ -301,4 +280,51 @@ pub struct CanisterWasm {
 #[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
 pub struct InitModel {
     pub model_name: String,
+}
+
+#[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
+pub struct RemoveField {
+    pub field_name: String,
+}
+
+//
+//  ##### #####  #    #  ####  ##### ###### #####      ####    ##   #    # #  ####  ##### ###### #####   ####
+//    #   #    # #    # #        #   #      #    #    #    #  #  #  ##   # # #        #   #      #    # #
+//    #   #    # #    #  ####    #   #####  #    #    #      #    # # #  # #  ####    #   #####  #    #  ####
+//    #   #####  #    #      #   #   #      #    #    #      ###### #  # # #      #   #   #      #####       #
+//    #   #   #  #    # #    #   #   #      #    #    #    # #    # #   ## # #    #   #   #      #   #  #    #
+//    #   #    #  ####   ####    #   ###### #####      ####  #    # #    # #  ####    #   ###### #    #  ####
+
+#[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
+pub struct TrustedCanister {
+    pub name: String,
+    pub canister_id: String,
+}
+
+#[derive(Clone, Debug, CandidType, Deserialize)]
+pub struct TrustedCanistersResponse {
+    pub ok: Vec<TrustedCanister>,
+    pub err: String,
+}
+
+impl Default for TrustedCanistersResponse {
+    fn default() -> Self {
+        TrustedCanistersResponse {
+            ok: vec![],
+            err: "".to_string(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
+pub struct AddTrustedCanister {
+    pub token: String,
+    pub name: String,
+    pub canister_id: String,
+}
+
+#[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
+pub struct RemoveTrustedCanister {
+    pub token: String,
+    pub canister_id: String,
 }

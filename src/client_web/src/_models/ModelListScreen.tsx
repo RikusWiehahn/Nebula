@@ -14,6 +14,7 @@ import { MoreHoverBox } from "../components/MoreHoverBox";
 import { AddDataFieldUtility } from "./AddDataFieldUtility";
 import { RemoveDataFieldUtility } from "./RemoveDataFieldUtility";
 import { DeleteModelUtility } from "./DeleteModelUtility";
+import { dataFieldTypesList } from "../config/_Interfaces";
 dayjs.extend(relativeTime);
 
 export const ModelListScreen = () => {
@@ -24,8 +25,10 @@ export const ModelListScreen = () => {
   const model_list = useSelector((s: StoreState) => s.model_list);
 
   useEffect(() => {
-    getModels();
-  }, []);
+    if (auth.token) {
+      getModels();
+    }
+  }, [auth.token]);
 
   const getModels = async () => {
     try {
@@ -71,18 +74,22 @@ export const ModelListScreen = () => {
           </div>
           <div className="flex">
             <div className="flex-1">id</div>
-            <div className="flex-1">STRING</div>
+            <div className="flex-1">String</div>
             <div className="flex-1">Auto-generated</div>
           </div>
           <div className="flex">
             <div className="flex-1">model_name</div>
-            <div className="flex-1">STRING</div>
+            <div className="flex-1">String</div>
             <div className="flex-1">Auto-generated</div>
           </div>
           {model.data_fields.map((field) => (
             <div className="flex">
               <div className="flex-1">{field.field_name}</div>
-              <div className="flex-1">{field.data_type}</div>
+              <div className="flex-1">
+                {dataFieldTypesList
+                  .map((t) => (t.value === field.data_type ? t.label : ""))
+                  .reduce((a, b) => a + b)}
+              </div>
               <div className="flex-1">{field.default_json_value}</div>
             </div>
           ))}

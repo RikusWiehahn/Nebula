@@ -32,8 +32,9 @@ export interface Telemetry {
   'main_cycles' : number,
 }
 export interface TelemetryResponse { 'ok' : [] | [Telemetry], 'err' : string }
+export interface TrustedCanister { 'name' : string, 'canister_id' : string }
 export interface TrustedCanistersResponse {
-  'ok' : Array<string>,
+  'ok' : Array<TrustedCanister>,
   'err' : string,
 }
 export interface _SERVICE {
@@ -49,7 +50,7 @@ export interface _SERVICE {
       arg_1: ModelDataFieldType,
     ) => Promise<ModelResponse>,
   'addTrustedCanister' : (
-      arg_0: { 'token' : string, 'canister_id' : string },
+      arg_0: { 'token' : string, 'name' : string, 'canister_id' : string },
     ) => Promise<TrustedCanistersResponse>,
   'changePassword' : (
       arg_0: {

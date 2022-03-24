@@ -36,6 +36,15 @@ type ModelInstanceResponse = record {
     "err": text;
 };
 
+type ModelInstanceListResponse = record {
+    "start_index": float64;
+    "returned_count": float64;
+    "end_index": float64;
+    "total_count": float64;
+    "json": vec text;
+    "err": text;
+};
+
 service : {
     // Auth & setup
     "setAdminCanister": (record { canister_id: principal }) -> (BasicResponse);
@@ -52,7 +61,9 @@ service : {
     "updateInstance": (record { id: text; json: text; }) -> (ModelInstanceResponse);
     "getInstance": (record { id: text }) -> (ModelInstanceResponse);
     "deleteInstance": (record { id: text }) -> (BasicResponse);
+    "getInstanceList": (record { start_index, end_index }) -> (ModelInstanceListResponse)
 
     // wallet
     "wallet_receive": (nat) -> ();
+    "wallet_drain": () -> ();
 }

@@ -353,4 +353,35 @@ pub fn accept_cycles() -> u64 {
     return cycles_accepted;
 }
 
+//
+//  #####  ######  ####  ##### #####   ####  #   #     ####    ##   #    # #  ####  ##### ###### #####
+//  #    # #      #        #   #    # #    #  # #     #    #  #  #  ##   # # #        #   #      #    #
+//  #    # #####   ####    #   #    # #    #   #      #      #    # # #  # #  ####    #   #####  #    #
+//  #    # #           #   #   #####  #    #   #      #      ###### #  # # #      #   #   #      #####
+//  #    # #      #    #   #   #   #  #    #   #      #    # #    # #   ## # #    #   #   #      #   #
+//  #####  ######  ####    #   #    #  ####    #       ####  #    # #    # #  ####    #   ###### #    #
 
+pub async fn destroy_sub_canister(canister_id: &str) -> Result<(), String> {
+    let principal_res = Principal::from_text(canister_id.clone());
+    if principal_res.is_err() {
+        let err_msg = format!("Invalid canister id: {}", canister_id);
+        return Err(err_msg);
+    }
+    let in_arg = CanisterId {
+        canister_id: principal_res.unwrap(),
+    };
+
+    let stop_res: Result<((),), (RejectionCode, String)> =
+        ic_cdk::call(Principal::management_canister(), "stop_canister", (in_arg.clone(),)).await;
+    if stop_res.is_err() {
+        return Err(stop_res.err().unwrap().1);
+    }
+
+    let delete_res: Result<((),), (RejectionCode, String)> =
+        ic_cdk::call(Principal::management_canister(), "delete_canister", (in_arg.clone(),)).await;
+    if delete_res.is_err() {
+        return Err(delete_res.err().unwrap().1);
+    }
+
+    return Ok(());
+}

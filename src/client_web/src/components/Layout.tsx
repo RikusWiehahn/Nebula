@@ -75,11 +75,13 @@ export const Layout = (props: Props) => {
               className="h-12"
             />
           </Link>
-          <div className="ml-4 py-1 px-2 text-xs font-semibold rounded-md bg-green-300 text-green-800">
+          <div className="ml-4 py-1 px-2 text-xs font-semibold rounded-md bg-green-300 text-green-800 dark:bg-green-800 dark:text-gray-300">
             Beta
           </div>
         </div>
-        <div className="flex-1"></div>
+        <div className="flex-1 flex justify-center items-center">
+          <div className="font-bold text-2xl">✨ Nebula ✨</div>
+        </div>
         <div className="h-16 flex items-center justify-end mr-2 flex-1">
           {renderNavButtons()}
         </div>
