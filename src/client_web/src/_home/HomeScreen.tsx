@@ -18,8 +18,10 @@ export const HomeScreen = () => {
   const telemetry = useSelector((s: StoreState) => s.telemetry);
 
   useEffect(() => {
-    getSystemStatus();
-  }, []);
+    if (auth.token) {
+      getSystemStatus();
+    }
+  }, [auth.token]);
 
   const getSystemStatus = async () => {
     try {

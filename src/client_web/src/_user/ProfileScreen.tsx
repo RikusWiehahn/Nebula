@@ -18,6 +18,12 @@ export const ProfileScreen = () => {
         <div className="container px-4 mx-auto">
         <div className="max-w-md pt-8">
           <h1 className="text-xl font-bold mb-4">Settings</h1>
+          <h2 className="text-lg font-bold mb-4">Trusted external canisters</h2>
+          <div className="mb-4">
+            <div>qwesasdasdfasdfasdf</div>
+            <div>qwesasdasdfasdfasdf</div>
+            <div>Add trusted external canister</div>
+          </div>
           <SignOutUtility />
           <UIModeSwitch />
         </div>

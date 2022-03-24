@@ -20,10 +20,11 @@ export const SignOutUtility = () => {
 
   const logout = async () => {
     dispatch(updateAuthSession({ ...EMPTY_AUTH_SESSION }));
-    dispatch(updateConfigState({ ...EMPTY_CONFIG_STATE }));
     setShowModal(false);
     SuccessToast("Signed out successfully");
-    navigate(routes.HOME, { replace: true });
+    setTimeout(() => {
+      navigate(routes.HOME, { replace: true });
+    }, 100)
   };
 
   return (
