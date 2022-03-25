@@ -24,7 +24,7 @@ pub async fn create_model(
         res.err = "No model name provided".to_string();
         return res;
     }
-    let auth_res = authenticate_token(&token);
+    let auth_res = validate_auth_token(&token);
     if auth_res.is_err() {
         res.err = auth_res.err().unwrap();
         return res;
@@ -103,7 +103,7 @@ pub async fn create_model(
 #[update]
 pub async fn get_models(TokenRecord { token }: TokenRecord) -> ModelListResponse {
     let mut res: ModelListResponse = ModelListResponse::default();
-    let auth_res = authenticate_token(&token);
+    let auth_res = validate_auth_token(&token);
     if auth_res.is_err() {
         res.err = auth_res.err().unwrap();
         return res;
@@ -132,7 +132,7 @@ pub async fn get_models(TokenRecord { token }: TokenRecord) -> ModelListResponse
 #[update]
 pub async fn get_model(CreateOrGetModel { token, model_name }: CreateOrGetModel) -> ModelResponse {
     let mut res: ModelResponse = ModelResponse::default();
-    let auth_res = authenticate_token(&token);
+    let auth_res = validate_auth_token(&token);
     if auth_res.is_err() {
         res.err = auth_res.err().unwrap();
         return res;
@@ -174,7 +174,7 @@ pub async fn add_model_field(
     }: ModelDataFieldType,
 ) -> ModelResponse {
     let mut res: ModelResponse = ModelResponse::default();
-    let auth_res = authenticate_token(&token);
+    let auth_res = validate_auth_token(&token);
     if auth_res.is_err() {
         res.err = auth_res.err().unwrap();
         return res;
@@ -275,7 +275,7 @@ pub async fn remove_model_field(
     }: RemoveModelField,
 ) -> ModelResponse {
     let mut res: ModelResponse = ModelResponse::default();
-    let auth_res = authenticate_token(&token);
+    let auth_res = validate_auth_token(&token);
     if auth_res.is_err() {
         res.err = auth_res.err().unwrap();
         return res;
@@ -352,7 +352,7 @@ pub async fn delete_model(
     CreateOrGetModel { token, model_name }: CreateOrGetModel,
 ) -> BasicResponse {
     let mut res: BasicResponse = BasicResponse::default();
-    let auth_res = authenticate_token(&token);
+    let auth_res = validate_auth_token(&token);
     if auth_res.is_err() {
         res.err = auth_res.err().unwrap();
         return res;

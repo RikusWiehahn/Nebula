@@ -14,7 +14,7 @@ use ic_cdk_macros::update;
 
 #[update]
 pub async fn is_auth_set() -> bool {
-    let auth_info_res = get_auth_info();
+    let auth_info_res = find_auth_info();
     if auth_info_res.is_err() {
         return false;
     }
@@ -107,7 +107,7 @@ pub async fn set_auth(
 #[update]
 pub async fn sign_in(SignIn { password }: SignIn) -> BasicResponse {
     let mut res: BasicResponse = BasicResponse::default();
-    let auth_info_res = get_auth_info();
+    let auth_info_res = find_auth_info();
     if auth_info_res.is_err() {
         res.err = auth_info_res.err().unwrap();
         return res;
@@ -166,7 +166,7 @@ pub async fn change_password(
     }: ChangePassword,
 ) -> BasicResponse {
     let mut res: BasicResponse = BasicResponse::default();
-    let auth_info_res = get_auth_info();
+    let auth_info_res = find_auth_info();
     if auth_info_res.is_err() {
         res.err = auth_info_res.err().unwrap();
         return res;
@@ -230,7 +230,7 @@ pub async fn change_password(
 #[update]
 pub async fn check_session(TokenRecord { token }: TokenRecord) -> BasicResponse {
     let mut res: BasicResponse = BasicResponse::default();
-    let auth_res = authenticate_token(&token);
+    let auth_res = validate_auth_token(&token);
     if auth_res.is_err() {
         res.err = auth_res.err().unwrap();
         return res;
@@ -251,7 +251,7 @@ pub async fn check_session(TokenRecord { token }: TokenRecord) -> BasicResponse 
 #[update]
 pub async fn get_trusted_canisters(TokenRecord { token }: TokenRecord) -> TrustedCanistersResponse {
     let mut res: TrustedCanistersResponse = TrustedCanistersResponse::default();
-    let auth_res = authenticate_token(&token);
+    let auth_res = validate_auth_token(&token);
     if auth_res.is_err() {
         res.err = auth_res.err().unwrap();
         return res;
@@ -283,7 +283,7 @@ pub async fn add_trusted_canister(
     }: AddTrustedCanister,
 ) -> TrustedCanistersResponse {
     let mut res: TrustedCanistersResponse = TrustedCanistersResponse::default();
-    let auth_res = authenticate_token(&token);
+    let auth_res = validate_auth_token(&token);
     if auth_res.is_err() {
         res.err = auth_res.err().unwrap();
         return res;
@@ -340,7 +340,7 @@ pub async fn remove_trusted_canister(
     RemoveTrustedCanister { token, canister_id }: RemoveTrustedCanister,
 ) -> TrustedCanistersResponse {
     let mut res: TrustedCanistersResponse = TrustedCanistersResponse::default();
-    let auth_res = authenticate_token(&token);
+    let auth_res = validate_auth_token(&token);
     if auth_res.is_err() {
         res.err = auth_res.err().unwrap();
         return res;
