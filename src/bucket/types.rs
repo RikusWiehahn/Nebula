@@ -98,12 +98,6 @@ pub struct Id {
     pub id: String,
 }
 
-#[derive(Clone, Debug, CandidType, Deserialize)]
-pub struct CreateOrUpdateInstance {
-    pub id: String,
-    pub json: String,
-}
-
 // Data Types:
 // "STRING"
 // "NUMBER"
@@ -133,14 +127,14 @@ pub struct ModelInstance {
 
 #[derive(Clone, Debug, CandidType, Deserialize)]
 pub struct ModelInstanceResponse {
-    pub json: Option<String>,
+    pub ok: Option<ModelInstance>,
     pub err: String,
 }
 
 impl Default for ModelInstanceResponse {
     fn default() -> Self {
         ModelInstanceResponse {
-            json: None,
+            ok: None,
             err: "".to_string(),
         }
     }

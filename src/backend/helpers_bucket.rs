@@ -18,7 +18,7 @@ pub async fn set_admin_canister(target_canister_id: Principal) -> Result<(), Str
     };
 
     let call_res: Result<(BasicResponse,), (RejectionCode, String)> =
-        ic_cdk::call(target_canister_id, "setAdminCanister", (input,)).await;
+        ic_cdk::call(target_canister_id, "set_admin_canister", (input,)).await;
     if call_res.is_err() {
         return Err(format!("{:?}", call_res.err().unwrap()));
     }
@@ -47,7 +47,7 @@ pub async fn initialize_canister_model(
     };
 
     let call_res: Result<(BasicResponse,), (RejectionCode, String)> =
-        ic_cdk::call(target_canister_id, "initModel", (input,)).await;
+        ic_cdk::call(target_canister_id, "init_model", (input,)).await;
     if call_res.is_err() {
         return Err(format!("{:?}", call_res.err().unwrap()));
     }
@@ -79,7 +79,7 @@ pub async fn add_field_to_sub_canister(
     let principal = principal_res.unwrap();
 
     let call_res: Result<(BasicResponse,), (RejectionCode, String)> =
-        ic_cdk::call(principal, "addField", (input,)).await;
+        ic_cdk::call(principal, "add_field", (input,)).await;
     if call_res.is_err() {
         return Err(format!("{:?}", call_res.err().unwrap()));
     }
@@ -116,7 +116,7 @@ pub async fn remove_field_from_sub_canister(
     };
 
     let call_res: Result<(BasicResponse,), (RejectionCode, String)> =
-        ic_cdk::call(principal, "removeField", (input,)).await;
+        ic_cdk::call(principal, "remove_field", (input,)).await;
     if call_res.is_err() {
         return Err(format!("{:?}", call_res.err().unwrap()));
     }

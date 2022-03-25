@@ -76,7 +76,7 @@ pub fn validate_data_field_type(data_type: &str) -> Result<(), String> {
 //   #  #  #    # #      # #    # #    #   #   #          #  #  #    # #      #    # #
 //    ##   #    # ###### # #####  #    #   #   ######      ##   #    # ######  ####  ######
 
-pub fn validate_json_field_value(json_value: Value, data_type: String) -> Result<(), String> {
+pub fn validate_json_field_value(json_value: Value, data_type: &str) -> Result<(), String> {
     if data_type == "BOOLEAN".to_string() {
         if !json_value.is_boolean() {
             return Err("Provided JSON value is not a boolean".to_string());
@@ -117,6 +117,27 @@ pub fn validate_json_field_value(json_value: Value, data_type: String) -> Result
     return Ok(());
 }
 
+
+//                                                                                           
+//   ####  ###### #####    #    #  ####  #####  ###### #         #    #   ##   #    # ###### 
+//  #    # #        #      ##  ## #    # #    # #      #         ##   #  #  #  ##  ## #      
+//  #      #####    #      # ## # #    # #    # #####  #         # #  # #    # # ## # #####  
+//  #  ### #        #      #    # #    # #    # #      #         #  # # ###### #    # #      
+//  #    # #        #      #    # #    # #    # #      #         #   ## #    # #    # #      
+//   ####  ######   #      #    #  ####  #####  ###### ######    #    # #    # #    # ###### 
+
+pub fn find_model_name() -> Result<String, String> {
+    let mut name_opt: Option<String> = None;
+    let bucket_model_name = STATE.with(|state: &GlobalState| {
+        let name = state.model_name.borrow();
+        name.clone()
+    });
+    if name_opt.is_none() {
+        return Err("Model name not found".to_string());
+    }
+    Ok(name_opt.unwrap())
+}
+
 //
 //  ###### # #    # #####     # #    #  ####  #####   ##   #    #  ####  ######
 //  #      # ##   # #    #    # ##   # #        #    #  #  ##   # #    # #
@@ -140,6 +161,8 @@ pub fn find_model_instance(instance_id: &str) -> Result<ModelInstance, String> {
     Ok(instance_opt.unwrap())
 }
 
+
+
 //
 //   ####  ###### #####    # #    #  ####  #####   ##   #    #  ####  ######      ##    ####          #  ####   ####  #    #
 //  #    # #        #      # ##   # #        #    #  #  ##   # #    # #          #  #  #              # #      #    # ##   #
@@ -148,47 +171,47 @@ pub fn find_model_instance(instance_id: &str) -> Result<ModelInstance, String> {
 //  #    # #        #      # #   ## #    #   #   #    # #   ## #    # #         #    # #    #    #    # #    # #    # #   ##
 //   ####  ######   #      # #    #  ####    #   #    # #    #  ####  ######    #    #  ####      ####   ####   ####  #    #
 
-pub fn get_instance_as_json(instance_id: &str) -> Result<String, String> {
-    let instance_res = find_model_instance(instance_id);
-    if instance_res.is_err() {
-        return Err(instance_res.err().unwrap());
-    }
-    let instance = instance_res.unwrap();
+// pub fn get_instance_as_json(instance_id: &str) -> Result<String, String> {
+//     let instance_res = find_model_instance(instance_id);
+//     if instance_res.is_err() {
+//         return Err(instance_res.err().unwrap());
+//     }
+//     let instance = instance_res.unwrap();
 
-    // get model name
-    let model_name = STATE.with(|state: &GlobalState| {
-        let name = state.model_name.borrow();
-        name.clone()
-    });
-    // get data fields
-    let data_fields = STATE.with(|state: &GlobalState| {
-        let fields = state.model_data_fields.borrow();
-        fields.clone()
-    });
+//     // get model name
+//     let model_name = STATE.with(|state: &GlobalState| {
+//         let name = state.model_name.borrow();
+//         name.clone()
+//     });
+//     // get data fields
+//     let data_fields = STATE.with(|state: &GlobalState| {
+//         let fields = state.model_data_fields.borrow();
+//         fields.clone()
+//     });
 
-    let mut instance_json = json!({
-      "id": instance_id,
-      "model_name": model_name,
-    });
+//     let mut instance_json = json!({
+//       "id": instance_id,
+//       "model_name": model_name,
+//     });
 
-    for data_field in data_fields.values() {
-        let data_field_name = data_field.field_name.clone();
-        let mut data_field_opt: Option<ModelDataField> = None;
-        for instance_data_field_value in instance.data_fields.iter() {
-            if instance_data_field_value.field_name == data_field_name {
-                data_field_opt = Some(instance_data_field_value.clone());
-            }
-        }
+//     for data_field in data_fields.values() {
+//         let data_field_name = data_field.field_name.clone();
+//         let mut data_field_opt: Option<ModelDataField> = None;
+//         for instance_data_field_value in instance.data_fields.iter() {
+//             if instance_data_field_value.field_name == data_field_name {
+//                 data_field_opt = Some(instance_data_field_value.clone());
+//             }
+//         }
 
-        if data_field_opt.is_some() {
-            let data_field = data_field_opt.unwrap();
-            let data_field_value: serde_json::Result<Value> =
-                serde_json::from_str(&data_field.json_value);
-            if data_field_value.is_ok() {
-                instance_json[data_field_name.as_str()] = data_field_value.unwrap();
-            }
-        }
-    }
+//         if data_field_opt.is_some() {
+//             let data_field = data_field_opt.unwrap();
+//             let data_field_value: serde_json::Result<Value> =
+//                 serde_json::from_str(&data_field.json_value);
+//             if data_field_value.is_ok() {
+//                 instance_json[data_field_name.as_str()] = data_field_value.unwrap();
+//             }
+//         }
+//     }
 
-    return Ok(instance_json.to_string());
-}
+//     return Ok(instance_json.to_string());
+// }

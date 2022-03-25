@@ -12,7 +12,7 @@ use ic_cdk_macros::update;
 //  #    # #    #   #   #    #    # #    #    #    # #        #      #    # #
 //  #    #  ####    #   #    #    #  ####      ####  ######   #       ####  #
 
-#[update(name = "isActivated")]
+#[update]
 pub async fn is_auth_set() -> bool {
     let auth_info_res = get_auth_info();
     if auth_info_res.is_err() {
@@ -29,7 +29,7 @@ pub async fn is_auth_set() -> bool {
 //  #    # #        #   #    # #
 //   ####  ######   #    ####  #
 
-#[update(name = "activate")]
+#[update]
 pub async fn set_auth(
     Activate {
         password,
@@ -104,7 +104,7 @@ pub async fn set_auth(
 //  #    # # #    # #   ##    # #   ##
 //   ####  #  ####  #    #    # #    #
 
-#[update(name = "signIn")]
+#[update]
 pub async fn sign_in(SignIn { password }: SignIn) -> BasicResponse {
     let mut res: BasicResponse = BasicResponse::default();
     let auth_info_res = get_auth_info();
@@ -157,7 +157,7 @@ pub async fn sign_in(SignIn { password }: SignIn) -> BasicResponse {
 //  #    # #    # #    # #   ## #    # #         #      #    # #    # #    # ##  ## #    # #   #  #    #
 //   ####  #    # #    # #    #  ####  ######    #      #    #  ####   ####  #    #  ####  #    # #####
 
-#[update(name = "changePassword")]
+#[update]
 pub async fn change_password(
     ChangePassword {
         old_password,
@@ -227,7 +227,7 @@ pub async fn change_password(
 //  #    # #    # #      #    # #   #     #    # #      #    # #    # # #    # #   ##
 //   ####  #    # ######  ####  #    #     ####  ######  ####   ####  #  ####  #    #
 
-#[update(name = "checkSession")]
+#[update]
 pub async fn check_session(TokenRecord { token }: TokenRecord) -> BasicResponse {
     let mut res: BasicResponse = BasicResponse::default();
     let auth_res = authenticate_token(&token);
@@ -248,7 +248,7 @@ pub async fn check_session(TokenRecord { token }: TokenRecord) -> BasicResponse 
 //  #    # #        #        #   #   #  #    # #    #   #   #      #    #    #    # #    # #   ## # #    #   #   #      #   #  #    #
 //   ####  ######   #        #   #    #  ####   ####    #   ###### #####      ####  #    # #    # #  ####    #   ###### #    #  ####
 
-#[update(name = "getTrustedCanisters")]
+#[update]
 pub async fn get_trusted_canisters(TokenRecord { token }: TokenRecord) -> TrustedCanistersResponse {
     let mut res: TrustedCanistersResponse = TrustedCanistersResponse::default();
     let auth_res = authenticate_token(&token);
@@ -274,8 +274,8 @@ pub async fn get_trusted_canisters(TokenRecord { token }: TokenRecord) -> Truste
 //  #    # #    # #    #      #   #   #  #    # #    #   #   #      #    #    #    # #    # #   ## # #    #   #   #      #   #
 //  #    # #####  #####       #   #    #  ####   ####    #   ###### #####      ####  #    # #    # #  ####    #   ###### #    #
 
-#[update(name = "addTrustedCanister")]
-pub async fn add_trusted_canister_id(
+#[update]
+pub async fn add_trusted_canister(
     AddTrustedCanister {
         token,
         name,
@@ -335,7 +335,7 @@ pub async fn add_trusted_canister_id(
 //  #   #  #      #    # #    #  #  #  #           #   #   #  #    # #    #   #   #      #    #    #    # #    # #   ## # #    #   #   #      #   #
 //  #    # ###### #    #  ####    ##   ######      #   #    #  ####   ####    #   ###### #####      ####  #    # #    # #  ####    #   ###### #    #
 
-#[update(name = "removeTrustedCanister")]
+#[update]
 pub async fn remove_trusted_canister(
     RemoveTrustedCanister { token, canister_id }: RemoveTrustedCanister,
 ) -> TrustedCanistersResponse {

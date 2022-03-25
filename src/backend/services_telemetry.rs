@@ -50,7 +50,7 @@ pub async fn auto_update_telemetry() {
 //  #    # #        #      #    #   #   #    #   #   #    # #    #
 //   ####  ######   #       ####    #   #    #   #    ####   ####
 
-#[update(name = "getSystemTelemetry")]
+#[update]
 pub async fn get_telemetry(TokenRecord { token }: TokenRecord) -> TelemetryResponse {
     let mut res = TelemetryResponse::default();
     let auth_res = authenticate_token(&token);

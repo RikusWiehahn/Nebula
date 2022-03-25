@@ -1,6 +1,6 @@
 use crate::helpers::*;
+use crate::helpers_bucket::*;
 use crate::main::*;
-use crate::services_bucket::*;
 use crate::types::*;
 use crate::utilities::*;
 use ic_cdk_macros::update;
@@ -15,7 +15,7 @@ use serde_json::{Result, Value};
 //  #    # #   #  #      #    #   #   #         #    # #    # #    # #      #
 //   ####  #    # ###### #    #   #   ######    #    #  ####  #####  ###### ######
 
-#[update(name = "createModel")]
+#[update]
 pub async fn create_model(
     CreateOrGetModel { token, model_name }: CreateOrGetModel,
 ) -> BasicResponse {
@@ -100,7 +100,7 @@ pub async fn create_model(
 //  #    # #        #      #    # #    # #    # #      #      #    #
 //   ####  ######   #      #    #  ####  #####  ###### ######  ####
 
-#[update(name = "getModels")]
+#[update]
 pub async fn get_models(TokenRecord { token }: TokenRecord) -> ModelListResponse {
     let mut res: ModelListResponse = ModelListResponse::default();
     let auth_res = authenticate_token(&token);
@@ -129,7 +129,7 @@ pub async fn get_models(TokenRecord { token }: TokenRecord) -> ModelListResponse
 //  #    # #        #      #    # #    # #    # #      #
 //   ####  ######   #      #    #  ####  #####  ###### ######
 
-#[update(name = "getModel")]
+#[update]
 pub async fn get_model(CreateOrGetModel { token, model_name }: CreateOrGetModel) -> ModelResponse {
     let mut res: ModelResponse = ModelResponse::default();
     let auth_res = authenticate_token(&token);
@@ -164,7 +164,7 @@ pub async fn get_model(CreateOrGetModel { token, model_name }: CreateOrGetModel)
 //  #    # #    # #    #    #      # #      #      #    #
 //  #    # #####  #####     #      # ###### ###### #####
 
-#[update(name = "addModelField")]
+#[update]
 pub async fn add_model_field(
     CreateOrGetModel { token, model_name }: CreateOrGetModel,
     ModelDataFieldType {
@@ -266,7 +266,7 @@ pub async fn add_model_field(
 //  #   #  #      #    # #    #  #  #  #         #      # #      #      #    #
 //  #    # ###### #    #  ####    ##   ######    #      # ###### ###### #####
 
-#[update(name = "removeModelField")]
+#[update]
 pub async fn remove_model_field(
     RemoveModelField {
         token,
@@ -347,8 +347,7 @@ pub async fn remove_model_field(
 //  #    # #      #      #        #   #         #    # #    # #    # #      #
 //  #####  ###### ###### ######   #   ######    #    #  ####  #####  ###### ######
 
-
-#[update(name = "deleteModel")]
+#[update]
 pub async fn delete_model(
     CreateOrGetModel { token, model_name }: CreateOrGetModel,
 ) -> BasicResponse {

@@ -143,11 +143,6 @@ pub async fn verify_password(password: &str, hash: &str) -> Result<(), String> {
 //  #      #   ## #    # #    # #    # #         #    # ##  ##   #
 //  ###### #    #  ####   ####  #####  ######     ####  #    #   #
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Payload {
-    pub id: String,
-    pub exp: u64,
-}
 
 pub fn generate_token_from_id(id: &str) -> Result<String, String> {
     let jwt_secret_res = get_jwt_secret();
@@ -156,7 +151,7 @@ pub fn generate_token_from_id(id: &str) -> Result<String, String> {
     }
     let jwt_secret = jwt_secret_res.unwrap();
 
-    let to_encode: Payload = Payload {
+    let to_encode: JwtPayload = JwtPayload {
         id: id.to_string(),
         exp: (time() + 1_000_000_000 * 60 * 60 * 24 * 7) as u64, // 7 days
     };
@@ -190,7 +185,7 @@ pub fn decode_id_from_token(token: &str) -> Result<String, String> {
     if payload_res.is_err() {
         return Err("Failed to decode token".to_string());
     }
-    let payload: Payload = payload_res.unwrap();
+    let payload: JwtPayload = payload_res.unwrap();
     if payload.id.len() == 0 {
         return Err("Invalid token".to_string());
     }

@@ -35,6 +35,12 @@ impl Default for BasicResponse {
 //  #    # #    #   #   #    #
 //  #    #  ####    #   #    #
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct JwtPayload {
+    pub id: String,
+    pub exp: u64,
+}
+
 #[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
 pub struct Authentication {
     pub session_id: String,

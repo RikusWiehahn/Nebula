@@ -9,23 +9,6 @@ use serde::Serialize;
 use std::cell::RefCell;
 use std::collections::HashMap;
 
-//                                                   
-//  #####    ##   #        ##   #    #  ####  ###### 
-//  #    #  #  #  #       #  #  ##   # #    # #      
-//  #####  #    # #      #    # # #  # #      #####  
-//  #    # ###### #      ###### #  # # #      #      
-//  #    # #    # #      #    # #   ## #    # #      
-//  #####  #    # ###### #    # #    #  ####  ###### 
-
-#[update]
-fn wallet_receive() {
-    accept_cycles();
-}
-
-#[update]
-async fn wallet_drain() {
-    let _ = drain_cycles().await;
-}
 
 //
 //   ####  #####   ##   ##### ######

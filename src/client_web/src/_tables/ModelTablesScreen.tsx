@@ -49,6 +49,7 @@ export const ModelTablesScreen = () => {
   const renderModelTabs = () => {
     return (
       <div className="flex">
+        {model_list.models.length === 0 ? "No models created yet." : null}
         {model_list.models.map((model) => (
           <div key={model.model_name}>
             <button
