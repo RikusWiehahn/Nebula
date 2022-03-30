@@ -48,6 +48,13 @@ type RecordResponse = record {
     "err": text;
 };
 
+type RecordListResponse = record {
+    "ok": vec Record;
+    "err": text;
+    "page": float64;
+    "page_size": float64;
+};
+
 service : {
     // Auth & setup
     "set_admin_canister": (record { "canister_id": principal }) -> (BasicResponse);
@@ -64,6 +71,7 @@ service : {
     "update_record": (Record) -> (RecordResponse);
     "get_record": (record { "id": text }) -> (RecordResponse);
     "delete_record": (record { "id": text }) -> (BasicResponse);
+    "get_record_list": (record { "page": float64; "page_size": float64; }) -> (RecordListResponse);
 
     // wallet
     "wallet_receive": (nat) -> ();

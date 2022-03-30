@@ -217,13 +217,10 @@ pub async fn add_model_field(
         res.err = "Provided default JSON value is not valid".to_string();
         return res;
     }
-    let json = json_res.unwrap();
-    if !json.is_object() {
-        res.err = "Provided default JSON value is not an object".to_string();
-        return res;
-    }
+    let json_value = json_res.unwrap();
 
-    let valid_res = validate_json_field_value(json.clone(), data_type.clone());
+
+    let valid_res = validate_json_field_value(json_value.clone(), data_type.clone());
     if valid_res.is_err() {
         res.err = valid_res.err().unwrap();
         return res;
@@ -237,7 +234,7 @@ pub async fn add_model_field(
             model_found.data_fields.push(ModelDataFieldType {
                 field_name: field_name.clone(),
                 data_type: data_type.clone(),
-                default_json_value: json.clone().to_string(),
+                default_json_value: json_value.clone().to_string(),
             });
             model_to_return = Some(model_found.clone());
         }
@@ -462,7 +459,7 @@ pub async fn create_record(
         return res;
     }
 
-    res.json = Some(record_as_string_res.unwrap());
+    res.ok = Some(record_as_string_res.unwrap());
     return res;
 }
 
@@ -532,7 +529,7 @@ pub async fn update_record(
         return res;
     }
 
-    res.json = Some(record_as_string_res.unwrap());
+    res.ok = Some(record_as_string_res.unwrap());
     return res;
 }
 
@@ -596,7 +593,7 @@ pub async fn get_record(
         return res;
     }
 
-    res.json = Some(record_as_string_res.unwrap());
+    res.ok = Some(record_as_string_res.unwrap());
     return res;
 }
 

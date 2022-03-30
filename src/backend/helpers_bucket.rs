@@ -173,7 +173,7 @@ pub async fn insert_record_into_sub_canister(
     if call_res.is_err() {
         return Err(format!("{:?}", call_res.err().unwrap()));
     }
-
+    
     let (record_res,) = call_res.unwrap();
     if !record_res.err.is_empty() {
         return Err(format!("{:?}", record_res.err));

@@ -166,7 +166,7 @@ pub fn find_model_data_field_type(
         }
     }
     if field_opt.is_none() {
-        return Err("Data field not found".to_string());
+        return Err(format!("Data field {} was not found", field_name));
     }
     Ok(field_opt.unwrap())
 }
@@ -261,9 +261,9 @@ pub fn convert_json_to_record(json: String) -> Result<Record, String> {
     }
 
     // make sure model exists
-    let model_name_opt = json_value["model"].as_str();
+    let model_name_opt = json_value["model_name"].as_str();
     if model_name_opt.is_none() {
-        return Err("No model name provided".to_string());
+        return Err("No model name was provided".to_string());
     }
     let model_name = model_name_opt.unwrap().to_string();
     let model_res = find_model(&model_name);
@@ -277,7 +277,6 @@ pub fn convert_json_to_record(json: String) -> Result<Record, String> {
     for default_field in model.data_fields.iter() {
         let new_data_field = RecordDataField {
             field_name: default_field.field_name.clone(),
-            data_type: default_field.data_type.clone(),
             json_value: default_field.default_json_value.clone(),
         };
         new_data_fields.push(new_data_field);
@@ -346,12 +345,16 @@ pub fn convert_record_to_json(record: Record) -> Result<Value, String> {
         }
         let field_json_value: Value = field_json_value_res.unwrap();
 
-        let field_type = data_field.data_type.clone();
-        let valid_type_res = validate_data_field_type(&field_type);
+        let field_data_type_res = find_model_data_field_type(&record.model_name, &field_name);
+        if field_data_type_res.is_err() {
+            return Err(field_data_type_res.err().unwrap());
+        }
+        let field_data_type = field_data_type_res.unwrap();
+        let valid_type_res = validate_data_field_type(&field_data_type.data_type);
         if valid_type_res.is_err() {
             return Err(valid_type_res.err().unwrap());
         }
-        let valid_res = validate_json_field_value(field_json_value.clone(), field_type);
+        let valid_res = validate_json_field_value(field_json_value.clone(), field_data_type.data_type.clone());
         if valid_res.is_err() {
             return Err(valid_res.err().unwrap());
         }

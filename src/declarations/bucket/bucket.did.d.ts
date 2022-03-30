@@ -15,6 +15,12 @@ export interface RecordDataField {
   'json_value' : string,
   'data_type' : string,
 }
+export interface RecordListResponse {
+  'ok' : Array<Record>,
+  'err' : string,
+  'page_size' : number,
+  'page' : number,
+}
 export interface RecordResponse { 'ok' : [] | [Record], 'err' : string }
 export interface SubCanisterTelemetry {
   'id' : string,
@@ -32,6 +38,9 @@ export interface _SERVICE {
   'check_if_admin_canister' : () => Promise<BasicResponse>,
   'delete_record' : (arg_0: { 'id' : string }) => Promise<BasicResponse>,
   'get_record' : (arg_0: { 'id' : string }) => Promise<RecordResponse>,
+  'get_record_list' : (
+      arg_0: { 'page_size' : number, 'page' : number },
+    ) => Promise<RecordListResponse>,
   'get_telemetry' : () => Promise<SubCanisterTelemetryResponse>,
   'init_model' : (arg_0: { 'model_name' : string }) => Promise<BasicResponse>,
   'insert_record' : (arg_0: Record) => Promise<RecordResponse>,

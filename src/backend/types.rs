@@ -354,10 +354,8 @@ pub struct RecordRequest {
 #[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
 pub struct RecordDataField {
     pub field_name: String,
-    pub data_type: String,
     pub json_value: String,
 }
-
 #[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
 pub struct Record {
     pub id: String,
@@ -388,14 +386,14 @@ pub struct CreateOrUpdateRecordJson {
 
 #[derive(Clone, Debug, CandidType, Deserialize)]
 pub struct RecordJsonResponse {
-    pub json: Option<String>,
+    pub ok: Option<String>,
     pub err: String,
 }
 
 impl Default for RecordJsonResponse {
     fn default() -> Self {
         RecordJsonResponse {
-            json: None,
+            ok: None,
             err: "".to_string(),
         }
     }

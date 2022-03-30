@@ -135,7 +135,7 @@ pub struct Record {
     pub data_fields: Vec<RecordDataField>,
 }
 
-#[derive(Clone, Debug, CandidType, Deserialize)]
+#[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
 pub struct RecordResponse {
     pub ok: Option<Record>,
     pub err: String,

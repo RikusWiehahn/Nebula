@@ -22,6 +22,12 @@ export const idlFactory = ({ IDL }) => {
     'ok' : IDL.Opt(Record),
     'err' : IDL.Text,
   });
+  const RecordListResponse = IDL.Record({
+    'ok' : IDL.Vec(Record),
+    'err' : IDL.Text,
+    'page_size' : IDL.Float64,
+    'page' : IDL.Float64,
+  });
   const SubCanisterTelemetry = IDL.Record({
     'id' : IDL.Text,
     'memory_size' : IDL.Float64,
@@ -44,6 +50,11 @@ export const idlFactory = ({ IDL }) => {
     'get_record' : IDL.Func(
         [IDL.Record({ 'id' : IDL.Text })],
         [RecordResponse],
+        [],
+      ),
+    'get_record_list' : IDL.Func(
+        [IDL.Record({ 'page_size' : IDL.Float64, 'page' : IDL.Float64 })],
+        [RecordListResponse],
         [],
       ),
     'get_telemetry' : IDL.Func([], [SubCanisterTelemetryResponse], []),

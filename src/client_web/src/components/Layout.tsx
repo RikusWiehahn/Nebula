@@ -1,9 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { routes } from "../config/routes";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { StoreState } from "../config/ReduxStore";
-import { RiBarChart2Fill, RiBarChart2Line, RiBarChartFill, RiBarChartLine, RiEditBoxFill, RiEditBoxLine, RiSettings3Line, RiTableLine, RiUser3Line } from "react-icons/ri";
+import {
+  RiBarChart2Fill,
+  RiBarChart2Line,
+  RiBarChartFill,
+  RiBarChartLine,
+  RiEditBoxFill,
+  RiEditBoxLine,
+  RiSettings3Line,
+  RiTableLine,
+  RiUser3Line,
+} from "react-icons/ri";
 
 interface Props {
   children: JSX.Element | null;
@@ -16,28 +26,33 @@ export const Layout = (props: Props) => {
   const dispatch = useDispatch();
 
   const renderNavButtons = () => {
+    const classes =
+      "h-12 w-12 flex items-center justify-center rounded-full ml-2 bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-10";
+    const renderButton = (route: string, icon: JSX.Element) => {
+      return (
+        <NavLink to={route}>
+          <div
+            className={`${classes} ${
+              window.location.pathname === route ? "border" : ""
+            }`}
+          >
+            {icon}
+          </div>
+        </NavLink>
+      );
+    };
     return (
       <div className="flex">
-        <NavLink to={routes.HOME}>
-          <div className="h-12 w-12 flex items-center justify-center rounded-full ml-2 bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-10">
-            <RiBarChartLine className="h-6 w-6" />
-          </div>
-        </NavLink>
-        <NavLink to={routes.MODEL_TYPES}>
-          <div className="h-12 w-12 flex items-center justify-center rounded-full ml-2 bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-10">
-            <RiEditBoxLine className="h-6 w-6" />
-          </div>
-        </NavLink>
-        <NavLink to={routes.MODEL_TABLE_LIST}>
-          <div className="h-12 w-12 flex items-center justify-center rounded-full ml-2 bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-10">
-            <RiTableLine className="h-6 w-6" />
-          </div>
-        </NavLink>
-        <NavLink to={routes.SETTINGS}>
-          <div className="h-12 w-12 flex items-center justify-center rounded-full ml-2 bg-black bg-opacity-10 dark:bg-white dark:bg-opacity-10">
-            <RiSettings3Line className="h-6 w-6" />
-          </div>
-        </NavLink>
+        {renderButton(routes.HOME, <RiBarChartLine className="h-6 w-6" />)}
+        {renderButton(
+          routes.MODEL_TYPES,
+          <RiEditBoxLine className="h-6 w-6" />
+        )}
+        {renderButton(
+          routes.MODEL_TABLE_LIST,
+          <RiTableLine className="h-6 w-6" />
+        )}
+        {renderButton(routes.SETTINGS, <RiSettings3Line className="h-6 w-6" />)}
       </div>
     );
   };

@@ -50,16 +50,19 @@ export const CreateRecordUtility = (props: Props) => {
         ...record.data_fields.map((f) => [f.field_name, f.json_value]),
       ]);
 
+      console.log(json);
       const create_res = await backend.create_record({
         token,
         json: JSON.stringify(json),
       });
+
       if (create_res.err) throw new Error(create_res.err);
       if (!create_res?.ok[0]) throw new Error("Failed to create model record.");
       SuccessToast("Model record created.");
       setLoading(false);
       setShowModal(false);
     } catch (e: any) {
+      console.log({e});
       ErrorToast(e.message);
       setLoading(false);
     }

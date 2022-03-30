@@ -41,7 +41,7 @@ pub fn find_data_field(field_name: &str) -> Result<ModelDataFieldType, String> {
         }
     });
     if data_field_opt.is_none() {
-        return Err("Data field not found".to_string());
+        return Err(format!("Data field not found: {}", field_name));
     }
     Ok(data_field_opt.unwrap())
 }
@@ -154,7 +154,7 @@ pub fn find_record(record_id: &str) -> Result<Record, String> {
         }
     });
     if record_opt.is_none() {
-        return Err("Data field not found".to_string());
+        return Err("Record not found".to_string());
     }
     Ok(record_opt.unwrap())
 }

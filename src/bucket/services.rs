@@ -265,8 +265,8 @@ pub async fn insert_record(
     });
 
     let already_exists_res = find_record(&id);
-    if already_exists_res.is_err() {
-        res.err = already_exists_res.err().unwrap();
+    if already_exists_res.is_ok() {
+        res.err = "Record already exists".to_string();
         return res;
     }
 
@@ -276,6 +276,7 @@ pub async fn insert_record(
         model_name: model_name,
         data_fields: vec![],
     };
+
 
     // insert data fields
     for data_field in data_fields {
@@ -331,7 +332,8 @@ pub async fn insert_record(
         records.insert(new_record.id.clone(), new_record.clone());
     });
 
-    res.ok = Some(new_record);
+    
+    res.ok = Some(new_record.clone());
     return res;
 }
 
