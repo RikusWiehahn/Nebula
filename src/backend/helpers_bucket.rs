@@ -257,6 +257,45 @@ pub async fn find_record_in_sub_canister(
     Ok(record_res.ok.unwrap())
 }
 
+
+//                                                                            
+//  #####  ######  ####   ####  #####  #####   ####     #      #  ####  ##### 
+//  #    # #      #    # #    # #    # #    # #         #      # #        #   
+//  #    # #####  #      #    # #    # #    #  ####     #      #  ####    #   
+//  #####  #      #      #    # #####  #    #      #    #      #      #   #   
+//  #   #  #      #    # #    # #   #  #    # #    #    #      # #    #   #   
+//  #    # ######  ####   ####  #    # #####   ####     ###### #  ####    #   
+
+pub async fn find_sub_canister_records_list(
+    canister_id: String,
+    page: f64,
+    page_size: f64,
+) -> Result<RecordListResponse, String> {
+    let principal_res = Principal::from_text(canister_id);
+    if principal_res.is_err() {
+        return Err(format!("{:?}", principal_res.err().unwrap()));
+    }
+    let principal = principal_res.unwrap();
+
+    let input = BucketRecordListRequest {
+        page: page,
+        page_size: page_size,
+    };
+
+    let call_res: Result<(RecordListResponse,), (RejectionCode, String)> =
+        ic_cdk::call(principal, "get_record", (input,)).await;
+    if call_res.is_err() {
+        return Err(format!("{:?}", call_res.err().unwrap()));
+    }
+
+    let (record_res,) = call_res.unwrap();
+    if !record_res.err.is_empty() {
+        return Err(format!("{:?}", record_res.err));
+    }
+
+    Ok(record_res)
+}
+
 //                                                                                        
 //  #####  ###### #      ###### ##### ######    #####  ######  ####   ####  #####  #####  
 //  #    # #      #      #        #   #         #    # #      #    # #    # #    # #    # 

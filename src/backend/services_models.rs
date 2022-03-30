@@ -396,13 +396,13 @@ pub async fn delete_model(
     return res;
 }
 
-//                                                                                        
-//   ####  #####  ######   ##   ##### ######    #####  ######  ####   ####  #####  #####  
-//  #    # #    # #       #  #    #   #         #    # #      #    # #    # #    # #    # 
-//  #      #    # #####  #    #   #   #####     #    # #####  #      #    # #    # #    # 
-//  #      #####  #      ######   #   #         #####  #      #      #    # #####  #    # 
-//  #    # #   #  #      #    #   #   #         #   #  #      #    # #    # #   #  #    # 
-//   ####  #    # ###### #    #   #   ######    #    # ######  ####   ####  #    # #####  
+//
+//   ####  #####  ######   ##   ##### ######    #####  ######  ####   ####  #####  #####
+//  #    # #    # #       #  #    #   #         #    # #      #    # #    # #    # #    #
+//  #      #    # #####  #    #   #   #####     #    # #####  #      #    # #    # #    #
+//  #      #####  #      ######   #   #         #####  #      #      #    # #####  #    #
+//  #    # #   #  #      #    #   #   #         #   #  #      #    # #    # #   #  #    #
+//   ####  #    # ###### #    #   #   ######    #    # ######  ####   ####  #    # #####
 
 #[update]
 pub async fn create_record(
@@ -466,13 +466,13 @@ pub async fn create_record(
     return res;
 }
 
-//                                                                                        
-//  #    # #####  #####    ##   ##### ######    #####  ######  ####   ####  #####  #####  
-//  #    # #    # #    #  #  #    #   #         #    # #      #    # #    # #    # #    # 
-//  #    # #    # #    # #    #   #   #####     #    # #####  #      #    # #    # #    # 
-//  #    # #####  #    # ######   #   #         #####  #      #      #    # #####  #    # 
-//  #    # #      #    # #    #   #   #         #   #  #      #    # #    # #   #  #    # 
-//   ####  #      #####  #    #   #   ######    #    # ######  ####   ####  #    # #####  
+//
+//  #    # #####  #####    ##   ##### ######    #####  ######  ####   ####  #####  #####
+//  #    # #    # #    #  #  #    #   #         #    # #      #    # #    # #    # #    #
+//  #    # #    # #    # #    #   #   #####     #    # #####  #      #    # #    # #    #
+//  #    # #####  #    # ######   #   #         #####  #      #      #    # #####  #    #
+//  #    # #      #    # #    #   #   #         #   #  #      #    # #    # #   #  #    #
+//   ####  #      #####  #    #   #   ######    #    # ######  ####   ####  #    # #####
 
 #[update]
 pub async fn update_record(
@@ -536,13 +536,13 @@ pub async fn update_record(
     return res;
 }
 
-//                                                                   
-//   ####  ###### #####    #####  ######  ####   ####  #####  #####  
-//  #    # #        #      #    # #      #    # #    # #    # #    # 
-//  #      #####    #      #    # #####  #      #    # #    # #    # 
-//  #  ### #        #      #####  #      #      #    # #####  #    # 
-//  #    # #        #      #   #  #      #    # #    # #   #  #    # 
-//   ####  ######   #      #    # ######  ####   ####  #    # #####  
+//
+//   ####  ###### #####    #####  ######  ####   ####  #####  #####
+//  #    # #        #      #    # #      #    # #    # #    # #    #
+//  #      #####    #      #    # #####  #      #    # #    # #    #
+//  #  ### #        #      #####  #      #      #    # #####  #    #
+//  #    # #        #      #   #  #      #    # #    # #   #  #    #
+//   ####  ######   #      #    # ######  ####   ####  #    # #####
 
 #[update]
 pub async fn get_record(
@@ -600,23 +600,24 @@ pub async fn get_record(
     return res;
 }
 
-//                                                                     
-//  #####  ######  ####   ####  #####  #####     #      #  ####  ##### 
-//  #    # #      #    # #    # #    # #    #    #      # #        #   
-//  #    # #####  #      #    # #    # #    #    #      #  ####    #   
-//  #####  #      #      #    # #####  #    #    #      #      #   #   
-//  #   #  #      #    # #    # #   #  #    #    #      # #    #   #   
-//  #    # ######  ####   ####  #    # #####     ###### #  ####    #   
+//
+//  #####  ######  ####   ####  #####  #####     #      #  ####  #####
+//  #    # #      #    # #    # #    # #    #    #      # #        #
+//  #    # #####  #      #    # #    # #    #    #      #  ####    #
+//  #####  #      #      #    # #####  #    #    #      #      #   #
+//  #   #  #      #    # #    # #   #  #    #    #      # #    #   #
+//  #    # ######  ####   ####  #    # #####     ###### #  ####    #
 
 #[update]
 pub async fn get_record_list(
-    RecordRequest {
+    RecordListRequest {
         token,
-        id,
         model_name,
-    }: RecordRequest,
-) -> RecordJsonResponse {
-    let mut res: RecordJsonResponse = RecordJsonResponse::default();
+        page,
+        page_size,
+    }: RecordListRequest,
+) -> RecordListJsonResponse {
+    let mut res: RecordListJsonResponse = RecordListJsonResponse::default();
     let auth_res = validate_auth_token(&token);
     let trusted_res = is_call_from_trusted_canister();
     if auth_res.is_err() && trusted_res.is_err() {
@@ -636,41 +637,42 @@ pub async fn get_record_list(
     }
     let canister_id = model.canisters[0].clone(); // TODO - pick canister based on memory usage
 
-    // make sure record exists
-    let record_res = find_record_in_sub_canister(canister_id.clone(), id.clone()).await;
-    if record_res.is_err() {
-        res.err = record_res.err().unwrap();
+    let records_res = find_sub_canister_records_list(canister_id, page, page_size).await;
+    if records_res.is_err() {
+        res.err = records_res.err().unwrap();
         return res;
     }
-    let record = record_res.ok();
-    if record.is_none() {
-        res.err = "record not found".to_string();
-        return res;
-    }
+    let records = records_res.unwrap();
+    res.page = records.page;
+    res.page_size = records.page_size;
 
-    let record_as_json_res = convert_record_to_json(record.unwrap());
-    if record_as_json_res.is_err() {
-        res.err = record_as_json_res.err().unwrap();
-        return res;
+    let mut records_to_return: Vec<String> = Vec::new();
+    for record in records.ok {
+        let json_res = convert_record_to_json(record);
+        if json_res.is_err() {
+            res.err = json_res.err().unwrap();
+            return res;
+        }
+        let json = json_res.unwrap();
+        let string_res = serde_json::to_string(&json);
+        if string_res.is_err() {
+            res.err = "Failed to convert record to json".to_string();
+            return res;
+        }
+        records_to_return.push(string_res.unwrap());
     }
-    let record_as_json = record_as_json_res.unwrap();
-    let record_as_string_res = serde_json::to_string(&record_as_json);
-    if record_as_string_res.is_err() {
-        res.err = "Failed to convert record to json".to_string();
-        return res;
-    }
+    res.ok = records_to_return;
 
-    res.json = Some(record_as_string_res.unwrap());
     return res;
 }
 
-//                                                                                        
-//  #####  ###### #      ###### ##### ######    #####  ######  ####   ####  #####  #####  
-//  #    # #      #      #        #   #         #    # #      #    # #    # #    # #    # 
-//  #    # #####  #      #####    #   #####     #    # #####  #      #    # #    # #    # 
-//  #    # #      #      #        #   #         #####  #      #      #    # #####  #    # 
-//  #    # #      #      #        #   #         #   #  #      #    # #    # #   #  #    # 
-//  #####  ###### ###### ######   #   ######    #    # ######  ####   ####  #    # #####  
+//
+//  #####  ###### #      ###### ##### ######    #####  ######  ####   ####  #####  #####
+//  #    # #      #      #        #   #         #    # #      #    # #    # #    # #    #
+//  #    # #####  #      #####    #   #####     #    # #####  #      #    # #    # #    #
+//  #    # #      #      #        #   #         #####  #      #      #    # #####  #    #
+//  #    # #      #      #        #   #         #   #  #      #    # #    # #   #  #    #
+//  #####  ###### ###### ######   #   ######    #    # ######  ####   ####  #    # #####
 
 #[update]
 pub async fn delete_record(

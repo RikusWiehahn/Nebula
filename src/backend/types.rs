@@ -279,6 +279,20 @@ pub struct BucketRecordRequest {
     pub id: String,
 }
 
+#[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
+pub struct BucketRecordListRequest {
+    pub page: f64,
+    pub page_size: f64,
+}
+
+#[derive(Clone, Debug, CandidType, Deserialize)]
+pub struct RecordListResponse {
+    pub ok: Vec<Record>,
+    pub err: String,
+    pub page: f64,
+    pub page_size: f64,
+}
+
 
 //
 //  ##### #####  #    #  ####  ##### ###### #####      ####    ##   #    # #  ####  ##### ###### #####   ####
@@ -392,7 +406,6 @@ impl Default for RecordJsonResponse {
 pub struct RecordListRequest {
     pub token: String,
     pub model_name: String,
-    pub id: String,
     pub page: f64,
     pub page_size: f64,
 }
@@ -403,4 +416,15 @@ pub struct RecordListJsonResponse {
     pub err: String,
     pub page: f64,
     pub page_size: f64,
+}
+
+impl Default for RecordListJsonResponse {
+    fn default() -> Self {
+        RecordListJsonResponse {
+            ok: vec![],
+            err: "".to_string(),
+            page: 0.0,
+            page_size: 0.0,
+        }
+    }
 }

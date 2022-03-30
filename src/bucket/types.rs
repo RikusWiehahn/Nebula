@@ -112,6 +112,16 @@ pub struct ModelDataFieldType {
     pub default_json_value: String,
 }
 
+
+//                                                   
+//  #####  ######  ####   ####  #####  #####   ####  
+//  #    # #      #    # #    # #    # #    # #      
+//  #    # #####  #      #    # #    # #    #  ####  
+//  #####  #      #      #    # #####  #    #      # 
+//  #   #  #      #    # #    # #   #  #    # #    # 
+//  #    # ######  ####   ####  #    # #####   ####  
+
+
 #[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
 pub struct RecordDataField {
     pub field_name: String,
@@ -136,6 +146,32 @@ impl Default for RecordResponse {
         RecordResponse {
             ok: None,
             err: "".to_string(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, CandidType, Deserialize)]
+pub struct RecordListRequest {
+    pub page: f64,
+    pub page_size: f64,
+}
+
+
+#[derive(Clone, Debug, CandidType, Deserialize)]
+pub struct RecordListResponse {
+    pub ok: Vec<Record>,
+    pub err: String,
+    pub page: f64,
+    pub page_size: f64,
+}
+
+impl Default for RecordListResponse {
+    fn default() -> Self {
+        RecordListResponse {
+            ok: vec![],
+            err: "".to_string(),
+            page: 0.0,
+            page_size: 0.0,
         }
     }
 }
