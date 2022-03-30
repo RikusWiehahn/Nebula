@@ -289,3 +289,4 @@ pub async fn delete_instance_in_sub_canister(
     }
     Ok(())
 }
+
