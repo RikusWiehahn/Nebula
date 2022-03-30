@@ -9,28 +9,28 @@ import { ErrorToast, SuccessToast } from "../config/toast";
 import { updateModelListState } from "../config/_Actions";
 import {
   DataFieldType,
-  EMPTY_MODEL_INSTANCE,
+  EMPTY_RECORD,
   Model,
-  ModelInstance,
+  Record,
 } from "../config/_Interfaces";
 
 interface Props {
   model: Model;
 }
 
-export const CreateModelInstanceUtility = (props: Props) => {
+export const CreateRecordUtility = (props: Props) => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const dispatch = useDispatch();
   const auth = useSelector((s: StoreState) => s.auth);
-  const model_table = useSelector((s: StoreState) => s.model_table);
-  const [instance, setInstance] = useState<ModelInstance>({
-    ...EMPTY_MODEL_INSTANCE,
+  const record_table = useSelector((s: StoreState) => s.record_table);
+  const [record, setRecord] = useState<Record>({
+    ...EMPTY_RECORD,
   });
 
   useEffect(() => {
-    setInstance({
-      ...EMPTY_MODEL_INSTANCE,
+    setRecord({
+      ...EMPTY_RECORD,
       model_name: props.model.model_name,
       data_fields: props.model.data_fields.map((f) => ({
         field_name: f.field_name,
@@ -40,23 +40,23 @@ export const CreateModelInstanceUtility = (props: Props) => {
     });
   }, []);
 
-  const createDataModelInstance = async () => {
+  const createRecord = async () => {
     try {
       const { token } = auth;
       setLoading(true);
       const json = Object.fromEntries([
-        ["id", instance.id],
-        ["model_name", instance.model_name],
-        ...instance.data_fields.map((f) => [f.field_name, f.json_value]),
+        ["id", record.id],
+        ["model_name", record.model_name],
+        ...record.data_fields.map((f) => [f.field_name, f.json_value]),
       ]);
 
-      const create_res = await backend.create_model_instance({
+      const create_res = await backend.create_record({
         token,
         json: JSON.stringify(json),
       });
       if (create_res.err) throw new Error(create_res.err);
-      if (!create_res.json) throw new Error("Failed to create model instance.");
-      SuccessToast("Model instance created.");
+      if (!create_res?.ok[0]) throw new Error("Failed to create model record.");
+      SuccessToast("Model record created.");
       setLoading(false);
       setShowModal(false);
     } catch (e: any) {
@@ -68,7 +68,7 @@ export const CreateModelInstanceUtility = (props: Props) => {
   const renderFields = () => {
     const list = props.model.data_fields.map((f) => {
       if (f.data_type === DataFieldType.STRING) {
-        const value = instance.data_fields.find(
+        const value = record.data_fields.find(
           (d) => d.field_name === f.field_name
         )?.json_value;
 
@@ -79,13 +79,13 @@ export const CreateModelInstanceUtility = (props: Props) => {
               className="input-primary"
               value={value || ""}
               onChange={({ target }) => {
-                const new_instance = { ...instance };
-                const field = new_instance.data_fields.find(
+                const new_record = { ...record };
+                const field = new_record.data_fields.find(
                   (d) => d.field_name === f.field_name
                 );
                 if (!field) return;
                 field.json_value = target.value;
-                setInstance(new_instance);
+                setRecord(new_record);
               }}
               type="text"
               autoComplete="off"
@@ -95,7 +95,7 @@ export const CreateModelInstanceUtility = (props: Props) => {
         );
       }
       if (f.data_type === DataFieldType.BOOLEAN) {
-        const value = instance.data_fields.find(
+        const value = record.data_fields.find(
           (d) => d.field_name === f.field_name
         )?.json_value;
 
@@ -106,13 +106,13 @@ export const CreateModelInstanceUtility = (props: Props) => {
               className="input-primary"
               value={value || ""}
               onChange={({ target }) => {
-                const new_instance = { ...instance };
-                const field = new_instance.data_fields.find(
+                const new_record = { ...record };
+                const field = new_record.data_fields.find(
                   (d) => d.field_name === f.field_name
                 );
                 if (!field) return;
                 field.json_value = target.value;
-                setInstance(new_instance);
+                setRecord(new_record);
               }}
               type="text"
               autoComplete="off"
@@ -122,7 +122,7 @@ export const CreateModelInstanceUtility = (props: Props) => {
         );
       }
       if (f.data_type === DataFieldType.NUMBER) {
-        const value = instance.data_fields.find(
+        const value = record.data_fields.find(
           (d) => d.field_name === f.field_name
         )?.json_value;
 
@@ -133,13 +133,13 @@ export const CreateModelInstanceUtility = (props: Props) => {
               className="input-primary"
               value={value || ""}
               onChange={({ target }) => {
-                const new_instance = { ...instance };
-                const field = new_instance.data_fields.find(
+                const new_record = { ...record };
+                const field = new_record.data_fields.find(
                   (d) => d.field_name === f.field_name
                 );
                 if (!field) return;
                 field.json_value = target.value;
-                setInstance(new_instance);
+                setRecord(new_record);
               }}
               type="text"
               autoComplete="off"
@@ -149,7 +149,7 @@ export const CreateModelInstanceUtility = (props: Props) => {
         );
       }
       if (f.data_type === DataFieldType.STRING_ARRAY) {
-        const value = instance.data_fields.find(
+        const value = record.data_fields.find(
           (d) => d.field_name === f.field_name
         )?.json_value;
 
@@ -160,13 +160,13 @@ export const CreateModelInstanceUtility = (props: Props) => {
               className="input-primary"
               value={value || ""}
               onChange={({ target }) => {
-                const new_instance = { ...instance };
-                const field = new_instance.data_fields.find(
+                const new_record = { ...record };
+                const field = new_record.data_fields.find(
                   (d) => d.field_name === f.field_name
                 );
                 if (!field) return;
                 field.json_value = target.value;
-                setInstance(new_instance);
+                setRecord(new_record);
               }}
               type="text"
               autoComplete="off"
@@ -176,7 +176,7 @@ export const CreateModelInstanceUtility = (props: Props) => {
         );
       }
       if (f.data_type === DataFieldType.NUMBER_ARRAY) {
-        const value = instance.data_fields.find(
+        const value = record.data_fields.find(
           (d) => d.field_name === f.field_name
         )?.json_value;
 
@@ -187,13 +187,13 @@ export const CreateModelInstanceUtility = (props: Props) => {
               className="input-primary"
               value={value || ""}
               onChange={({ target }) => {
-                const new_instance = { ...instance };
-                const field = new_instance.data_fields.find(
+                const new_record = { ...record };
+                const field = new_record.data_fields.find(
                   (d) => d.field_name === f.field_name
                 );
                 if (!field) return;
                 field.json_value = target.value;
-                setInstance(new_instance);
+                setRecord(new_record);
               }}
               type="text"
               autoComplete="off"
@@ -213,7 +213,7 @@ export const CreateModelInstanceUtility = (props: Props) => {
         {renderFields()}
         <button
           className="btn-primary mt-4 w-full"
-          onClick={createDataModelInstance}
+          onClick={createRecord}
         >
           Create new item
         </button>

@@ -9,14 +9,14 @@ import {
   Telemetry,
   ModelList,
   Model,
-  ModelTable,
+  RecordTable,
 } from "./_Interfaces";
 import {
   ConfigReducer,
   AuthSessionReducer,
   TelemetryReducer,
   ModelListReducer,
-  ModelTableReducer,
+  RecordTableReducer,
 } from "./_Reducers";
 
 export interface StoreState {
@@ -24,7 +24,7 @@ export interface StoreState {
   auth: AuthSession;
   telemetry: Telemetry;
   model_list: ModelList;
-  model_table: ModelTable;
+  record_table: RecordTable;
 }
 
 const reducers: any = combineReducers<StoreState>({
@@ -32,7 +32,7 @@ const reducers: any = combineReducers<StoreState>({
   auth: AuthSessionReducer,
   telemetry: TelemetryReducer,
   model_list: ModelListReducer,
-  model_table: ModelTableReducer,
+  record_table: RecordTableReducer,
 });
 
 const persistConfig = {

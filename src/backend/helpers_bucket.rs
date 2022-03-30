@@ -13,7 +13,7 @@ use ic_cdk::export::Principal;
 
 pub async fn set_admin_canister(target_canister_id: Principal) -> Result<(), String> {
     let main_canister = ic_cdk::id();
-    let input = CanisterId {
+    let input = CanisterIdRecord {
         canister_id: main_canister,
     };
 
@@ -38,11 +38,11 @@ pub async fn set_admin_canister(target_canister_id: Principal) -> Result<(), Str
 //  # #   ## #   #      #    # #    # #    # #      #
 //  # #    # #   #      #    #  ####  #####  ###### ######
 
-pub async fn initialize_canister_model(
+pub async fn initialize_sub_canister_model(
     target_canister_id: Principal,
     model_name: String,
 ) -> Result<(), String> {
-    let input = InitModel {
+    let input = InitBucketModelRequest {
         model_name: model_name,
     };
 
@@ -110,7 +110,7 @@ pub async fn remove_field_from_sub_canister(
     }
     let principal = principal_res.unwrap();
 
-    let input: RemoveField = RemoveField { field_name };
+    let input: RemoveBucketFieldRequest = RemoveBucketFieldRequest { field_name };
 
     let call_res: Result<(BasicResponse,), (RejectionCode, String)> =
         ic_cdk::call(principal, "remove_field", (input,)).await;
@@ -150,122 +150,122 @@ pub async fn top_up_sub_canister_cycles(canister_id: String, amount: u64) -> Res
     Ok(())
 }
 
-//
-//  # #    #  ####  ###### #####  #####    # #    #  ####  #####   ##   #    #  ####  ######
-//  # ##   # #      #      #    #   #      # ##   # #        #    #  #  ##   # #    # #
-//  # # #  #  ####  #####  #    #   #      # # #  #  ####    #   #    # # #  # #      #####
-//  # #  # #      # #      #####    #      # #  # #      #   #   ###### #  # # #      #
-//  # #   ## #    # #      #   #    #      # #   ## #    #   #   #    # #   ## #    # #
-//  # #    #  ####  ###### #    #   #      # #    #  ####    #   #    # #    #  ####  ######
+//                                                                                   
+//  # #    #  ####  ###### #####  #####    #####  ######  ####   ####  #####  #####  
+//  # ##   # #      #      #    #   #      #    # #      #    # #    # #    # #    # 
+//  # # #  #  ####  #####  #    #   #      #    # #####  #      #    # #    # #    # 
+//  # #  # #      # #      #####    #      #####  #      #      #    # #####  #    # 
+//  # #   ## #    # #      #   #    #      #   #  #      #    # #    # #   #  #    # 
+//  # #    #  ####  ###### #    #   #      #    # ######  ####   ####  #    # #####  
 
-pub async fn insert_instance_into_sub_canister(
+pub async fn insert_record_into_sub_canister(
     canister_id: String,
-    input: ModelInstance,
-) -> Result<ModelInstance, String> {
+    input: Record,
+) -> Result<Record, String> {
     let principal_res = Principal::from_text(canister_id);
     if principal_res.is_err() {
         return Err(format!("{:?}", principal_res.err().unwrap()));
     }
     let principal = principal_res.unwrap();
 
-    let call_res: Result<(ModelInstanceResponse,), (RejectionCode, String)> =
-        ic_cdk::call(principal, "insert_instance", (input,)).await;
+    let call_res: Result<(RecordResponse,), (RejectionCode, String)> =
+        ic_cdk::call(principal, "insert_record", (input,)).await;
     if call_res.is_err() {
         return Err(format!("{:?}", call_res.err().unwrap()));
     }
 
-    let (instance_res,) = call_res.unwrap();
-    if !instance_res.err.is_empty() {
-        return Err(format!("{:?}", instance_res.err));
+    let (record_res,) = call_res.unwrap();
+    if !record_res.err.is_empty() {
+        return Err(format!("{:?}", record_res.err));
     }
-    if instance_res.ok.is_none() {
-        return Err(format!("{:?}", "No instance returned"));
+    if record_res.ok.is_none() {
+        return Err(format!("{:?}", "No record returned"));
     }
 
-    Ok(instance_res.ok.unwrap())
+    Ok(record_res.ok.unwrap())
 }
 
-//
-//  #    # #####  #####    ##   ##### ######    # #    #  ####  #####   ##   #    #  ####  ######
-//  #    # #    # #    #  #  #    #   #         # ##   # #        #    #  #  ##   # #    # #
-//  #    # #    # #    # #    #   #   #####     # # #  #  ####    #   #    # # #  # #      #####
-//  #    # #####  #    # ######   #   #         # #  # #      #   #   ###### #  # # #      #
-//  #    # #      #    # #    #   #   #         # #   ## #    #   #   #    # #   ## #    # #
-//   ####  #      #####  #    #   #   ######    # #    #  ####    #   #    # #    #  ####  ######
+//                                                                                        
+//  #    # #####  #####    ##   ##### ######    #####  ######  ####   ####  #####  #####  
+//  #    # #    # #    #  #  #    #   #         #    # #      #    # #    # #    # #    # 
+//  #    # #    # #    # #    #   #   #####     #    # #####  #      #    # #    # #    # 
+//  #    # #####  #    # ######   #   #         #####  #      #      #    # #####  #    # 
+//  #    # #      #    # #    #   #   #         #   #  #      #    # #    # #   #  #    # 
+//   ####  #      #####  #    #   #   ######    #    # ######  ####   ####  #    # #####  
 
-pub async fn update_instance_in_sub_canister(
+pub async fn update_record_in_sub_canister(
     canister_id: String,
-    input: ModelInstance,
-) -> Result<ModelInstance, String> {
+    input: Record,
+) -> Result<Record, String> {
     let principal_res = Principal::from_text(canister_id);
     if principal_res.is_err() {
         return Err(format!("{:?}", principal_res.err().unwrap()));
     }
     let principal = principal_res.unwrap();
 
-    let call_res: Result<(ModelInstanceResponse,), (RejectionCode, String)> =
-        ic_cdk::call(principal, "update_instance", (input,)).await;
+    let call_res: Result<(RecordResponse,), (RejectionCode, String)> =
+        ic_cdk::call(principal, "update_record", (input,)).await;
     if call_res.is_err() {
         return Err(format!("{:?}", call_res.err().unwrap()));
     }
 
-    let (instance_res,) = call_res.unwrap();
-    if !instance_res.err.is_empty() {
-        return Err(format!("{:?}", instance_res.err));
+    let (record_res,) = call_res.unwrap();
+    if !record_res.err.is_empty() {
+        return Err(format!("{:?}", record_res.err));
     }
-    if instance_res.ok.is_none() {
-        return Err(format!("{:?}", "No instance returned"));
+    if record_res.ok.is_none() {
+        return Err(format!("{:?}", "No record returned"));
     }
 
-    Ok(instance_res.ok.unwrap())
+    Ok(record_res.ok.unwrap())
 }
 
-//
-//   ####  ###### #####    # #    #  ####  #####   ##   #    #  ####  ######
-//  #    # #        #      # ##   # #        #    #  #  ##   # #    # #
-//  #      #####    #      # # #  #  ####    #   #    # # #  # #      #####
-//  #  ### #        #      # #  # #      #   #   ###### #  # # #      #
-//  #    # #        #      # #   ## #    #   #   #    # #   ## #    # #
-//   ####  ######   #      # #    #  ####    #   #    # #    #  ####  ######
+//                                                                      
+//  ###### # #    # #####     #####  ######  ####   ####  #####  #####  
+//  #      # ##   # #    #    #    # #      #    # #    # #    # #    # 
+//  #####  # # #  # #    #    #    # #####  #      #    # #    # #    # 
+//  #      # #  # # #    #    #####  #      #      #    # #####  #    # 
+//  #      # #   ## #    #    #   #  #      #    # #    # #   #  #    # 
+//  #      # #    # #####     #    # ######  ####   ####  #    # #####  
 
-pub async fn find_instance_in_sub_canister(
+pub async fn find_record_in_sub_canister(
     canister_id: String,
     id: String,
-) -> Result<ModelInstance, String> {
+) -> Result<Record, String> {
     let principal_res = Principal::from_text(canister_id);
     if principal_res.is_err() {
         return Err(format!("{:?}", principal_res.err().unwrap()));
     }
     let principal = principal_res.unwrap();
 
-    let input = ModelInstanceId { id: id };
+    let input = BucketRecordRequest { id: id };
 
-    let call_res: Result<(ModelInstanceResponse,), (RejectionCode, String)> =
-        ic_cdk::call(principal, "get_instance", (input,)).await;
+    let call_res: Result<(RecordResponse,), (RejectionCode, String)> =
+        ic_cdk::call(principal, "get_record", (input,)).await;
     if call_res.is_err() {
         return Err(format!("{:?}", call_res.err().unwrap()));
     }
 
-    let (instance_res,) = call_res.unwrap();
-    if !instance_res.err.is_empty() {
-        return Err(format!("{:?}", instance_res.err));
+    let (record_res,) = call_res.unwrap();
+    if !record_res.err.is_empty() {
+        return Err(format!("{:?}", record_res.err));
     }
-    if instance_res.ok.is_none() {
-        return Err(format!("{:?}", "No instance returned"));
+    if record_res.ok.is_none() {
+        return Err(format!("{:?}", "No record returned"));
     }
 
-    Ok(instance_res.ok.unwrap())
+    Ok(record_res.ok.unwrap())
 }
 
-//
-//  #####  ###### #      ###### ##### ######    # #    #  ####  #####   ##   #    #  ####  ######
-//  #    # #      #      #        #   #         # ##   # #        #    #  #  ##   # #    # #
-//  #    # #####  #      #####    #   #####     # # #  #  ####    #   #    # # #  # #      #####
-//  #    # #      #      #        #   #         # #  # #      #   #   ###### #  # # #      #
-//  #    # #      #      #        #   #         # #   ## #    #   #   #    # #   ## #    # #
-//  #####  ###### ###### ######   #   ######    # #    #  ####    #   #    # #    #  ####  ######
+//                                                                                        
+//  #####  ###### #      ###### ##### ######    #####  ######  ####   ####  #####  #####  
+//  #    # #      #      #        #   #         #    # #      #    # #    # #    # #    # 
+//  #    # #####  #      #####    #   #####     #    # #####  #      #    # #    # #    # 
+//  #    # #      #      #        #   #         #####  #      #      #    # #####  #    # 
+//  #    # #      #      #        #   #         #   #  #      #    # #    # #   #  #    # 
+//  #####  ###### ###### ######   #   ######    #    # ######  ####   ####  #    # #####  
 
-pub async fn delete_instance_in_sub_canister(
+pub async fn delete_record_in_sub_canister(
     canister_id: String,
     id: String,
 ) -> Result<(), String> {
@@ -275,18 +275,17 @@ pub async fn delete_instance_in_sub_canister(
     }
     let principal = principal_res.unwrap();
 
-    let input = ModelInstanceId { id: id };
+    let input = BucketRecordRequest { id: id };
 
     let call_res: Result<(BasicResponse,), (RejectionCode, String)> =
-        ic_cdk::call(principal, "delete_instance", (input,)).await;
+        ic_cdk::call(principal, "delete_record", (input,)).await;
     if call_res.is_err() {
         return Err(format!("{:?}", call_res.err().unwrap()));
     }
 
-    let (instance_res,) = call_res.unwrap();
-    if !instance_res.err.is_empty() {
-        return Err(format!("{:?}", instance_res.err));
+    let (record_res,) = call_res.unwrap();
+    if !record_res.err.is_empty() {
+        return Err(format!("{:?}", record_res.err));
     }
     Ok(())
 }
-

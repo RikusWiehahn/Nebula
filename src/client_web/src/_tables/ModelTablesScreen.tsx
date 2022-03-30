@@ -11,9 +11,9 @@ import { ErrorToast } from "../config/toast";
 import { RiTableLine } from "react-icons/ri";
 import {
   updateModelListState,
-  updateModelTableState,
+  updateRecordTableState,
 } from "../config/_Actions";
-import { CreateModelInstanceUtility } from "./CreateModelInstanceUtility";
+import { CreateRecordUtility } from "./CreateRecordUtility";
 dayjs.extend(relativeTime);
 
 export const ModelTablesScreen = () => {
@@ -21,7 +21,7 @@ export const ModelTablesScreen = () => {
   const dispatch = useDispatch();
   const auth = useSelector((s: StoreState) => s.auth);
   const model_list = useSelector((s: StoreState) => s.model_list);
-  const model_table = useSelector((s: StoreState) => s.model_table);
+  const record_table = useSelector((s: StoreState) => s.record_table);
 
   useEffect(() => {
     if (auth.token) {
@@ -53,10 +53,10 @@ export const ModelTablesScreen = () => {
     const model = model_list.models.find((m) => m.model_name === model_name);
     if (!model) return;
     dispatch(
-      updateModelTableState({
+      updateRecordTableState({
         model_name: model.model_name,
         data_fields: model.data_fields,
-        instances: [],
+        records: [],
       })
     );
   };
@@ -69,7 +69,7 @@ export const ModelTablesScreen = () => {
           {model_list.models.map((model) => (
             <div key={model.model_name}>
               <button
-                className={`btn-list ${model.model_name === model_table.model_name ? 'border-b' : ''}`}
+                className={`btn-list ${model.model_name === record_table.model_name ? 'border-b' : ''}`}
                 onClick={() => {
                   selectModel(model.model_name);
                 }}
@@ -81,12 +81,12 @@ export const ModelTablesScreen = () => {
           ))}
         </div>
         <div>
-          {model_table.model_name ? (
-            <CreateModelInstanceUtility
-              key={model_table.model_name}
+          {record_table.model_name ? (
+            <CreateRecordUtility
+              key={record_table.model_name}
               model={{
-                model_name: model_table.model_name,
-                data_fields: model_table.data_fields,
+                model_name: record_table.model_name,
+                data_fields: record_table.data_fields,
               }}
             />
           ) : null}

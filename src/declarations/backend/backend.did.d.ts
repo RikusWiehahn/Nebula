@@ -9,12 +9,15 @@ export interface ModelDataFieldType {
   'data_type' : string,
   'default_json_value' : string,
 }
-export interface ModelInstanceResponse {
-  'err' : string,
-  'json' : [] | [string],
-}
 export interface ModelListResponse { 'ok' : Array<Model>, 'err' : string }
 export interface ModelResponse { 'ok' : [] | [Model], 'err' : string }
+export interface RecordJsonResponse { 'ok' : [] | [string], 'err' : string }
+export interface RecordListJsonResponse {
+  'ok' : Array<string>,
+  'err' : string,
+  'page_size' : number,
+  'page' : number,
+}
 export interface SubCanisterTelemetry {
   'id' : string,
   'memory_size' : number,
@@ -63,22 +66,30 @@ export interface _SERVICE {
   'create_model' : (
       arg_0: { 'token' : string, 'model_name' : string },
     ) => Promise<BasicResponse>,
-  'create_model_instance' : (
-      arg_0: { 'token' : string, 'json' : string },
-    ) => Promise<ModelInstanceResponse>,
+  'create_record' : (arg_0: { 'token' : string, 'json' : string }) => Promise<
+      RecordJsonResponse
+    >,
   'delete_model' : (
       arg_0: { 'token' : string, 'model_name' : string },
     ) => Promise<BasicResponse>,
-  'delete_model_instance' : (
-      arg_0: { 'id' : string, 'token' : string },
+  'delete_record' : (
+      arg_0: { 'id' : string, 'token' : string, 'model_name' : string },
     ) => Promise<BasicResponse>,
   'get_model' : (arg_0: { 'token' : string, 'model_name' : string }) => Promise<
       ModelResponse
     >,
-  'get_model_instance' : (
-      arg_0: { 'id' : string, 'token' : string },
-    ) => Promise<ModelInstanceResponse>,
   'get_models' : (arg_0: { 'token' : string }) => Promise<ModelListResponse>,
+  'get_record' : (
+      arg_0: { 'id' : string, 'token' : string, 'model_name' : string },
+    ) => Promise<RecordJsonResponse>,
+  'get_record_list' : (
+      arg_0: {
+        'page_size' : number,
+        'token' : string,
+        'model_name' : string,
+        'page' : number,
+      },
+    ) => Promise<RecordListJsonResponse>,
   'get_telemetry' : (arg_0: { 'token' : string }) => Promise<TelemetryResponse>,
   'get_trusted_canisters' : (arg_0: { 'token' : string }) => Promise<
       TrustedCanistersResponse
@@ -91,8 +102,8 @@ export interface _SERVICE {
       arg_0: { 'token' : string, 'canister_id' : string },
     ) => Promise<TrustedCanistersResponse>,
   'sign_in' : (arg_0: { 'password' : string }) => Promise<BasicResponse>,
-  'update_model_instance' : (
-      arg_0: { 'id' : string, 'token' : string, 'json' : string },
-    ) => Promise<ModelInstanceResponse>,
+  'update_record' : (arg_0: { 'token' : string, 'json' : string }) => Promise<
+      RecordJsonResponse
+    >,
   'wallet_receive' : (arg_0: bigint) => Promise<undefined>,
 }

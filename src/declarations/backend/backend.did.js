@@ -21,13 +21,19 @@ export const idlFactory = ({ IDL }) => {
     'ok' : IDL.Vec(TrustedCanister),
     'err' : IDL.Text,
   });
-  const ModelInstanceResponse = IDL.Record({
+  const RecordJsonResponse = IDL.Record({
+    'ok' : IDL.Opt(IDL.Text),
     'err' : IDL.Text,
-    'json' : IDL.Opt(IDL.Text),
   });
   const ModelListResponse = IDL.Record({
     'ok' : IDL.Vec(Model),
     'err' : IDL.Text,
+  });
+  const RecordListJsonResponse = IDL.Record({
+    'ok' : IDL.Vec(IDL.Text),
+    'err' : IDL.Text,
+    'page_size' : IDL.Float64,
+    'page' : IDL.Float64,
   });
   const SubCanisterTelemetry = IDL.Record({
     'id' : IDL.Text,
@@ -101,9 +107,9 @@ export const idlFactory = ({ IDL }) => {
         [BasicResponse],
         [],
       ),
-    'create_model_instance' : IDL.Func(
+    'create_record' : IDL.Func(
         [IDL.Record({ 'token' : IDL.Text, 'json' : IDL.Text })],
-        [ModelInstanceResponse],
+        [RecordJsonResponse],
         [],
       ),
     'delete_model' : IDL.Func(
@@ -111,8 +117,14 @@ export const idlFactory = ({ IDL }) => {
         [BasicResponse],
         [],
       ),
-    'delete_model_instance' : IDL.Func(
-        [IDL.Record({ 'id' : IDL.Text, 'token' : IDL.Text })],
+    'delete_record' : IDL.Func(
+        [
+          IDL.Record({
+            'id' : IDL.Text,
+            'token' : IDL.Text,
+            'model_name' : IDL.Text,
+          }),
+        ],
         [BasicResponse],
         [],
       ),
@@ -121,14 +133,32 @@ export const idlFactory = ({ IDL }) => {
         [ModelResponse],
         [],
       ),
-    'get_model_instance' : IDL.Func(
-        [IDL.Record({ 'id' : IDL.Text, 'token' : IDL.Text })],
-        [ModelInstanceResponse],
-        [],
-      ),
     'get_models' : IDL.Func(
         [IDL.Record({ 'token' : IDL.Text })],
         [ModelListResponse],
+        [],
+      ),
+    'get_record' : IDL.Func(
+        [
+          IDL.Record({
+            'id' : IDL.Text,
+            'token' : IDL.Text,
+            'model_name' : IDL.Text,
+          }),
+        ],
+        [RecordJsonResponse],
+        [],
+      ),
+    'get_record_list' : IDL.Func(
+        [
+          IDL.Record({
+            'page_size' : IDL.Float64,
+            'token' : IDL.Text,
+            'model_name' : IDL.Text,
+            'page' : IDL.Float64,
+          }),
+        ],
+        [RecordListJsonResponse],
         [],
       ),
     'get_telemetry' : IDL.Func(
@@ -163,15 +193,9 @@ export const idlFactory = ({ IDL }) => {
         [BasicResponse],
         [],
       ),
-    'update_model_instance' : IDL.Func(
-        [
-          IDL.Record({
-            'id' : IDL.Text,
-            'token' : IDL.Text,
-            'json' : IDL.Text,
-          }),
-        ],
-        [ModelInstanceResponse],
+    'update_record' : IDL.Func(
+        [IDL.Record({ 'token' : IDL.Text, 'json' : IDL.Text })],
+        [RecordJsonResponse],
         [],
       ),
     'wallet_receive' : IDL.Func([IDL.Nat], [], []),

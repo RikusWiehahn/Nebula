@@ -17,7 +17,7 @@ use serde_json::{Result, Value};
 
 #[update]
 pub async fn create_model(
-    CreateOrGetModel { token, model_name }: CreateOrGetModel,
+    CreateOrGetModelRequest { token, model_name }: CreateOrGetModelRequest,
 ) -> BasicResponse {
     let mut res: BasicResponse = BasicResponse::default();
     if model_name == "" {
@@ -69,7 +69,7 @@ pub async fn create_model(
 
     // initialize model
     let init_model_res =
-        initialize_canister_model(new_canister_id.clone(), model_name.clone()).await;
+        initialize_sub_canister_model(new_canister_id.clone(), model_name.clone()).await;
     if init_model_res.is_err() {
         res.err = init_model_res.err().unwrap();
         return res;
@@ -101,7 +101,7 @@ pub async fn create_model(
 //   ####  ######   #      #    #  ####  #####  ###### ######  ####
 
 #[update]
-pub async fn get_models(TokenRecord { token }: TokenRecord) -> ModelListResponse {
+pub async fn get_models(TokenRequest { token }: TokenRequest) -> ModelListResponse {
     let mut res: ModelListResponse = ModelListResponse::default();
     let auth_res = validate_auth_token(&token);
     if auth_res.is_err() {
@@ -130,7 +130,9 @@ pub async fn get_models(TokenRecord { token }: TokenRecord) -> ModelListResponse
 //   ####  ######   #      #    #  ####  #####  ###### ######
 
 #[update]
-pub async fn get_model(CreateOrGetModel { token, model_name }: CreateOrGetModel) -> ModelResponse {
+pub async fn get_model(
+    CreateOrGetModelRequest { token, model_name }: CreateOrGetModelRequest,
+) -> ModelResponse {
     let mut res: ModelResponse = ModelResponse::default();
     let auth_res = validate_auth_token(&token);
     if auth_res.is_err() {
@@ -166,7 +168,7 @@ pub async fn get_model(CreateOrGetModel { token, model_name }: CreateOrGetModel)
 
 #[update]
 pub async fn add_model_field(
-    CreateOrGetModel { token, model_name }: CreateOrGetModel,
+    CreateOrGetModelRequest { token, model_name }: CreateOrGetModelRequest,
     ModelDataFieldType {
         field_name,
         data_type,
@@ -272,11 +274,11 @@ pub async fn add_model_field(
 
 #[update]
 pub async fn remove_model_field(
-    RemoveModelField {
+    RemoveModelFieldRequest {
         token,
         model_name,
         field_name,
-    }: RemoveModelField,
+    }: RemoveModelFieldRequest,
 ) -> ModelResponse {
     let mut res: ModelResponse = ModelResponse::default();
     let auth_res = validate_auth_token(&token);
@@ -353,7 +355,7 @@ pub async fn remove_model_field(
 
 #[update]
 pub async fn delete_model(
-    CreateOrGetModel { token, model_name }: CreateOrGetModel,
+    CreateOrGetModelRequest { token, model_name }: CreateOrGetModelRequest,
 ) -> BasicResponse {
     let mut res: BasicResponse = BasicResponse::default();
     let auth_res = validate_auth_token(&token);
@@ -394,19 +396,19 @@ pub async fn delete_model(
     return res;
 }
 
-//
-//   ####  #####  ######   ##   ##### ######    # #    #  ####  #####   ##   #    #  ####  ######
-//  #    # #    # #       #  #    #   #         # ##   # #        #    #  #  ##   # #    # #
-//  #      #    # #####  #    #   #   #####     # # #  #  ####    #   #    # # #  # #      #####
-//  #      #####  #      ######   #   #         # #  # #      #   #   ###### #  # # #      #
-//  #    # #   #  #      #    #   #   #         # #   ## #    #   #   #    # #   ## #    # #
-//   ####  #    # ###### #    #   #   ######    # #    #  ####    #   #    # #    #  ####  ######
+//                                                                                        
+//   ####  #####  ######   ##   ##### ######    #####  ######  ####   ####  #####  #####  
+//  #    # #    # #       #  #    #   #         #    # #      #    # #    # #    # #    # 
+//  #      #    # #####  #    #   #   #####     #    # #####  #      #    # #    # #    # 
+//  #      #####  #      ######   #   #         #####  #      #      #    # #####  #    # 
+//  #    # #   #  #      #    #   #   #         #   #  #      #    # #    # #   #  #    # 
+//   ####  #    # ###### #    #   #   ######    #    # ######  ####   ####  #    # #####  
 
 #[update]
-pub async fn create_model_instance(
-    CreateOrUpdateModelInstanceJson { token, json }: CreateOrUpdateModelInstanceJson,
-) -> ModelInstanceJsonResponse {
-    let mut res: ModelInstanceJsonResponse = ModelInstanceJsonResponse::default();
+pub async fn create_record(
+    CreateOrUpdateRecordJson { token, json }: CreateOrUpdateRecordJson,
+) -> RecordJsonResponse {
+    let mut res: RecordJsonResponse = RecordJsonResponse::default();
     let auth_res = validate_auth_token(&token);
     let trusted_res = is_call_from_trusted_canister();
     if auth_res.is_err() && trusted_res.is_err() {
@@ -414,12 +416,12 @@ pub async fn create_model_instance(
         return res;
     }
 
-    let instance_res = convert_json_to_model_instance(json);
-    if instance_res.is_err() {
-        res.err = instance_res.err().unwrap();
+    let record_res = convert_json_to_record(json);
+    if record_res.is_err() {
+        res.err = record_res.err().unwrap();
         return res;
     }
-    let mut instance = instance_res.ok().unwrap();
+    let mut record = record_res.ok().unwrap();
 
     // generate uuid
     let uuid_res = generate_uuid().await;
@@ -427,10 +429,10 @@ pub async fn create_model_instance(
         res.err = uuid_res.err().unwrap();
         return res;
     }
-    instance.id = uuid_res.unwrap();
+    record.id = uuid_res.unwrap();
 
-    // create model instance
-    let model_res = find_model(&instance.model_name);
+    // get model
+    let model_res = find_model(&record.model_name);
     if model_res.is_err() {
         res.err = model_res.err().unwrap();
         return res;
@@ -442,56 +444,56 @@ pub async fn create_model_instance(
     }
     let canister_id = model.canisters[0].clone(); // TODO - pick canister based on memory usage
 
-    let insert_res = insert_instance_into_sub_canister(canister_id, instance.clone()).await;
+    let insert_res = insert_record_into_sub_canister(canister_id, record.clone()).await;
     if insert_res.is_err() {
         res.err = insert_res.err().unwrap();
         return res;
     }
 
-    let instance_as_json_res = convert_model_instance_to_json(instance.clone());
-    if instance_as_json_res.is_err() {
-        res.err = instance_as_json_res.err().unwrap();
+    let record_as_json_res = convert_record_to_json(record.clone());
+    if record_as_json_res.is_err() {
+        res.err = record_as_json_res.err().unwrap();
         return res;
     }
-    let instance_as_json = instance_as_json_res.unwrap();
-    let instance_as_string_res = serde_json::to_string(&instance_as_json);
-    if instance_as_string_res.is_err() {
-        res.err = "Failed to convert instance to json".to_string();
+    let record_as_json = record_as_json_res.unwrap();
+    let record_as_string_res = serde_json::to_string(&record_as_json);
+    if record_as_string_res.is_err() {
+        res.err = "Failed to convert record to json".to_string();
         return res;
     }
 
-    res.json = Some(instance_as_string_res.unwrap());
+    res.json = Some(record_as_string_res.unwrap());
     return res;
 }
 
-//
-//  #    # #####  #####    ##   ##### ######    # #    #  ####  #####   ##   #    #  ####  ######
-//  #    # #    # #    #  #  #    #   #         # ##   # #        #    #  #  ##   # #    # #
-//  #    # #    # #    # #    #   #   #####     # # #  #  ####    #   #    # # #  # #      #####
-//  #    # #####  #    # ######   #   #         # #  # #      #   #   ###### #  # # #      #
-//  #    # #      #    # #    #   #   #         # #   ## #    #   #   #    # #   ## #    # #
-//   ####  #      #####  #    #   #   ######    # #    #  ####    #   #    # #    #  ####  ######
+//                                                                                        
+//  #    # #####  #####    ##   ##### ######    #####  ######  ####   ####  #####  #####  
+//  #    # #    # #    #  #  #    #   #         #    # #      #    # #    # #    # #    # 
+//  #    # #    # #    # #    #   #   #####     #    # #####  #      #    # #    # #    # 
+//  #    # #####  #    # ######   #   #         #####  #      #      #    # #####  #    # 
+//  #    # #      #    # #    #   #   #         #   #  #      #    # #    # #   #  #    # 
+//   ####  #      #####  #    #   #   ######    #    # ######  ####   ####  #    # #####  
 
 #[update]
-pub async fn update_model_instance(
-    CreateOrUpdateModelInstanceJson { token, json }: CreateOrUpdateModelInstanceJson,
-) -> ModelInstanceJsonResponse {
-    let mut res: ModelInstanceJsonResponse = ModelInstanceJsonResponse::default();
+pub async fn update_record(
+    CreateOrUpdateRecordJson { token, json }: CreateOrUpdateRecordJson,
+) -> RecordJsonResponse {
+    let mut res: RecordJsonResponse = RecordJsonResponse::default();
     let auth_res = validate_auth_token(&token);
     let trusted_res = is_call_from_trusted_canister();
     if auth_res.is_err() && trusted_res.is_err() {
         res.err = auth_res.err().unwrap() + " " + &trusted_res.err().unwrap();
         return res;
     }
-    let instance_res = convert_json_to_model_instance(json);
-    if instance_res.is_err() {
-        res.err = instance_res.err().unwrap();
+    let record_res = convert_json_to_record(json);
+    if record_res.is_err() {
+        res.err = record_res.err().unwrap();
         return res;
     }
-    let instance = instance_res.ok().unwrap();
+    let record = record_res.ok().unwrap();
 
     // make sure model exists
-    let model_res = find_model(&instance.model_name);
+    let model_res = find_model(&record.model_name);
     if model_res.is_err() {
         res.err = model_res.err().unwrap();
         return res;
@@ -503,58 +505,54 @@ pub async fn update_model_instance(
     }
     let canister_id = model.canisters[0].clone(); // TODO - pick canister based on memory usage
 
-    // make sure instance exists
-    let instance_exists_res =
-        find_instance_in_sub_canister(canister_id.clone(), instance.id.clone()).await;
-    if instance_exists_res.is_err() {
-        res.err = instance_exists_res.err().unwrap();
+    // make sure record exists
+    let record_exists_res =
+        find_record_in_sub_canister(canister_id.clone(), record.id.clone()).await;
+    if record_exists_res.is_err() {
+        res.err = record_exists_res.err().unwrap();
         return res;
     }
 
-    // update instance
-    let insert_res = update_instance_in_sub_canister(
-        canister_id,
-        instance.clone(),
-    )
-    .await;
+    // update record
+    let insert_res = update_record_in_sub_canister(canister_id, record.clone()).await;
     if insert_res.is_err() {
         res.err = insert_res.err().unwrap();
         return res;
     }
 
-    let instance_as_json_res = convert_model_instance_to_json(instance.clone());
-    if instance_as_json_res.is_err() {
-        res.err = instance_as_json_res.err().unwrap();
+    let record_as_json_res = convert_record_to_json(record.clone());
+    if record_as_json_res.is_err() {
+        res.err = record_as_json_res.err().unwrap();
         return res;
     }
-    let instance_as_json = instance_as_json_res.unwrap();
-    let instance_as_string_res = serde_json::to_string(&instance_as_json);
-    if instance_as_string_res.is_err() {
-        res.err = "Failed to convert instance to json".to_string();
+    let record_as_json = record_as_json_res.unwrap();
+    let record_as_string_res = serde_json::to_string(&record_as_json);
+    if record_as_string_res.is_err() {
+        res.err = "Failed to convert record to json".to_string();
         return res;
     }
 
-    res.json = Some(instance_as_string_res.unwrap());
+    res.json = Some(record_as_string_res.unwrap());
     return res;
 }
 
-//
-//   ####  ###### #####    # #    #  ####  #####   ##   #    #  ####  ######
-//  #    # #        #      # ##   # #        #    #  #  ##   # #    # #
-//  #      #####    #      # # #  #  ####    #   #    # # #  # #      #####
-//  #  ### #        #      # #  # #      #   #   ###### #  # # #      #
-//  #    # #        #      # #   ## #    #   #   #    # #   ## #    # #
-//   ####  ######   #      # #    #  ####    #   #    # #    #  ####  ######
+//                                                                   
+//   ####  ###### #####    #####  ######  ####   ####  #####  #####  
+//  #    # #        #      #    # #      #    # #    # #    # #    # 
+//  #      #####    #      #    # #####  #      #    # #    # #    # 
+//  #  ### #        #      #####  #      #      #    # #####  #    # 
+//  #    # #        #      #   #  #      #    # #    # #   #  #    # 
+//   ####  ######   #      #    # ######  ####   ####  #    # #####  
 
 #[update]
-pub async fn get_model_instance(
-    ModelInstanceRequest {
+pub async fn get_record(
+    RecordRequest {
         token,
         id,
         model_name,
-    }: ModelInstanceRequest,
-) -> ModelInstanceJsonResponse {
-    let mut res: ModelInstanceJsonResponse = ModelInstanceJsonResponse::default();
+    }: RecordRequest,
+) -> RecordJsonResponse {
+    let mut res: RecordJsonResponse = RecordJsonResponse::default();
     let auth_res = validate_auth_token(&token);
     let trusted_res = is_call_from_trusted_canister();
     if auth_res.is_err() && trusted_res.is_err() {
@@ -574,49 +572,113 @@ pub async fn get_model_instance(
     }
     let canister_id = model.canisters[0].clone(); // TODO - pick canister based on memory usage
 
-    // make sure instance exists
-    let instance_res = find_instance_in_sub_canister(canister_id.clone(), id.clone()).await;
-    if instance_res.is_err() {
-        res.err = instance_res.err().unwrap();
+    // make sure record exists
+    let record_res = find_record_in_sub_canister(canister_id.clone(), id.clone()).await;
+    if record_res.is_err() {
+        res.err = record_res.err().unwrap();
         return res;
     }
-    let instance = instance_res.ok();
-    if instance.is_none() {
-        res.err = "Instance not found".to_string();
-        return res;
-    }
-
-    let instance_as_json_res = convert_model_instance_to_json(instance.unwrap());
-    if instance_as_json_res.is_err() {
-        res.err = instance_as_json_res.err().unwrap();
-        return res;
-    }
-    let instance_as_json = instance_as_json_res.unwrap();
-    let instance_as_string_res = serde_json::to_string(&instance_as_json);
-    if instance_as_string_res.is_err() {
-        res.err = "Failed to convert instance to json".to_string();
+    let record = record_res.ok();
+    if record.is_none() {
+        res.err = "record not found".to_string();
         return res;
     }
 
-    res.json = Some(instance_as_string_res.unwrap());
+    let record_as_json_res = convert_record_to_json(record.unwrap());
+    if record_as_json_res.is_err() {
+        res.err = record_as_json_res.err().unwrap();
+        return res;
+    }
+    let record_as_json = record_as_json_res.unwrap();
+    let record_as_string_res = serde_json::to_string(&record_as_json);
+    if record_as_string_res.is_err() {
+        res.err = "Failed to convert record to json".to_string();
+        return res;
+    }
+
+    res.json = Some(record_as_string_res.unwrap());
     return res;
 }
 
-//
-//  #####  ###### #      ###### ##### ######    # #    #  ####  #####   ##   #    #  ####  ######
-//  #    # #      #      #        #   #         # ##   # #        #    #  #  ##   # #    # #
-//  #    # #####  #      #####    #   #####     # # #  #  ####    #   #    # # #  # #      #####
-//  #    # #      #      #        #   #         # #  # #      #   #   ###### #  # # #      #
-//  #    # #      #      #        #   #         # #   ## #    #   #   #    # #   ## #    # #
-//  #####  ###### ###### ######   #   ######    # #    #  ####    #   #    # #    #  ####  ######
+//                                                                     
+//  #####  ######  ####   ####  #####  #####     #      #  ####  ##### 
+//  #    # #      #    # #    # #    # #    #    #      # #        #   
+//  #    # #####  #      #    # #    # #    #    #      #  ####    #   
+//  #####  #      #      #    # #####  #    #    #      #      #   #   
+//  #   #  #      #    # #    # #   #  #    #    #      # #    #   #   
+//  #    # ######  ####   ####  #    # #####     ###### #  ####    #   
 
 #[update]
-pub async fn delete_model_instance(
-    ModelInstanceRequest {
+pub async fn get_record_list(
+    RecordRequest {
         token,
         id,
         model_name,
-    }: ModelInstanceRequest,
+    }: RecordRequest,
+) -> RecordJsonResponse {
+    let mut res: RecordJsonResponse = RecordJsonResponse::default();
+    let auth_res = validate_auth_token(&token);
+    let trusted_res = is_call_from_trusted_canister();
+    if auth_res.is_err() && trusted_res.is_err() {
+        res.err = auth_res.err().unwrap() + " " + &trusted_res.err().unwrap();
+        return res;
+    }
+    // make sure model exists
+    let model_res = find_model(&model_name);
+    if model_res.is_err() {
+        res.err = model_res.err().unwrap();
+        return res;
+    }
+    let model = model_res.ok().unwrap();
+    if model.canisters.len() == 0 {
+        res.err = "No canisters associated with this model".to_string();
+        return res;
+    }
+    let canister_id = model.canisters[0].clone(); // TODO - pick canister based on memory usage
+
+    // make sure record exists
+    let record_res = find_record_in_sub_canister(canister_id.clone(), id.clone()).await;
+    if record_res.is_err() {
+        res.err = record_res.err().unwrap();
+        return res;
+    }
+    let record = record_res.ok();
+    if record.is_none() {
+        res.err = "record not found".to_string();
+        return res;
+    }
+
+    let record_as_json_res = convert_record_to_json(record.unwrap());
+    if record_as_json_res.is_err() {
+        res.err = record_as_json_res.err().unwrap();
+        return res;
+    }
+    let record_as_json = record_as_json_res.unwrap();
+    let record_as_string_res = serde_json::to_string(&record_as_json);
+    if record_as_string_res.is_err() {
+        res.err = "Failed to convert record to json".to_string();
+        return res;
+    }
+
+    res.json = Some(record_as_string_res.unwrap());
+    return res;
+}
+
+//                                                                                        
+//  #####  ###### #      ###### ##### ######    #####  ######  ####   ####  #####  #####  
+//  #    # #      #      #        #   #         #    # #      #    # #    # #    # #    # 
+//  #    # #####  #      #####    #   #####     #    # #####  #      #    # #    # #    # 
+//  #    # #      #      #        #   #         #####  #      #      #    # #####  #    # 
+//  #    # #      #      #        #   #         #   #  #      #    # #    # #   #  #    # 
+//  #####  ###### ###### ######   #   ######    #    # ######  ####   ####  #    # #####  
+
+#[update]
+pub async fn delete_record(
+    RecordRequest {
+        token,
+        id,
+        model_name,
+    }: RecordRequest,
 ) -> BasicResponse {
     let mut res: BasicResponse = BasicResponse::default();
     let auth_res = validate_auth_token(&token);
@@ -638,13 +700,13 @@ pub async fn delete_model_instance(
     }
     let canister_id = model.canisters[0].clone(); // TODO - pick canister based on memory usage
 
-    // make sure instance exists
-    let instance_res = delete_instance_in_sub_canister(canister_id.clone(), id.clone()).await;
-    if instance_res.is_err() {
-        res.err = instance_res.err().unwrap();
+    // make sure record exists
+    let record_res = delete_record_in_sub_canister(canister_id.clone(), id.clone()).await;
+    if record_res.is_err() {
+        res.err = record_res.err().unwrap();
         return res;
     }
 
-    res.ok = Some("Instance deleted".to_string());
+    res.ok = Some("record deleted".to_string());
     return res;
 }

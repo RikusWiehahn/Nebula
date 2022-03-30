@@ -84,17 +84,17 @@ pub struct CanisterId {
 }
 
 #[derive(Clone, Debug, CandidType, Deserialize)]
-pub struct InitModel {
+pub struct InitModelRequest {
     pub model_name: String,
 }
 
 #[derive(Clone, Debug, CandidType, Deserialize)]
-pub struct RemoveField {
+pub struct RemoveFieldRequest {
     pub field_name: String,
 }
 
 #[derive(Clone, Debug, CandidType, Deserialize)]
-pub struct Id {
+pub struct IdRequest {
     pub id: String,
 }
 
@@ -113,27 +113,27 @@ pub struct ModelDataFieldType {
 }
 
 #[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
-pub struct ModelInstanceDataField {
+pub struct RecordDataField {
     pub field_name: String,
     pub json_value: String,
 }
 
 #[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
-pub struct ModelInstance {
+pub struct Record {
     pub id: String,
     pub model_name: String,
-    pub data_fields: Vec<ModelInstanceDataField>,
+    pub data_fields: Vec<RecordDataField>,
 }
 
 #[derive(Clone, Debug, CandidType, Deserialize)]
-pub struct ModelInstanceResponse {
-    pub ok: Option<ModelInstance>,
+pub struct RecordResponse {
+    pub ok: Option<Record>,
     pub err: String,
 }
 
-impl Default for ModelInstanceResponse {
+impl Default for RecordResponse {
     fn default() -> Self {
-        ModelInstanceResponse {
+        RecordResponse {
             ok: None,
             err: "".to_string(),
         }

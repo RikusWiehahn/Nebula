@@ -31,28 +31,20 @@ type ModelDataFieldType = record {
     "NUMBER_ARRAY"
 */
 
-type ModelDataField = record {
+type RecordDataField = record {
     "field_name": text;
     "data_type": text;
     "json_value": text;
 };
 
-type ModelInstance = record {
+type Record = record {
     "id": text;
     "model_name": text;
-    "data_fields": vec ModelDataField;
+    "data_fields": vec RecordDataField;
 };
 
-type ModelInstanceResponse = record {
-    "ok": opt ModelInstance;
-    "err": text;
-};
-
-type ModelInstanceListResponse = record {
-    "start_index": float64;
-    "end_index": float64;
-    "total_count": float64;
-    "list": vec ModelInstance;
+type RecordResponse = record {
+    "ok": opt Record;
     "err": text;
 };
 
@@ -67,12 +59,11 @@ service : {
     "add_field": (ModelDataFieldType) -> (BasicResponse);
     "remove_field": (record { "field_name": text }) -> (BasicResponse);
 
-    // Create/Read/Update/Delete model instances
-    "create_instance": (ModelInstance) -> (ModelInstanceResponse);
-    "update_instance": (ModelInstance) -> (ModelInstanceResponse);
-    "get_instance": (record { "id": text }) -> (ModelInstanceResponse);
-    "delete_instance": (record { "id": text }) -> (BasicResponse);
-    "get_instance_list": (record { "start_index": float64; "end_index": float64 }) -> (ModelInstanceListResponse);
+    // Create/Read/Update/Delete records
+    "insert_record": (Record) -> (RecordResponse);
+    "update_record": (Record) -> (RecordResponse);
+    "get_record": (record { "id": text }) -> (RecordResponse);
+    "delete_record": (record { "id": text }) -> (BasicResponse);
 
     // wallet
     "wallet_receive": (nat) -> ();

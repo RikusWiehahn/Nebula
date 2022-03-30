@@ -59,26 +59,26 @@ impl Default for Authentication {
 }
 
 #[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
-pub struct Activate {
+pub struct ActivationRequest {
     pub password: String,
     pub password_check: String,
     pub bucket_wasm: Vec<u8>,
 }
 
 #[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
-pub struct SignIn {
+pub struct SignInRequest {
     pub password: String,
 }
 
 #[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
-pub struct ChangePassword {
+pub struct ChangePasswordRequest {
     pub old_password: String,
     pub password: String,
     pub password_check: String,
 }
 
 #[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
-pub struct TokenRecord {
+pub struct TokenRequest {
     pub token: String,
 }
 
@@ -91,27 +91,8 @@ pub struct TokenRecord {
 //   ####  #    # #    # #  ####    #   ###### #    #     ####  ######   #     #   # #    #  ####   ####
 
 #[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
-pub struct CanisterId {
+pub struct CanisterIdRecord {
     pub canister_id: Principal,
-}
-
-#[derive(Clone, Debug, CandidType, Deserialize)]
-pub struct CanisterSettings {
-    pub controllers: Option<Vec<Principal>>,
-    pub compute_allocation: Option<u64>,
-    pub memory_allocation: Option<u64>,
-    pub freezing_threshold: Option<u64>,
-}
-
-impl Default for CanisterSettings {
-    fn default() -> Self {
-        CanisterSettings {
-            controllers: None,
-            compute_allocation: None,
-            memory_allocation: None,
-            freezing_threshold: None,
-        }
-    }
 }
 
 //
@@ -206,13 +187,13 @@ impl Default for TelemetryResponse {
 //  #    #  ####  #####  ###### ######  ####
 
 #[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
-pub struct CreateOrGetModel {
+pub struct CreateOrGetModelRequest {
     pub token: String,
     pub model_name: String,
 }
 
 #[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
-pub struct RemoveModelField {
+pub struct RemoveModelFieldRequest {
     pub token: String,
     pub model_name: String,
     pub field_name: String,
@@ -284,14 +265,20 @@ pub struct CanisterWasm {
 //  #####   ####   ####  #    # ######   #    ####
 
 #[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
-pub struct InitModel {
+pub struct InitBucketModelRequest {
     pub model_name: String,
 }
 
 #[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
-pub struct RemoveField {
+pub struct RemoveBucketFieldRequest {
     pub field_name: String,
 }
+
+#[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
+pub struct BucketRecordRequest {
+    pub id: String,
+}
+
 
 //
 //  ##### #####  #    #  ####  ##### ###### #####      ####    ##   #    # #  ####  ##### ###### #####   ####
@@ -323,62 +310,56 @@ impl Default for TrustedCanistersResponse {
 }
 
 #[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
-pub struct AddTrustedCanister {
+pub struct AddTrustedCanisterRequest {
     pub token: String,
     pub name: String,
     pub canister_id: String,
 }
 
 #[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
-pub struct RemoveTrustedCanister {
+pub struct RemoveTrustedCanisterRequest {
     pub token: String,
     pub canister_id: String,
 }
 
-
-//                                                           
-//  # #    #  ####  #####   ##   #    #  ####  ######  ####  
-//  # ##   # #        #    #  #  ##   # #    # #      #      
-//  # # #  #  ####    #   #    # # #  # #      #####   ####  
-//  # #  # #      #   #   ###### #  # # #      #           # 
-//  # #   ## #    #   #   #    # #   ## #    # #      #    # 
-//  # #    #  ####    #   #    # #    #  ####  ######  ####  
-
-#[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
-pub struct ModelInstanceId {
-    pub id: String,
-}
+//                                                   
+//  #####  ######  ####   ####  #####  #####   ####  
+//  #    # #      #    # #    # #    # #    # #      
+//  #    # #####  #      #    # #    # #    #  ####  
+//  #####  #      #      #    # #####  #    #      # 
+//  #   #  #      #    # #    # #   #  #    # #    # 
+//  #    # ######  ####   ####  #    # #####   ####  
 
 #[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
-pub struct ModelInstanceRequest {
+pub struct RecordRequest {
     pub token: String,
     pub model_name: String,
     pub id: String,
 }
 
 #[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
-pub struct ModelInstanceDataField {
+pub struct RecordDataField {
     pub field_name: String,
     pub data_type: String,
     pub json_value: String,
 }
 
 #[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
-pub struct ModelInstance {
+pub struct Record {
     pub id: String,
     pub model_name: String,
-    pub data_fields: Vec<ModelInstanceDataField>,    
+    pub data_fields: Vec<RecordDataField>,    
 }
 
 #[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
-pub struct ModelInstanceResponse {
-    pub ok: Option<ModelInstance>,
+pub struct RecordResponse {
+    pub ok: Option<Record>,
     pub err: String,
 }
 
-impl Default for ModelInstanceResponse {
+impl Default for RecordResponse {
     fn default() -> Self {
-        ModelInstanceResponse {
+        RecordResponse {
             ok: None,
             err: "".to_string(),
         }
@@ -386,22 +367,40 @@ impl Default for ModelInstanceResponse {
 }
 
 #[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
-pub struct CreateOrUpdateModelInstanceJson {
+pub struct CreateOrUpdateRecordJson {
     pub token: String,
     pub json: String,
 }
 
 #[derive(Clone, Debug, CandidType, Deserialize)]
-pub struct ModelInstanceJsonResponse {
+pub struct RecordJsonResponse {
     pub json: Option<String>,
     pub err: String,
 }
 
-impl Default for ModelInstanceJsonResponse {
+impl Default for RecordJsonResponse {
     fn default() -> Self {
-        ModelInstanceJsonResponse {
+        RecordJsonResponse {
             json: None,
             err: "".to_string(),
         }
     }
+}
+
+
+#[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
+pub struct RecordListRequest {
+    pub token: String,
+    pub model_name: String,
+    pub id: String,
+    pub page: f64,
+    pub page_size: f64,
+}
+
+#[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
+pub struct RecordListJsonResponse {
+    pub ok: Vec<String>,
+    pub err: String,
+    pub page: f64,
+    pub page_size: f64,
 }

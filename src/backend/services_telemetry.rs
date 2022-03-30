@@ -51,7 +51,7 @@ pub async fn auto_update_telemetry() {
 //   ####  ######   #       ####    #   #    #   #    ####   ####
 
 #[update]
-pub async fn get_telemetry(TokenRecord { token }: TokenRecord) -> TelemetryResponse {
+pub async fn get_telemetry(TokenRequest { token }: TokenRequest) -> TelemetryResponse {
     let mut res = TelemetryResponse::default();
     let auth_res = validate_auth_token(&token);
     if auth_res.is_err() {

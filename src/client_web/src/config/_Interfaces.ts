@@ -132,39 +132,39 @@ export const dataFieldTypesList = [
   },
 ];
 
-//
-//  # #    #  ####  #####   ##   #    #  ####  ######  ####
-//  # ##   # #        #    #  #  ##   # #    # #      #
-//  # # #  #  ####    #   #    # # #  # #      #####   ####
-//  # #  # #      #   #   ###### #  # # #      #           #
-//  # #   ## #    #   #   #    # #   ## #    # #      #    #
-//  # #    #  ####    #   #    # #    #  ####  ######  ####
+//                                                   
+//  #####  ######  ####   ####  #####  #####   ####  
+//  #    # #      #    # #    # #    # #    # #      
+//  #    # #####  #      #    # #    # #    #  ####  
+//  #####  #      #      #    # #####  #    #      # 
+//  #   #  #      #    # #    # #   #  #    # #    # 
+//  #    # ######  ####   ####  #    # #####   ####  
 
-export interface ModelDataField {
+export interface RecordDataField {
   field_name: string;
   json_value: string;
   data_type: string;
 }
-export interface ModelInstance {
+export interface Record {
   id: string;
   model_name: string;
-  data_fields: Array<ModelDataField>;
+  data_fields: Array<RecordDataField>;
 }
 
-export const EMPTY_MODEL_INSTANCE = {
+export const EMPTY_RECORD = {
   id: "",
   model_name: "",
   data_fields: [],
 };
 
-export interface ModelTable {
+export interface RecordTable {
   model_name: string;
   data_fields: Array<ModelDataFieldType>;
-  instances: Array<ModelInstance>;
+  records: Array<Record>;
 }
 
-export const EMPTY_MODEL_TABLE = {
+export const EMPTY_RECORD_TABLE = {
   model_name: "",
   data_fields: [],
-  instances: [],
+  records: [],
 };

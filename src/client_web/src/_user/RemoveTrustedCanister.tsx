@@ -55,7 +55,7 @@ export const RemoveTrustedCanisterUtility = (props: {
       <div className="font-bold mb-4">{props.canister_id}</div>
       <div className="mb-4">
         Remove this canister's ability to make calls that can CREATE, READ,
-        UPDATE, and DELETE instances of data models stored?
+        UPDATE, and DELETE records?
       </div>
 
       <button className="btn-primary w-full" onClick={removeTrustedCanister}>

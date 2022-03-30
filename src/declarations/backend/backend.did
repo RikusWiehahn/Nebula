@@ -66,9 +66,16 @@ type ModelListResponse = record {
     "err": text;
 };
 
-type ModelInstanceResponse = record {
-    "json": opt text;
+type RecordJsonResponse = record {
+    "ok": opt text;
     "err": text;
+};
+
+type RecordListJsonResponse = record {
+    "ok": vec text;
+    "err": text;
+    "page": float64;
+    "page_size": float64;
 };
 
 service : {
@@ -91,10 +98,11 @@ service : {
     "remove_model_field": (record {token: text; model_name: text; field_name: text }) -> (ModelResponse);
     "delete_model": (record { token: text; model_name: text }) -> (BasicResponse);
     
-    "create_model_instance": (record { token: text; json: text; }) -> (ModelInstanceResponse);
-    "update_model_instance": (record { token: text; id: text; json: text; }) -> (ModelInstanceResponse);
-    "get_model_instance": (record { token: text; id: text }) -> (ModelInstanceResponse);
-    "delete_model_instance": (record { token: text; id: text }) -> (BasicResponse);
+    "create_record": (record { token: text; json: text; }) -> (RecordJsonResponse);
+    "update_record": (record { token: text; json: text; }) -> (RecordJsonResponse);
+    "get_record": (record { token: text; model_name: text; id: text }) -> (RecordJsonResponse);
+    "delete_record": (record { token: text; model_name: text; id: text }) -> (BasicResponse);
+    "get_record_list": (record { token: text; model_name: text; page: float64; page_size: float64; }) -> (RecordListJsonResponse);
 
     "wallet_receive": (nat) -> ();
 }

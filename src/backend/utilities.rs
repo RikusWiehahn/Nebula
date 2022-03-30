@@ -9,7 +9,7 @@ use ic_cdk::export::candid::CandidType;
 use ic_cdk::export::Principal;
 use ic_cdk::{api::time, println};
 use jwt::{SignWithKey, VerifyWithKey};
-use serde::{Deserialize};
+use serde::Deserialize;
 use sha2::Sha256;
 use std::result::Result;
 use std::vec::Vec;
@@ -142,7 +142,6 @@ pub async fn verify_password(password: &str, hash: &str) -> Result<(), String> {
 //  #      #   ## #    # #    # #    # #         #    # ##  ##   #
 //  ###### #    #  ####   ####  #####  ######     ####  #    #   #
 
-
 pub fn generate_token_from_id(id: &str) -> Result<String, String> {
     let jwt_secret_res = get_jwt_secret();
     if jwt_secret_res.is_err() {
@@ -242,6 +241,14 @@ pub fn delay() -> garcon::Delay {
 //   ####  #    # ###### #    #   #   ######     ####  #    # #    # #  ####    #   ###### #    #
 
 pub async fn create_canister(cycles: u64) -> Result<Principal, String> {
+    #[derive(Clone, Debug, CandidType, Deserialize)]
+    struct CanisterSettings {
+        controllers: Option<Vec<Principal>>,
+        compute_allocation: Option<u64>,
+        memory_allocation: Option<u64>,
+        freezing_threshold: Option<u64>,
+    }
+
     #[derive(CandidType)]
     struct In {
         settings: Option<CanisterSettings>,
@@ -256,7 +263,7 @@ pub async fn create_canister(cycles: u64) -> Result<Principal, String> {
         }),
     };
 
-    let create_call_res: Result<(CanisterId,), (RejectionCode, String)> =
+    let create_call_res: Result<(CanisterIdRecord,), (RejectionCode, String)> =
         ic_cdk::api::call::call_with_payment(
             Principal::management_canister(),
             "create_canister",
@@ -361,18 +368,26 @@ pub async fn destroy_sub_canister(canister_id: &str) -> Result<(), String> {
         let err_msg = format!("Invalid canister id: {}", canister_id);
         return Err(err_msg);
     }
-    let in_arg = CanisterId {
+    let in_arg = CanisterIdRecord {
         canister_id: principal_res.unwrap(),
     };
 
-    let stop_res: Result<((),), (RejectionCode, String)> =
-        ic_cdk::call(Principal::management_canister(), "stop_canister", (in_arg.clone(),)).await;
+    let stop_res: Result<((),), (RejectionCode, String)> = ic_cdk::call(
+        Principal::management_canister(),
+        "stop_canister",
+        (in_arg.clone(),),
+    )
+    .await;
     if stop_res.is_err() {
         return Err(stop_res.err().unwrap().1);
     }
 
-    let delete_res: Result<((),), (RejectionCode, String)> =
-        ic_cdk::call(Principal::management_canister(), "delete_canister", (in_arg.clone(),)).await;
+    let delete_res: Result<((),), (RejectionCode, String)> = ic_cdk::call(
+        Principal::management_canister(),
+        "delete_canister",
+        (in_arg.clone(),),
+    )
+    .await;
     if delete_res.is_err() {
         return Err(delete_res.err().unwrap().1);
     }

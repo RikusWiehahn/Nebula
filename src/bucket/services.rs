@@ -77,7 +77,7 @@ pub async fn check_if_admin_canister() -> BasicResponse {
 //  # #    # #   #      #    #  ####  #####  ###### ######
 
 #[update]
-pub async fn init_model(InitModel { model_name }: InitModel) -> BasicResponse {
+pub async fn init_model(InitModelRequest { model_name }: InitModelRequest) -> BasicResponse {
     let mut res = BasicResponse::default();
     let is_admin_res = caller_is_admin();
     if is_admin_res.is_err() {
@@ -154,15 +154,15 @@ pub async fn add_field(input: ModelDataFieldType) -> BasicResponse {
         data_fields.insert(input.field_name.clone(), input.clone());
     });
 
-    // update every model instance
+    // update every record
     STATE.with(|state: &GlobalState| {
-        let mut instances = state.instances.borrow_mut();
-        for instance in instances.values_mut() {
-            let new_field = ModelInstanceDataField {
+        let mut records = state.records.borrow_mut();
+        for record in records.values_mut() {
+            let new_field = RecordDataField {
                 field_name: input.field_name.clone(),
                 json_value: input.default_json_value.clone(),
             };
-            instance.data_fields.push(new_field);
+            record.data_fields.push(new_field);
         }
     });
 
@@ -179,23 +179,23 @@ pub async fn add_field(input: ModelDataFieldType) -> BasicResponse {
 //  #    # ###### #    #  ####    ##   ######    #      # ###### ###### #####
 
 #[update]
-pub async fn remove_field(input: RemoveField) -> BasicResponse {
+pub async fn remove_field(RemoveFieldRequest { field_name }: RemoveFieldRequest) -> BasicResponse {
     let mut res = BasicResponse::default();
     let is_admin_res = caller_is_admin();
     if is_admin_res.is_err() {
         res.err = is_admin_res.err().unwrap();
         return res;
     }
-    if input.field_name.is_empty() {
+    if field_name.is_empty() {
         res.err = "Provided field name is empty".to_string();
         return res;
     }
-    if input.field_name == "id" || input.field_name == "model_name" {
+    if field_name == "id" || field_name == "model_name" {
         res.err = "Provided field name cannot be 'id' or 'model_name'".to_string();
         return res;
     }
     // check that data field is in the model
-    let data_field_res = find_data_field(&input.field_name);
+    let data_field_res = find_data_field(&field_name);
     if data_field_res.is_err() {
         res.err = "Data field does not exist".to_string();
         return res;
@@ -204,16 +204,16 @@ pub async fn remove_field(input: RemoveField) -> BasicResponse {
     // update model
     STATE.with(|state: &GlobalState| {
         let mut data_fields = state.model_data_fields.borrow_mut();
-        data_fields.retain(|key, _value| key != &input.field_name);
+        data_fields.retain(|key, _value| key != &field_name);
     });
 
-    // update every model instance
+    // update every record
     STATE.with(|state: &GlobalState| {
-        let mut instances = state.instances.borrow_mut();
-        for instance in instances.values_mut() {
-            instance
+        let mut records = state.records.borrow_mut();
+        for record in records.values_mut() {
+            record
                 .data_fields
-                .retain(|field| field.field_name != input.field_name);
+                .retain(|field| field.field_name != field_name);
         }
     });
 
@@ -221,23 +221,23 @@ pub async fn remove_field(input: RemoveField) -> BasicResponse {
     return res;
 }
 
-//
-//  # #    #  ####  ###### #####  #####    # #    #  ####  #####   ##   #    #  ####  ######
-//  # ##   # #      #      #    #   #      # ##   # #        #    #  #  ##   # #    # #
-//  # # #  #  ####  #####  #    #   #      # # #  #  ####    #   #    # # #  # #      #####
-//  # #  # #      # #      #####    #      # #  # #      #   #   ###### #  # # #      #
-//  # #   ## #    # #      #   #    #      # #   ## #    #   #   #    # #   ## #    # #
-//  # #    #  ####  ###### #    #   #      # #    #  ####    #   #    # #    #  ####  ######
+//                                                                                   
+//  # #    #  ####  ###### #####  #####    #####  ######  ####   ####  #####  #####  
+//  # ##   # #      #      #    #   #      #    # #      #    # #    # #    # #    # 
+//  # # #  #  ####  #####  #    #   #      #    # #####  #      #    # #    # #    # 
+//  # #  # #      # #      #####    #      #####  #      #      #    # #####  #    # 
+//  # #   ## #    # #      #   #    #      #   #  #      #    # #    # #   #  #    # 
+//  # #    #  ####  ###### #    #   #      #    # ######  ####   ####  #    # #####  
 
 #[update]
-pub async fn insert_instance(
-    ModelInstance {
+pub async fn insert_record(
+    Record {
         id,
         model_name,
         data_fields,
-    }: ModelInstance,
-) -> ModelInstanceResponse {
-    let mut res = ModelInstanceResponse::default();
+    }: Record,
+) -> RecordResponse {
+    let mut res = RecordResponse::default();
     let is_admin_res = caller_is_admin();
     if is_admin_res.is_err() {
         res.err = is_admin_res.err().unwrap();
@@ -264,14 +264,14 @@ pub async fn insert_instance(
         fields.clone()
     });
 
-    let already_exists_res = find_model_instance(&id);
+    let already_exists_res = find_record(&id);
     if already_exists_res.is_err() {
         res.err = already_exists_res.err().unwrap();
         return res;
     }
 
-    // create instance
-    let mut new_instance = ModelInstance {
+    // create record
+    let mut new_record = Record {
         id: id.clone(),
         model_name: model_name,
         data_fields: vec![],
@@ -302,7 +302,7 @@ pub async fn insert_instance(
             return res;
         }
 
-        new_instance.data_fields.push(ModelInstanceDataField {
+        new_record.data_fields.push(RecordDataField {
             field_name: data_field.field_name,
             json_value: data_field.json_value,
         });
@@ -311,41 +311,41 @@ pub async fn insert_instance(
     // insert missed data fields
     for (_, data_field) in model_data_fields {
         let mut found = false;
-        for instance_data_field in new_instance.data_fields.clone() {
-            if instance_data_field.field_name == data_field.field_name {
+        for record_data_field in new_record.data_fields.clone() {
+            if record_data_field.field_name == data_field.field_name {
                 found = true;
                 break;
             }
         }
         if !found {
-            new_instance.data_fields.push(ModelInstanceDataField {
+            new_record.data_fields.push(RecordDataField {
                 field_name: data_field.field_name,
                 json_value: data_field.default_json_value,
             });
         }
     }
 
-    // insert instance
+    // insert record
     STATE.with(|state: &GlobalState| {
-        let mut instances = state.instances.borrow_mut();
-        instances.insert(new_instance.id.clone(), new_instance.clone());
+        let mut records = state.records.borrow_mut();
+        records.insert(new_record.id.clone(), new_record.clone());
     });
 
-    res.ok = Some(new_instance);
+    res.ok = Some(new_record);
     return res;
 }
 
-//
-//   ####  ###### #####    # #    #  ####  #####   ##   #    #  ####  ######
-//  #    # #        #      # ##   # #        #    #  #  ##   # #    # #
-//  #      #####    #      # # #  #  ####    #   #    # # #  # #      #####
-//  #  ### #        #      # #  # #      #   #   ###### #  # # #      #
-//  #    # #        #      # #   ## #    #   #   #    # #   ## #    # #
-//   ####  ######   #      # #    #  ####    #   #    # #    #  ####  ######
+//                                                                   
+//   ####  ###### #####    #####  ######  ####   ####  #####  #####  
+//  #    # #        #      #    # #      #    # #    # #    # #    # 
+//  #      #####    #      #    # #####  #      #    # #    # #    # 
+//  #  ### #        #      #####  #      #      #    # #####  #    # 
+//  #    # #        #      #   #  #      #    # #    # #   #  #    # 
+//   ####  ######   #      #    # ######  ####   ####  #    # #####  
 
 #[update]
-pub async fn get_instance(Id { id }: Id) -> ModelInstanceResponse {
-    let mut res = ModelInstanceResponse::default();
+pub async fn get_record(IdRequest { id }: IdRequest) -> RecordResponse {
+    let mut res = RecordResponse::default();
     let is_admin_res = caller_is_admin();
     if is_admin_res.is_err() {
         res.err = is_admin_res.err().unwrap();
@@ -356,33 +356,33 @@ pub async fn get_instance(Id { id }: Id) -> ModelInstanceResponse {
         return res;
     }
 
-    let instance_res = find_model_instance(&id);
-    if instance_res.is_err() {
-        res.err = instance_res.err().unwrap();
+    let record_res = find_record(&id);
+    if record_res.is_err() {
+        res.err = record_res.err().unwrap();
         return res;
     }
 
-    res.ok = Some(instance_res.unwrap());
+    res.ok = Some(record_res.unwrap());
     return res;
 }
 
-//
-//  #    # #####  #####    ##   ##### ######    # #    #  ####  #####   ##   #    #  ####  ######
-//  #    # #    # #    #  #  #    #   #         # ##   # #        #    #  #  ##   # #    # #
-//  #    # #    # #    # #    #   #   #####     # # #  #  ####    #   #    # # #  # #      #####
-//  #    # #####  #    # ######   #   #         # #  # #      #   #   ###### #  # # #      #
-//  #    # #      #    # #    #   #   #         # #   ## #    #   #   #    # #   ## #    # #
-//   ####  #      #####  #    #   #   ######    # #    #  ####    #   #    # #    #  ####  ######
+//                                                                                        
+//  #    # #####  #####    ##   ##### ######    #####  ######  ####   ####  #####  #####  
+//  #    # #    # #    #  #  #    #   #         #    # #      #    # #    # #    # #    # 
+//  #    # #    # #    # #    #   #   #####     #    # #####  #      #    # #    # #    # 
+//  #    # #####  #    # ######   #   #         #####  #      #      #    # #####  #    # 
+//  #    # #      #    # #    #   #   #         #   #  #      #    # #    # #   #  #    # 
+//   ####  #      #####  #    #   #   ######    #    # ######  ####   ####  #    # #####  
 
 #[update]
-pub async fn update_instance(
-    ModelInstance {
+pub async fn update_record(
+    Record {
         id,
         model_name,
         data_fields,
-    }: ModelInstance,
-) -> ModelInstanceResponse {
-    let mut res = ModelInstanceResponse::default();
+    }: Record,
+) -> RecordResponse {
+    let mut res = RecordResponse::default();
     let is_admin_res = caller_is_admin();
     if is_admin_res.is_err() {
         res.err = is_admin_res.err().unwrap();
@@ -404,12 +404,12 @@ pub async fn update_instance(
         return res;
     }
 
-    let instance_res = find_model_instance(&id);
-    if instance_res.is_err() {
-        res.err = instance_res.err().unwrap();
+    let record_res = find_record(&id);
+    if record_res.is_err() {
+        res.err = record_res.err().unwrap();
         return res;
     }
-    let mut instance_to_update = instance_res.unwrap();
+    let mut record_to_update = record_res.unwrap();
 
     // get data fields
     let model_data_fields = STATE.with(|state: &GlobalState| {
@@ -442,7 +442,7 @@ pub async fn update_instance(
             return res;
         }
 
-        for field_to_update in instance_to_update.data_fields.iter_mut() {
+        for field_to_update in record_to_update.data_fields.iter_mut() {
             if field_to_update.field_name == data_field.field_name {
                 field_to_update.json_value = data_field.json_value.clone();
                 break;
@@ -453,64 +453,65 @@ pub async fn update_instance(
     // insert missed data fields
     for (_, model_data_field) in model_data_fields {
         let mut found = false;
-        for instance_data_field in instance_to_update.data_fields.clone() {
-            if instance_data_field.field_name == model_data_field.field_name {
+        for record_data_field in record_to_update.data_fields.clone() {
+            if record_data_field.field_name == model_data_field.field_name {
                 found = true;
                 break;
             }
         }
         if !found {
-            instance_to_update.data_fields.push(ModelInstanceDataField {
+            record_to_update.data_fields.push(RecordDataField {
                 field_name: model_data_field.field_name,
                 json_value: model_data_field.default_json_value,
             });
         }
     }
 
-    // insert instance
+    // insert record
     STATE.with(|state: &GlobalState| {
-        let mut instances = state.instances.borrow_mut();
-        if let Some(instance_found) = instances.get_mut(&id) {
-            *instance_found = instance_to_update;
+        let mut records = state.records.borrow_mut();
+        if let Some(record_found) = records.get_mut(&id) {
+            *record_found = record_to_update;
         }
     });
 
     return res;
 }
 
-//
-//  #####  ###### #      ###### ##### ######    # #    #  ####  #####   ##   #    #  ####  ######
-//  #    # #      #      #        #   #         # ##   # #        #    #  #  ##   # #    # #
-//  #    # #####  #      #####    #   #####     # # #  #  ####    #   #    # # #  # #      #####
-//  #    # #      #      #        #   #         # #  # #      #   #   ###### #  # # #      #
-//  #    # #      #      #        #   #         # #   ## #    #   #   #    # #   ## #    # #
-//  #####  ###### ###### ######   #   ######    # #    #  ####    #   #    # #    #  ####  ######
+
+//                                                                                        
+//  #####  ###### #      ###### ##### ######    #####  ######  ####   ####  #####  #####  
+//  #    # #      #      #        #   #         #    # #      #    # #    # #    # #    # 
+//  #    # #####  #      #####    #   #####     #    # #####  #      #    # #    # #    # 
+//  #    # #      #      #        #   #         #####  #      #      #    # #####  #    # 
+//  #    # #      #      #        #   #         #   #  #      #    # #    # #   #  #    # 
+//  #####  ###### ###### ######   #   ######    #    # ######  ####   ####  #    # #####  
 
 #[update]
-pub async fn delete_instance(input: Id) -> BasicResponse {
+pub async fn delete_record(IdRequest { id }: IdRequest) -> BasicResponse {
     let mut res = BasicResponse::default();
     let is_admin_res = caller_is_admin();
     if is_admin_res.is_err() {
         res.err = is_admin_res.err().unwrap();
         return res;
     }
-    if input.id.is_empty() {
+    if id.is_empty() {
         res.err = "Provided ID is empty".to_string();
         return res;
     }
-    let instance_res = find_model_instance(&input.id);
-    if instance_res.is_err() {
-        res.err = instance_res.err().unwrap();
+    let record_res = find_record(&id);
+    if record_res.is_err() {
+        res.err = record_res.err().unwrap();
         return res;
     }
 
-    // update every model instance
+    // update every model record
     STATE.with(|state: &GlobalState| {
-        let mut instances = state.instances.borrow_mut();
-        instances.retain(|key, _| key != &input.id);
+        let mut records = state.records.borrow_mut();
+        records.retain(|key, _| key != &id);
     });
 
-    res.ok = Some("Instance deleted".to_string());
+    res.ok = Some("Record deleted".to_string());
     return res;
 }
 

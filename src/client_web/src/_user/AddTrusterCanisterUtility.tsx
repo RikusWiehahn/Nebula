@@ -58,7 +58,7 @@ export const AddTrustedCanisterUtility = () => {
     >
       <div className="mb-4">
         Authorize an external canister to make calls that can CREATE, READ, UPDATE,
-        and DELETE instances of data models stored.
+        and DELETE records stored.
       </div>
       <label className="input-label">Canister name</label>
       <input

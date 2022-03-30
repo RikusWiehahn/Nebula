@@ -241,15 +241,16 @@ pub fn validate_json_field_value(json_value: Value, data_type: String) -> Result
     return Ok(());
 }
 
-//
-//       #  ####   ####  #    #    #####  ####     # #    #  ####  #####   ##   #    #  ####  ######
-//       # #      #    # ##   #      #   #    #    # ##   # #        #    #  #  ##   # #    # #
-//       #  ####  #    # # #  #      #   #    #    # # #  #  ####    #   #    # # #  # #      #####
-//       #      # #    # #  # #      #   #    #    # #  # #      #   #   ###### #  # # #      #
-//  #    # #    # #    # #   ##      #   #    #    # #   ## #    #   #   #    # #   ## #    # #
-//   ####   ####   ####  #    #      #    ####     # #    #  ####    #   #    # #    #  ####  ######
 
-pub fn convert_json_to_model_instance(json: String) -> Result<ModelInstance, String> {
+//                                       #                                                 
+//       #  ####   ####  #    #           #      #####  ######  ####   ####  #####  #####  
+//       # #      #    # ##   #            #     #    # #      #    # #    # #    # #    # 
+//       #  ####  #    # # #  #    #####    #    #    # #####  #      #    # #    # #    # 
+//       #      # #    # #  # #            #     #####  #      #      #    # #####  #    # 
+//  #    # #    # #    # #   ##           #      #   #  #      #    # #    # #   #  #    # 
+//   ####   ####   ####  #    #          #       #    # ######  ####   ####  #    # #####  
+
+pub fn convert_json_to_record(json: String) -> Result<Record, String> {
     let json_res: serde_json::Result<Value> = serde_json::from_str(&json);
     if json_res.is_err() {
         return Err("Provided default JSON value is not valid".to_string());
@@ -272,9 +273,9 @@ pub fn convert_json_to_model_instance(json: String) -> Result<ModelInstance, Str
     let model = model_res.ok().unwrap();
 
     // get default fields
-    let mut new_data_fields: Vec<ModelInstanceDataField> = Vec::new();
+    let mut new_data_fields: Vec<RecordDataField> = Vec::new();
     for default_field in model.data_fields.iter() {
-        let new_data_field = ModelInstanceDataField {
+        let new_data_field = RecordDataField {
             field_name: default_field.field_name.clone(),
             data_type: default_field.data_type.clone(),
             json_value: default_field.default_json_value.clone(),
@@ -308,35 +309,35 @@ pub fn convert_json_to_model_instance(json: String) -> Result<ModelInstance, Str
         field.json_value = new_json_value.unwrap();
     }
 
-    let instance = ModelInstance {
+    let record = Record {
         id: json_value["id"].as_str().unwrap_or("").to_string(),
         model_name: model_name.clone(),
         data_fields: new_data_fields.clone(),
     };
-    return Ok(instance);
+    return Ok(record);
 }
 
-//
-//  # #    #  ####  #####   ##   #    #  ####  ######    #####  ####          #  ####   ####  #    #
-//  # ##   # #        #    #  #  ##   # #    # #           #   #    #         # #      #    # ##   #
-//  # # #  #  ####    #   #    # # #  # #      #####       #   #    #         #  ####  #    # # #  #
-//  # #  # #      #   #   ###### #  # # #      #           #   #    #         #      # #    # #  # #
-//  # #   ## #    #   #   #    # #   ## #    # #           #   #    #    #    # #    # #    # #   ##
-//  # #    #  ####    #   #    # #    #  ####  ######      #    ####      ####   ####   ####  #    #
+//                                                     #                                   
+//  #####  ######  ####   ####  #####  #####            #           #  ####   ####  #    # 
+//  #    # #      #    # #    # #    # #    #            #          # #      #    # ##   # 
+//  #    # #####  #      #    # #    # #    #    #####    #         #  ####  #    # # #  # 
+//  #####  #      #      #    # #####  #    #            #          #      # #    # #  # # 
+//  #   #  #      #    # #    # #   #  #    #           #      #    # #    # #    # #   ## 
+//  #    # ######  ####   ####  #    # #####           #        ####   ####   ####  #    # 
 
-pub fn convert_model_instance_to_json(instance: ModelInstance) -> Result<Value, String> {
+pub fn convert_record_to_json(record: Record) -> Result<Value, String> {
     let mut json_value = json!({
-        "id": instance.id,
-        "model": instance.model_name,
+        "id": record.id,
+        "model": record.model_name,
     });
 
     // make sure model exists
-    let model_res = find_model(&instance.model_name);
+    let model_res = find_model(&record.model_name);
     if model_res.is_err() {
-        return Err(format!("Model {} not found", instance.model_name));
+        return Err(format!("Model {} not found", record.model_name));
     }
 
-    for data_field in instance.data_fields.iter() {
+    for data_field in record.data_fields.iter() {
         let field_name = data_field.field_name.clone();
         let field_value = data_field.json_value.clone();
         let field_json_value_res = serde_json::from_str(&field_value);

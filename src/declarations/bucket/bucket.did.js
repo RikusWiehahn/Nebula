@@ -8,26 +8,19 @@ export const idlFactory = ({ IDL }) => {
     'ok' : IDL.Opt(IDL.Text),
     'err' : IDL.Text,
   });
-  const ModelDataField = IDL.Record({
+  const RecordDataField = IDL.Record({
     'field_name' : IDL.Text,
     'json_value' : IDL.Text,
     'data_type' : IDL.Text,
   });
-  const ModelInstance = IDL.Record({
+  const Record = IDL.Record({
     'id' : IDL.Text,
     'model_name' : IDL.Text,
-    'data_fields' : IDL.Vec(ModelDataField),
+    'data_fields' : IDL.Vec(RecordDataField),
   });
-  const ModelInstanceResponse = IDL.Record({
-    'ok' : IDL.Opt(ModelInstance),
+  const RecordResponse = IDL.Record({
+    'ok' : IDL.Opt(Record),
     'err' : IDL.Text,
-  });
-  const ModelInstanceListResponse = IDL.Record({
-    'err' : IDL.Text,
-    'list' : IDL.Vec(ModelInstance),
-    'end_index' : IDL.Float64,
-    'total_count' : IDL.Float64,
-    'start_index' : IDL.Float64,
   });
   const SubCanisterTelemetry = IDL.Record({
     'id' : IDL.Text,
@@ -43,25 +36,14 @@ export const idlFactory = ({ IDL }) => {
   return IDL.Service({
     'add_field' : IDL.Func([ModelDataFieldType], [BasicResponse], []),
     'check_if_admin_canister' : IDL.Func([], [BasicResponse], []),
-    'create_instance' : IDL.Func([ModelInstance], [ModelInstanceResponse], []),
-    'delete_instance' : IDL.Func(
+    'delete_record' : IDL.Func(
         [IDL.Record({ 'id' : IDL.Text })],
         [BasicResponse],
         [],
       ),
-    'get_instance' : IDL.Func(
+    'get_record' : IDL.Func(
         [IDL.Record({ 'id' : IDL.Text })],
-        [ModelInstanceResponse],
-        [],
-      ),
-    'get_instance_list' : IDL.Func(
-        [
-          IDL.Record({
-            'end_index' : IDL.Float64,
-            'start_index' : IDL.Float64,
-          }),
-        ],
-        [ModelInstanceListResponse],
+        [RecordResponse],
         [],
       ),
     'get_telemetry' : IDL.Func([], [SubCanisterTelemetryResponse], []),
@@ -70,6 +52,7 @@ export const idlFactory = ({ IDL }) => {
         [BasicResponse],
         [],
       ),
+    'insert_record' : IDL.Func([Record], [RecordResponse], []),
     'remove_field' : IDL.Func(
         [IDL.Record({ 'field_name' : IDL.Text })],
         [BasicResponse],
@@ -80,7 +63,7 @@ export const idlFactory = ({ IDL }) => {
         [BasicResponse],
         [],
       ),
-    'update_instance' : IDL.Func([ModelInstance], [ModelInstanceResponse], []),
+    'update_record' : IDL.Func([Record], [RecordResponse], []),
     'wallet_receive' : IDL.Func([IDL.Nat], [], []),
   });
 };

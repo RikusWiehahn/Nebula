@@ -136,25 +136,25 @@ pub fn find_model_name() -> Result<String, String> {
     Ok(bucket_model_name)
 }
 
-//
-//  ###### # #    # #####     # #    #  ####  #####   ##   #    #  ####  ######
-//  #      # ##   # #    #    # ##   # #        #    #  #  ##   # #    # #
-//  #####  # # #  # #    #    # # #  #  ####    #   #    # # #  # #      #####
-//  #      # #  # # #    #    # #  # #      #   #   ###### #  # # #      #
-//  #      # #   ## #    #    # #   ## #    #   #   #    # #   ## #    # #
-//  #      # #    # #####     # #    #  ####    #   #    # #    #  ####  ######
+//                                                                      
+//  ###### # #    # #####     #####  ######  ####   ####  #####  #####  
+//  #      # ##   # #    #    #    # #      #    # #    # #    # #    # 
+//  #####  # # #  # #    #    #    # #####  #      #    # #    # #    # 
+//  #      # #  # # #    #    #####  #      #      #    # #####  #    # 
+//  #      # #   ## #    #    #   #  #      #    # #    # #   #  #    # 
+//  #      # #    # #####     #    # ######  ####   ####  #    # #####  
 
-pub fn find_model_instance(instance_id: &str) -> Result<ModelInstance, String> {
-    let mut instance_opt: Option<ModelInstance> = None;
+pub fn find_record(record_id: &str) -> Result<Record, String> {
+    let mut record_opt: Option<Record> = None;
     STATE.with(|state: &GlobalState| {
-        let instances = state.instances.borrow();
-        if let Some(instance_found) = instances.get(instance_id) {
-            let instance_to_return = instance_found.clone();
-            instance_opt = Some(instance_to_return);
+        let records = state.records.borrow();
+        if let Some(record_found) = records.get(record_id) {
+            let record_to_return = record_found.clone();
+            record_opt = Some(record_to_return);
         }
     });
-    if instance_opt.is_none() {
+    if record_opt.is_none() {
         return Err("Data field not found".to_string());
     }
-    Ok(instance_opt.unwrap())
+    Ok(record_opt.unwrap())
 }
