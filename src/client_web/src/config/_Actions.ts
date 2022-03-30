@@ -4,6 +4,7 @@ import {
   Telemetry,
   Model,
   ModelList,
+  ModelTable,
 } from "./_Interfaces";
 
 export type ReducerType =
@@ -11,7 +12,7 @@ export type ReducerType =
   | "AUTH_SESSION_REDUCER"
   | "TELEMETRY_REDUCER"
   | "MODEL_LIST_REDUCER"
-  | "MODEL_REDUCER";
+  | "MODEL_TABLE_REDUCER";
 
 export const updateConfigState = (
   payload: ConfigState
@@ -41,9 +42,9 @@ export const updateModelListState = (
   payload,
 });
 
-export const updateModelState = (
-  payload: Model
-): { type: ReducerType; payload: Model } => ({
-  type: "MODEL_LIST_REDUCER",
+export const updateModelTableState = (
+  payload: ModelTable
+): { type: ReducerType; payload: ModelTable } => ({
+  type: "MODEL_TABLE_REDUCER",
   payload,
 });

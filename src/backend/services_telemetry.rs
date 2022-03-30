@@ -110,7 +110,7 @@ pub async fn get_sub_canister_telemetry(canister_id: &str) -> Result<SubCanister
     ic_cdk::println!("Getting telemetry for canister {}", canister_id);
 
     let call_res: Result<(SubCanisterTelemetryResponse,), _> =
-        ic_cdk::call(principal, "getTelemetry", ()).await;
+        ic_cdk::call(principal, "get_telemetry", ()).await;
     if call_res.is_err() {
         return Err(format!(
             "Error getting telemetry for canister {:?}",

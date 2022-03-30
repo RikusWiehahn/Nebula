@@ -31,7 +31,7 @@ type ModelDataFieldType = record {
     "NUMBER_ARRAY"
 */
 
-type ModelDataField = record {
+type ModelInstanceDataField = record {
     "field_name": text;
     "data_type": text;
     "json_value": text;
@@ -39,8 +39,8 @@ type ModelDataField = record {
 
 type ModelInstance = record {
     "id": text;
-    "model_name': text;
-    "data_fields": vec ModelDataField;
+    "model_name": text;
+    "data_fields": vec ModelInstanceDataField;
 };
 
 type ModelInstanceResponse = record {
@@ -48,31 +48,22 @@ type ModelInstanceResponse = record {
     "err": text;
 };
 
-type ModelInstanceListResponse = record {
-    "start_index": float64;
-    "end_index": float64;
-    "total_count": float64;
-    "list": vec ModelInstance;
-    "err": text;
-};
-
 service : {
     // Auth & setup
-    "set_admin_canister": (record { canister_id: principal }) -> (BasicResponse);
+    "set_admin_canister": (record { "canister_id": principal }) -> (BasicResponse);
     "check_if_admin_canister": () -> (BasicResponse);
-    "init_model": (record { model_name: text }) -> (BasicResponse);
+    "init_model": (record { "model_name": text }) -> (BasicResponse);
     "get_telemetry": () -> (SubCanisterTelemetryResponse);
 
     // Manage model fields
     "add_field": (ModelDataFieldType) -> (BasicResponse);
-    "remove_field": (record { field_name: text }) -> (BasicResponse);
+    "remove_field": (record { "field_name": text }) -> (BasicResponse);
 
     // Create/Read/Update/Delete model instances
-    "create_instance": (ModelInstance) -> (ModelInstanceResponse);
+    "insert_instance": (ModelInstance) -> (ModelInstanceResponse);
     "update_instance": (ModelInstance) -> (ModelInstanceResponse);
-    "get_instance": (record { id: text }) -> (ModelInstanceResponse);
-    "delete_instance": (record { id: text }) -> (BasicResponse);
-    "get_instance_list": (record { start_index, end_index }) -> (ModelInstanceListResponse);
+    "get_instance": (record { "id": text }) -> (ModelInstanceResponse);
+    "delete_instance": (record { "id": text }) -> (BasicResponse);
 
     // wallet
     "wallet_receive": (nat) -> ();

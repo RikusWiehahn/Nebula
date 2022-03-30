@@ -7,18 +7,21 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { StoreState } from "../config/ReduxStore";
 import { LoadingIndicator } from "../components/LoadingIndicator";
 import { backend } from "../../../declarations/backend";
-import { updateModelListState } from "../config/_Actions";
 import { ErrorToast } from "../config/toast";
 import { RiTableLine } from "react-icons/ri";
+import {
+  updateModelListState,
+  updateModelTableState,
+} from "../config/_Actions";
+import { CreateModelInstanceUtility } from "./CreateModelInstanceUtility";
 dayjs.extend(relativeTime);
 
 export const ModelTablesScreen = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const dispatch = useDispatch();
   const auth = useSelector((s: StoreState) => s.auth);
-  const telemetry = useSelector((s: StoreState) => s.telemetry);
   const model_list = useSelector((s: StoreState) => s.model_list);
-  const [model_name, setModelName] = useState<string>("");
+  const model_table = useSelector((s: StoreState) => s.model_table);
 
   useEffect(() => {
     if (auth.token) {
@@ -30,7 +33,7 @@ export const ModelTablesScreen = () => {
     try {
       const { token } = auth;
       setLoading(true);
-      const models_res = await backend.getModels({ token });
+      const models_res = await backend.get_models({ token });
       if (models_res.err) throw new Error(models_res.err);
       if (!models_res.ok) throw new Error("Failed to get models.");
       dispatch(
@@ -46,21 +49,48 @@ export const ModelTablesScreen = () => {
     }
   };
 
+  const selectModel = (model_name: string) => {
+    const model = model_list.models.find((m) => m.model_name === model_name);
+    if (!model) return;
+    dispatch(
+      updateModelTableState({
+        model_name: model.model_name,
+        data_fields: model.data_fields,
+        instances: [],
+      })
+    );
+  };
+
   const renderModelTabs = () => {
     return (
-      <div className="flex">
-        {model_list.models.length === 0 ? "No models created yet." : null}
-        {model_list.models.map((model) => (
-          <div key={model.model_name}>
-            <button
-              className="btn-list"
-              onClick={() => setModelName(model.model_name)}
-            >
-              <RiTableLine className="mr-4" />
-              {model.model_name}
-            </button>
-          </div>
-        ))}
+      <div>
+        <div className="flex mb-4">
+          {model_list.models.length === 0 ? "No models created yet." : null}
+          {model_list.models.map((model) => (
+            <div key={model.model_name}>
+              <button
+                className={`btn-list ${model.model_name === model_table.model_name ? 'border-b' : ''}`}
+                onClick={() => {
+                  selectModel(model.model_name);
+                }}
+              >
+                <RiTableLine className="mr-4" />
+                {model.model_name}
+              </button>
+            </div>
+          ))}
+        </div>
+        <div>
+          {model_table.model_name ? (
+            <CreateModelInstanceUtility
+              key={model_table.model_name}
+              model={{
+                model_name: model_table.model_name,
+                data_fields: model_table.data_fields,
+              }}
+            />
+          ) : null}
+        </div>
       </div>
     );
   };

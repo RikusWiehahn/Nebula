@@ -9,7 +9,7 @@ import { StoreState } from "../config/ReduxStore";
 import { updateModelListState, updateTelemetryState } from "../config/_Actions";
 import { ErrorToast } from "../config/toast";
 import { LoadingIndicator } from "../components/LoadingIndicator";
-import { CreateDatModelUtility } from "./CreateDataModelUtility";
+import { CreateDataModelUtility } from "./CreateDataModelUtility";
 import { MoreHoverBox } from "../components/MoreHoverBox";
 import { AddDataFieldUtility } from "./AddDataFieldUtility";
 import { RemoveDataFieldUtility } from "./RemoveDataFieldUtility";
@@ -34,7 +34,7 @@ export const ModelListScreen = () => {
     try {
       const { token } = auth;
       setLoading(true);
-      const models_res = await backend.getModels({ token });
+      const models_res = await backend.get_models({ token });
       if (models_res.err) throw new Error(models_res.err);
       if (!models_res.ok) throw new Error("Failed to get models.");
       dispatch(
@@ -106,7 +106,7 @@ export const ModelListScreen = () => {
     return (
       <div className="">
         <div className="">
-          <CreateDatModelUtility />
+          <CreateDataModelUtility />
         </div>
         {renderModelList()}
       </div>

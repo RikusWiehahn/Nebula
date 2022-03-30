@@ -26,7 +26,7 @@ export const AddTrustedCanisterUtility = () => {
   const addTrustedCanister = async () => {
     try {
       setLoading(true);
-      const add_res = await backend.addTrustedCanister({
+      const add_res = await backend.add_trusted_canister({
         token: auth.token,
         name: state.name,
         canister_id: state.canister_id,

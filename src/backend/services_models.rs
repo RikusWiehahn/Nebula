@@ -216,6 +216,10 @@ pub async fn add_model_field(
         return res;
     }
     let json = json_res.unwrap();
+    if !json.is_object() {
+        res.err = "Provided default JSON value is not an object".to_string();
+        return res;
+    }
 
     let valid_res = validate_json_field_value(json.clone(), data_type.clone());
     if valid_res.is_err() {
@@ -372,21 +376,13 @@ pub async fn delete_model(
 
     // TODO - delete all of this model's canisters
     for sub_canister_id in model.canisters {
-        // drain cycles
-        let drain_res = drain_sub_canister_cycles(&sub_canister_id).await;
-        if drain_res.is_err() {
-            res.err = drain_res.err().unwrap();
-            return res;
-        }
-
-        delay();
-
         // destroy canister
         let destroy_res = destroy_sub_canister(&sub_canister_id).await;
         if destroy_res.is_err() {
             res.err = destroy_res.err().unwrap();
             return res;
         }
+        delay();
     }
 
     STATE.with(|state: &GlobalState| {
@@ -406,7 +402,67 @@ pub async fn delete_model(
 //  #    # #   #  #      #    #   #   #         # #   ## #    #   #   #    # #   ## #    # #
 //   ####  #    # ###### #    #   #   ######    # #    #  ####    #   #    # #    #  ####  ######
 
-// "createModelInstance": (record { token: text; json: text; }) -> (ModelInstanceResponse);
+#[update]
+pub async fn create_model_instance(
+    CreateOrUpdateModelInstanceJson { token, json }: CreateOrUpdateModelInstanceJson,
+) -> ModelInstanceJsonResponse {
+    let mut res: ModelInstanceJsonResponse = ModelInstanceJsonResponse::default();
+    let auth_res = validate_auth_token(&token);
+    let trusted_res = is_call_from_trusted_canister();
+    if auth_res.is_err() && trusted_res.is_err() {
+        res.err = auth_res.err().unwrap() + " " + &trusted_res.err().unwrap();
+        return res;
+    }
+
+    let instance_res = convert_json_to_model_instance(json);
+    if instance_res.is_err() {
+        res.err = instance_res.err().unwrap();
+        return res;
+    }
+    let mut instance = instance_res.ok().unwrap();
+
+    // generate uuid
+    let uuid_res = generate_uuid().await;
+    if uuid_res.is_err() {
+        res.err = uuid_res.err().unwrap();
+        return res;
+    }
+    instance.id = uuid_res.unwrap();
+
+    // create model instance
+    let model_res = find_model(&instance.model_name);
+    if model_res.is_err() {
+        res.err = model_res.err().unwrap();
+        return res;
+    }
+    let model = model_res.unwrap();
+    if model.canisters.len() == 0 {
+        res.err = "No canisters associated with this model".to_string();
+        return res;
+    }
+    let canister_id = model.canisters[0].clone(); // TODO - pick canister based on memory usage
+
+    let insert_res = insert_instance_into_sub_canister(canister_id, instance.clone()).await;
+    if insert_res.is_err() {
+        res.err = insert_res.err().unwrap();
+        return res;
+    }
+
+    let instance_as_json_res = convert_model_instance_to_json(instance.clone());
+    if instance_as_json_res.is_err() {
+        res.err = instance_as_json_res.err().unwrap();
+        return res;
+    }
+    let instance_as_json = instance_as_json_res.unwrap();
+    let instance_as_string_res = serde_json::to_string(&instance_as_json);
+    if instance_as_string_res.is_err() {
+        res.err = "Failed to convert instance to json".to_string();
+        return res;
+    }
+
+    res.json = Some(instance_as_string_res.unwrap());
+    return res;
+}
 
 //
 //  #    # #####  #####    ##   ##### ######    # #    #  ####  #####   ##   #    #  ####  ######
@@ -416,7 +472,71 @@ pub async fn delete_model(
 //  #    # #      #    # #    #   #   #         # #   ## #    #   #   #    # #   ## #    # #
 //   ####  #      #####  #    #   #   ######    # #    #  ####    #   #    # #    #  ####  ######
 
-// "updateModelInstance": (record { token: text; id: text; json: text; }) -> (ModelInstanceResponse);
+#[update]
+pub async fn update_model_instance(
+    CreateOrUpdateModelInstanceJson { token, json }: CreateOrUpdateModelInstanceJson,
+) -> ModelInstanceJsonResponse {
+    let mut res: ModelInstanceJsonResponse = ModelInstanceJsonResponse::default();
+    let auth_res = validate_auth_token(&token);
+    let trusted_res = is_call_from_trusted_canister();
+    if auth_res.is_err() && trusted_res.is_err() {
+        res.err = auth_res.err().unwrap() + " " + &trusted_res.err().unwrap();
+        return res;
+    }
+    let instance_res = convert_json_to_model_instance(json);
+    if instance_res.is_err() {
+        res.err = instance_res.err().unwrap();
+        return res;
+    }
+    let instance = instance_res.ok().unwrap();
+
+    // make sure model exists
+    let model_res = find_model(&instance.model_name);
+    if model_res.is_err() {
+        res.err = model_res.err().unwrap();
+        return res;
+    }
+    let model = model_res.ok().unwrap();
+    if model.canisters.len() == 0 {
+        res.err = "No canisters associated with this model".to_string();
+        return res;
+    }
+    let canister_id = model.canisters[0].clone(); // TODO - pick canister based on memory usage
+
+    // make sure instance exists
+    let instance_exists_res =
+        find_instance_in_sub_canister(canister_id.clone(), instance.id.clone()).await;
+    if instance_exists_res.is_err() {
+        res.err = instance_exists_res.err().unwrap();
+        return res;
+    }
+
+    // update instance
+    let insert_res = update_instance_in_sub_canister(
+        canister_id,
+        instance.clone(),
+    )
+    .await;
+    if insert_res.is_err() {
+        res.err = insert_res.err().unwrap();
+        return res;
+    }
+
+    let instance_as_json_res = convert_model_instance_to_json(instance.clone());
+    if instance_as_json_res.is_err() {
+        res.err = instance_as_json_res.err().unwrap();
+        return res;
+    }
+    let instance_as_json = instance_as_json_res.unwrap();
+    let instance_as_string_res = serde_json::to_string(&instance_as_json);
+    if instance_as_string_res.is_err() {
+        res.err = "Failed to convert instance to json".to_string();
+        return res;
+    }
+
+    res.json = Some(instance_as_string_res.unwrap());
+    return res;
+}
 
 //
 //   ####  ###### #####    # #    #  ####  #####   ##   #    #  ####  ######
@@ -426,7 +546,61 @@ pub async fn delete_model(
 //  #    # #        #      # #   ## #    #   #   #    # #   ## #    # #
 //   ####  ######   #      # #    #  ####    #   #    # #    #  ####  ######
 
-// "getModelInstance": (record { token: text; id: text }) -> (ModelInstanceResponse);
+#[update]
+pub async fn get_model_instance(
+    ModelInstanceRequest {
+        token,
+        id,
+        model_name,
+    }: ModelInstanceRequest,
+) -> ModelInstanceJsonResponse {
+    let mut res: ModelInstanceJsonResponse = ModelInstanceJsonResponse::default();
+    let auth_res = validate_auth_token(&token);
+    let trusted_res = is_call_from_trusted_canister();
+    if auth_res.is_err() && trusted_res.is_err() {
+        res.err = auth_res.err().unwrap() + " " + &trusted_res.err().unwrap();
+        return res;
+    }
+    // make sure model exists
+    let model_res = find_model(&model_name);
+    if model_res.is_err() {
+        res.err = model_res.err().unwrap();
+        return res;
+    }
+    let model = model_res.ok().unwrap();
+    if model.canisters.len() == 0 {
+        res.err = "No canisters associated with this model".to_string();
+        return res;
+    }
+    let canister_id = model.canisters[0].clone(); // TODO - pick canister based on memory usage
+
+    // make sure instance exists
+    let instance_res = find_instance_in_sub_canister(canister_id.clone(), id.clone()).await;
+    if instance_res.is_err() {
+        res.err = instance_res.err().unwrap();
+        return res;
+    }
+    let instance = instance_res.ok();
+    if instance.is_none() {
+        res.err = "Instance not found".to_string();
+        return res;
+    }
+
+    let instance_as_json_res = convert_model_instance_to_json(instance.unwrap());
+    if instance_as_json_res.is_err() {
+        res.err = instance_as_json_res.err().unwrap();
+        return res;
+    }
+    let instance_as_json = instance_as_json_res.unwrap();
+    let instance_as_string_res = serde_json::to_string(&instance_as_json);
+    if instance_as_string_res.is_err() {
+        res.err = "Failed to convert instance to json".to_string();
+        return res;
+    }
+
+    res.json = Some(instance_as_string_res.unwrap());
+    return res;
+}
 
 //
 //  #####  ###### #      ###### ##### ######    # #    #  ####  #####   ##   #    #  ####  ######
@@ -436,4 +610,41 @@ pub async fn delete_model(
 //  #    # #      #      #        #   #         # #   ## #    #   #   #    # #   ## #    # #
 //  #####  ###### ###### ######   #   ######    # #    #  ####    #   #    # #    #  ####  ######
 
-// "deleteModelInstance": (record { token: text; id: text }) -> (BasicResponse);
+#[update]
+pub async fn delete_model_instance(
+    ModelInstanceRequest {
+        token,
+        id,
+        model_name,
+    }: ModelInstanceRequest,
+) -> BasicResponse {
+    let mut res: BasicResponse = BasicResponse::default();
+    let auth_res = validate_auth_token(&token);
+    let trusted_res = is_call_from_trusted_canister();
+    if auth_res.is_err() && trusted_res.is_err() {
+        res.err = auth_res.err().unwrap() + " " + &trusted_res.err().unwrap();
+        return res;
+    }
+    // make sure model exists
+    let model_res = find_model(&model_name);
+    if model_res.is_err() {
+        res.err = model_res.err().unwrap();
+        return res;
+    }
+    let model = model_res.ok().unwrap();
+    if model.canisters.len() == 0 {
+        res.err = "No canisters associated with this model".to_string();
+        return res;
+    }
+    let canister_id = model.canisters[0].clone(); // TODO - pick canister based on memory usage
+
+    // make sure instance exists
+    let instance_res = delete_instance_in_sub_canister(canister_id.clone(), id.clone()).await;
+    if instance_res.is_err() {
+        res.err = instance_res.err().unwrap();
+        return res;
+    }
+
+    res.ok = Some("Instance deleted".to_string());
+    return res;
+}

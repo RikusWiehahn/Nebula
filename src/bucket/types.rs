@@ -113,7 +113,7 @@ pub struct ModelDataFieldType {
 }
 
 #[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
-pub struct ModelDataField {
+pub struct ModelInstanceDataField {
     pub field_name: String,
     pub json_value: String,
 }
@@ -122,7 +122,7 @@ pub struct ModelDataField {
 pub struct ModelInstance {
     pub id: String,
     pub model_name: String,
-    pub data_fields: Vec<ModelDataField>,
+    pub data_fields: Vec<ModelInstanceDataField>,
 }
 
 #[derive(Clone, Debug, CandidType, Deserialize)]

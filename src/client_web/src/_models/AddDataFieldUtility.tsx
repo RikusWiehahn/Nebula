@@ -26,7 +26,7 @@ export const AddDataFieldUtility = (props: { model: Model }) => {
     try {
       const { token } = auth;
       setLoading(true);
-      const add_res = await backend.addModelField(
+      const add_res = await backend.add_model_field(
         {
           token,
           model_name: props.model.model_name,
@@ -40,7 +40,7 @@ export const AddDataFieldUtility = (props: { model: Model }) => {
       if (add_res.err) throw new Error(add_res.err);
       if (!add_res.ok) throw new Error("Failed to get models.");
       SuccessToast("Field added.");
-      const models_res = await backend.getModels({ token });
+      const models_res = await backend.get_models({ token });
       if (models_res.err) throw new Error(models_res.err);
       if (!models_res.ok) throw new Error("Failed to get models.");
       dispatch(

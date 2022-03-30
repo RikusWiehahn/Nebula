@@ -24,7 +24,7 @@ export const SignInScreen = () => {
   const isAuthSet = async () => {
     try {
       setLoading(true);
-      const is_auth_set = await backend.isActivated();
+      const is_auth_set = await backend.is_activated();
       if (is_auth_set) {
         setIsActivated(true);
       }
@@ -38,7 +38,7 @@ export const SignInScreen = () => {
   const signIn = async () => {
     try {
       setLoading(true);
-      const sign_in_res = await backend.signIn({ password: state.password });
+      const sign_in_res = await backend.sign_in({ password: state.password });
       if (sign_in_res.err) throw new Error(sign_in_res.err);
       if (!sign_in_res.ok[0])
         throw new Error("Failed to sign in, no token returned.");

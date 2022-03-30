@@ -107,7 +107,7 @@ pub async fn init_model(InitModel { model_name }: InitModel) -> BasicResponse {
 //  #    # #####  #####     #      # ###### ###### #####
 
 #[update]
-pub async fn add_data_field(input: ModelDataFieldType) -> BasicResponse {
+pub async fn add_field(input: ModelDataFieldType) -> BasicResponse {
     let mut res = BasicResponse::default();
     let is_admin_res = caller_is_admin();
     if is_admin_res.is_err() {
@@ -158,7 +158,7 @@ pub async fn add_data_field(input: ModelDataFieldType) -> BasicResponse {
     STATE.with(|state: &GlobalState| {
         let mut instances = state.instances.borrow_mut();
         for instance in instances.values_mut() {
-            let new_field = ModelDataField {
+            let new_field = ModelInstanceDataField {
                 field_name: input.field_name.clone(),
                 json_value: input.default_json_value.clone(),
             };
@@ -179,7 +179,7 @@ pub async fn add_data_field(input: ModelDataFieldType) -> BasicResponse {
 //  #    # ###### #    #  ####    ##   ######    #      # ###### ###### #####
 
 #[update]
-pub async fn remove_data_field(input: RemoveField) -> BasicResponse {
+pub async fn remove_field(input: RemoveField) -> BasicResponse {
     let mut res = BasicResponse::default();
     let is_admin_res = caller_is_admin();
     if is_admin_res.is_err() {
@@ -222,15 +222,15 @@ pub async fn remove_data_field(input: RemoveField) -> BasicResponse {
 }
 
 //
-//   ####  #####  ######   ##   ##### ######    # #    #  ####  #####   ##   #    #  ####  ######
-//  #    # #    # #       #  #    #   #         # ##   # #        #    #  #  ##   # #    # #
-//  #      #    # #####  #    #   #   #####     # # #  #  ####    #   #    # # #  # #      #####
-//  #      #####  #      ######   #   #         # #  # #      #   #   ###### #  # # #      #
-//  #    # #   #  #      #    #   #   #         # #   ## #    #   #   #    # #   ## #    # #
-//   ####  #    # ###### #    #   #   ######    # #    #  ####    #   #    # #    #  ####  ######
+//  # #    #  ####  ###### #####  #####    # #    #  ####  #####   ##   #    #  ####  ######
+//  # ##   # #      #      #    #   #      # ##   # #        #    #  #  ##   # #    # #
+//  # # #  #  ####  #####  #    #   #      # # #  #  ####    #   #    # # #  # #      #####
+//  # #  # #      # #      #####    #      # #  # #      #   #   ###### #  # # #      #
+//  # #   ## #    # #      #   #    #      # #   ## #    #   #   #    # #   ## #    # #
+//  # #    #  ####  ###### #    #   #      # #    #  ####    #   #    # #    #  ####  ######
 
 #[update]
-pub async fn create_instance(
+pub async fn insert_instance(
     ModelInstance {
         id,
         model_name,
@@ -264,15 +264,15 @@ pub async fn create_instance(
         fields.clone()
     });
 
-    let uuid_res = generate_uuid().await;
-    if uuid_res.is_err() {
-        res.err = uuid_res.err().unwrap();
+    let already_exists_res = find_model_instance(&id);
+    if already_exists_res.is_err() {
+        res.err = already_exists_res.err().unwrap();
         return res;
     }
 
     // create instance
     let mut new_instance = ModelInstance {
-        id: uuid_res.unwrap(),
+        id: id.clone(),
         model_name: model_name,
         data_fields: vec![],
     };
@@ -302,7 +302,7 @@ pub async fn create_instance(
             return res;
         }
 
-        new_instance.data_fields.push(ModelDataField {
+        new_instance.data_fields.push(ModelInstanceDataField {
             field_name: data_field.field_name,
             json_value: data_field.json_value,
         });
@@ -318,7 +318,7 @@ pub async fn create_instance(
             }
         }
         if !found {
-            new_instance.data_fields.push(ModelDataField {
+            new_instance.data_fields.push(ModelInstanceDataField {
                 field_name: data_field.field_name,
                 json_value: data_field.default_json_value,
             });
@@ -460,7 +460,7 @@ pub async fn update_instance(
             }
         }
         if !found {
-            instance_to_update.data_fields.push(ModelDataField {
+            instance_to_update.data_fields.push(ModelInstanceDataField {
                 field_name: model_data_field.field_name,
                 json_value: model_data_field.default_json_value,
             });

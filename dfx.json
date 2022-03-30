@@ -12,7 +12,7 @@
       "package": "bucket",
       "type": "custom",
       "wasm": "target/wasm32-unknown-unknown/release/bucket-opt.wasm",
-      "build": "./generate-wasm.sh bucket"
+      "build": "./generate-bucket-wasm.sh bucket"
     },
     "client_web": {
       "dependencies": [

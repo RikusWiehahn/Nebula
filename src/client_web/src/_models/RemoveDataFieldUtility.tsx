@@ -26,7 +26,7 @@ export const RemoveDataFieldUtility = (props: { model: Model }) => {
     try {
       const { token } = auth;
       setLoading(true);
-      const remove_res = await backend.removeModelField({
+      const remove_res = await backend.remove_model_field({
         token,
         model_name: props.model.model_name,
         field_name: fieldName,
@@ -34,7 +34,7 @@ export const RemoveDataFieldUtility = (props: { model: Model }) => {
       if (remove_res.err) throw new Error(remove_res.err);
       if (!remove_res.ok) throw new Error("Failed to get models.");
       SuccessToast("Field removed.");
-      const models_res = await backend.getModels({ token });
+      const models_res = await backend.get_models({ token });
       if (models_res.err) throw new Error(models_res.err);
       if (!models_res.ok) throw new Error("Failed to get models.");
       dispatch(

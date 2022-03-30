@@ -20,7 +20,7 @@ export const AuthGate = ({ children }: { children: React.ReactNode }) => {
   const checkSession = async () => {
     try {
       const { token } = auth;
-      const session_res = await backend.checkSession({ token });
+      const session_res = await backend.check_session({ token });
       if (session_res.err) throw new Error(session_res.err);
       dispatch(
         updateAuthSession({

@@ -28,7 +28,7 @@ export const ProfileScreen = () => {
     try {
       const { token } = auth;
       setLoading(true);
-      const trusted_res = await backend.getTrustedCanisters({ token });
+      const trusted_res = await backend.get_trusted_canisters({ token });
       if (trusted_res.err) throw new Error(trusted_res.err);
       dispatch(
         updateAuthSession({

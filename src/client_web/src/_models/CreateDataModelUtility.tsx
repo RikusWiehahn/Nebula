@@ -8,7 +8,7 @@ import { StoreState } from "../config/ReduxStore";
 import { ErrorToast, SuccessToast } from "../config/toast";
 import { updateModelListState } from "../config/_Actions";
 
-export const CreateDatModelUtility = () => {
+export const CreateDataModelUtility = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [modelName, setModelName] = useState<string>("");
@@ -21,13 +21,13 @@ export const CreateDatModelUtility = () => {
     try {
       const { token } = auth;
       setLoading(true);
-      const create_res = await backend.createModel({
+      const create_res = await backend.create_model({
         token,
         model_name: modelName,
       });
       if (create_res.err) throw new Error(create_res.err);
       if (!create_res.ok) throw new Error("Failed to get models.");
-      const models_res = await backend.getModels({ token });
+      const models_res = await backend.get_models({ token });
       SuccessToast(create_res.ok?.[0] || "");
       if (models_res.err) throw new Error(models_res.err);
       if (!models_res.ok) throw new Error("Failed to get models.");

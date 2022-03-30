@@ -34,7 +34,6 @@ export interface AuthSession {
 export const EMPTY_AUTH_SESSION: AuthSession = {
   token: "",
   trusted_canisters: [],
-
 };
 
 export interface TrustedCanister {
@@ -49,7 +48,6 @@ export interface TrustedCanister {
 //    #   #      #      #      #    # #        #   #####    #
 //    #   #      #      #      #    # #        #   #   #    #
 //    #   ###### ###### ###### #    # ######   #   #    #   #
-
 
 export interface Telemetry {
   last_status_check: number;
@@ -110,10 +108,63 @@ export const EMPTY_MODEL_LIST = {
   models: [],
 };
 
+export enum DataFieldType {
+  STRING = "STRING",
+  NUMBER = "NUMBER",
+  BOOLEAN = "BOOLEAN",
+  STRING_ARRAY = "STRING_ARRAY",
+  NUMBER_ARRAY = "NUMBER_ARRAY",
+}
+
 export const dataFieldTypesList = [
-  { label: "String", value: "STRING", default_value: "" },
-  { label: "Boolean", value: "BOOLEAN", default_value: "false" },
-  { label: "Number", value: "NUMBER", default_value: "0" },
-  { label: "String Array", value: "STRING_ARRAY", default_value: "[]" },
-  { label: "Number Array", value: "NUMBER_ARRAY", default_value: "[]" },
+  { label: "String", value: DataFieldType.STRING, default_value: "" },
+  { label: "Boolean", value: DataFieldType.BOOLEAN, default_value: "false" },
+  { label: "Number", value: DataFieldType.NUMBER, default_value: "0" },
+  {
+    label: "String Array",
+    value: DataFieldType.STRING_ARRAY,
+    default_value: "[]",
+  },
+  {
+    label: "Number Array",
+    value: DataFieldType.NUMBER_ARRAY,
+    default_value: "[]",
+  },
 ];
+
+//
+//  # #    #  ####  #####   ##   #    #  ####  ######  ####
+//  # ##   # #        #    #  #  ##   # #    # #      #
+//  # # #  #  ####    #   #    # # #  # #      #####   ####
+//  # #  # #      #   #   ###### #  # # #      #           #
+//  # #   ## #    #   #   #    # #   ## #    # #      #    #
+//  # #    #  ####    #   #    # #    #  ####  ######  ####
+
+export interface ModelDataField {
+  field_name: string;
+  json_value: string;
+  data_type: string;
+}
+export interface ModelInstance {
+  id: string;
+  model_name: string;
+  data_fields: Array<ModelDataField>;
+}
+
+export const EMPTY_MODEL_INSTANCE = {
+  id: "",
+  model_name: "",
+  data_fields: [],
+};
+
+export interface ModelTable {
+  model_name: string;
+  data_fields: Array<ModelDataFieldType>;
+  instances: Array<ModelInstance>;
+}
+
+export const EMPTY_MODEL_TABLE = {
+  model_name: "",
+  data_fields: [],
+  instances: [],
+};

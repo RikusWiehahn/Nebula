@@ -61,7 +61,7 @@ export const idlFactory = ({ IDL }) => {
         [BasicResponse],
         [],
       ),
-    'addModelField' : IDL.Func(
+    'add_model_field' : IDL.Func(
         [
           IDL.Record({ 'token' : IDL.Text, 'model_name' : IDL.Text }),
           ModelDataFieldType,
@@ -69,7 +69,7 @@ export const idlFactory = ({ IDL }) => {
         [ModelResponse],
         [],
       ),
-    'addTrustedCanister' : IDL.Func(
+    'add_trusted_canister' : IDL.Func(
         [
           IDL.Record({
             'token' : IDL.Text,
@@ -80,7 +80,7 @@ export const idlFactory = ({ IDL }) => {
         [TrustedCanistersResponse],
         [],
       ),
-    'changePassword' : IDL.Func(
+    'change_password' : IDL.Func(
         [
           IDL.Record({
             'password' : IDL.Text,
@@ -91,58 +91,58 @@ export const idlFactory = ({ IDL }) => {
         [BasicResponse],
         [],
       ),
-    'checkSession' : IDL.Func(
+    'check_session' : IDL.Func(
         [IDL.Record({ 'token' : IDL.Text })],
         [BasicResponse],
         [],
       ),
-    'createModel' : IDL.Func(
+    'create_model' : IDL.Func(
         [IDL.Record({ 'token' : IDL.Text, 'model_name' : IDL.Text })],
         [BasicResponse],
         [],
       ),
-    'createModelInstance' : IDL.Func(
+    'create_model_instance' : IDL.Func(
         [IDL.Record({ 'token' : IDL.Text, 'json' : IDL.Text })],
         [ModelInstanceResponse],
         [],
       ),
-    'deleteModel' : IDL.Func(
+    'delete_model' : IDL.Func(
         [IDL.Record({ 'token' : IDL.Text, 'model_name' : IDL.Text })],
         [BasicResponse],
         [],
       ),
-    'deleteModelInstance' : IDL.Func(
+    'delete_model_instance' : IDL.Func(
         [IDL.Record({ 'id' : IDL.Text, 'token' : IDL.Text })],
         [BasicResponse],
         [],
       ),
-    'getModel' : IDL.Func(
+    'get_model' : IDL.Func(
         [IDL.Record({ 'token' : IDL.Text, 'model_name' : IDL.Text })],
         [ModelResponse],
         [],
       ),
-    'getModelInstance' : IDL.Func(
+    'get_model_instance' : IDL.Func(
         [IDL.Record({ 'id' : IDL.Text, 'token' : IDL.Text })],
         [ModelInstanceResponse],
         [],
       ),
-    'getModels' : IDL.Func(
+    'get_models' : IDL.Func(
         [IDL.Record({ 'token' : IDL.Text })],
         [ModelListResponse],
         [],
       ),
-    'getSystemTelemetry' : IDL.Func(
+    'get_telemetry' : IDL.Func(
         [IDL.Record({ 'token' : IDL.Text })],
         [TelemetryResponse],
         [],
       ),
-    'getTrustedCanisters' : IDL.Func(
+    'get_trusted_canisters' : IDL.Func(
         [IDL.Record({ 'token' : IDL.Text })],
         [TrustedCanistersResponse],
         [],
       ),
-    'isActivated' : IDL.Func([], [IDL.Bool], []),
-    'removeModelField' : IDL.Func(
+    'is_activated' : IDL.Func([], [IDL.Bool], []),
+    'remove_model_field' : IDL.Func(
         [
           IDL.Record({
             'token' : IDL.Text,
@@ -153,17 +153,17 @@ export const idlFactory = ({ IDL }) => {
         [ModelResponse],
         [],
       ),
-    'removeTrustedCanister' : IDL.Func(
+    'remove_trusted_canister' : IDL.Func(
         [IDL.Record({ 'token' : IDL.Text, 'canister_id' : IDL.Text })],
         [TrustedCanistersResponse],
         [],
       ),
-    'signIn' : IDL.Func(
+    'sign_in' : IDL.Func(
         [IDL.Record({ 'password' : IDL.Text })],
         [BasicResponse],
         [],
       ),
-    'updateModelInstance' : IDL.Func(
+    'update_model_instance' : IDL.Func(
         [
           IDL.Record({
             'id' : IDL.Text,

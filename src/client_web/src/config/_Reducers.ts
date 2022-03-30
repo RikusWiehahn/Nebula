@@ -9,6 +9,8 @@ import {
   ModelList,
   Model,
   EMPTY_MODEL,
+  EMPTY_MODEL_TABLE,
+  ModelTable,
 } from "./_Interfaces";
 
 export const ConfigReducer = (
@@ -87,15 +89,15 @@ export const ModelListReducer = (
   }
 };
 
-export const ModelReducer = (
-  state: Model = { ...EMPTY_MODEL },
+export const ModelTableReducer = (
+  state: ModelTable = { ...EMPTY_MODEL_TABLE },
   action: {
-    type: "MODEL_REDUCER";
-    payload: ModelList;
+    type: "MODEL_TABLE_REDUCER";
+    payload: ModelTable;
   }
 ) => {
   switch (action.type) {
-    case "MODEL_REDUCER": {
+    case "MODEL_TABLE_REDUCER": {
       return {
         ...state,
         ...action.payload,

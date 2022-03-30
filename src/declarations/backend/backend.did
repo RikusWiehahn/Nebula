@@ -72,37 +72,29 @@ type ModelInstanceResponse = record {
 };
 
 service : {
-    // Setup and authentication via the web client app.
     "activate": (record { password: text; password_check: text; bucket_wasm: blob }) -> (BasicResponse);
-    "isActivated": () -> (bool);
-    "signIn": (record { password: text }) -> (BasicResponse);
-    "checkSession": (record { token: text }) -> (BasicResponse);
-    "changePassword": (record { old_password: text; password: text; password_check: text }) -> (BasicResponse);
+    "is_activated": () -> (bool);
+    "sign_in": (record { password: text }) -> (BasicResponse);
+    "check_session": (record { token: text }) -> (BasicResponse);
+    "change_password": (record { old_password: text; password: text; password_check: text }) -> (BasicResponse);
 
-    // View status of main canister and data storage sub-canisters.
-    "getSystemTelemetry": (record { token: text }) -> (TelemetryResponse);
+    "get_telemetry": (record { token: text }) -> (TelemetryResponse);
 
-    // Manage which external entities are allowed to Create/Read/Update/Delete model instances.
-    "getTrustedCanisters": (record { token: text }) -> (TrustedCanistersResponse);
-    "addTrustedCanister": (record { token: text; name: text; canister_id: text }) -> (TrustedCanistersResponse);
-    "removeTrustedCanister": (record { token: text; canister_id: text}) -> (TrustedCanistersResponse);
+    "get_trusted_canisters": (record { token: text }) -> (TrustedCanistersResponse);
+    "add_trusted_canister": (record { token: text; name: text; canister_id: text }) -> (TrustedCanistersResponse);
+    "remove_trusted_canister": (record { token: text; canister_id: text}) -> (TrustedCanistersResponse);
 
-    // Manage the data models
-    // Performed via client app only
-    "createModel": (record { token: text; model_name: text }) -> (BasicResponse);
-    "getModels": (record { token: text }) -> (ModelListResponse);
-    "getModel": (record { token: text; model_name: text }) -> (ModelResponse);
-    "addModelField": (record { token: text; model_name: text }, ModelDataFieldType) -> (ModelResponse);
-    "removeModelField": (record {token: text; model_name: text; field_name: text }) -> (ModelResponse);
-    "deleteModel": (record { token: text; model_name: text }) -> (BasicResponse);
+    "create_model": (record { token: text; model_name: text }) -> (BasicResponse);
+    "get_models": (record { token: text }) -> (ModelListResponse);
+    "get_model": (record { token: text; model_name: text }) -> (ModelResponse);
+    "add_model_field": (record { token: text; model_name: text }, ModelDataFieldType) -> (ModelResponse);
+    "remove_model_field": (record {token: text; model_name: text; field_name: text }) -> (ModelResponse);
+    "delete_model": (record { token: text; model_name: text }) -> (BasicResponse);
     
-    // Create/Read/Update/Delete instances of the data models. 
-    // Performable via client ap and external canisters in the trusted canister list
-    "createModelInstance": (record { token: text; json: text; }) -> (ModelInstanceResponse);
-    "updateModelInstance": (record { token: text; id: text; json: text; }) -> (ModelInstanceResponse);
-    "getModelInstance": (record { token: text; id: text }) -> (ModelInstanceResponse);
-    "deleteModelInstance": (record { token: text; id: text }) -> (BasicResponse);
+    "create_model_instance": (record { token: text; json: text; }) -> (ModelInstanceResponse);
+    "update_model_instance": (record { token: text; id: text; json: text; }) -> (ModelInstanceResponse);
+    "get_model_instance": (record { token: text; id: text }) -> (ModelInstanceResponse);
+    "delete_model_instance": (record { token: text; id: text }) -> (BasicResponse);
 
-    // wallet
     "wallet_receive": (nat) -> ();
 }

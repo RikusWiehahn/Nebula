@@ -19,7 +19,7 @@ export const RemoveTrustedCanisterUtility = (props: {
   const removeTrustedCanister = async () => {
     try {
       setLoading(true);
-      const remove_res = await backend.removeTrustedCanister({
+      const remove_res = await backend.remove_trusted_canister({
         token: auth.token,
         canister_id: props.canister_id,
       });

@@ -66,7 +66,7 @@ type ModelListResponse = record {
     "err": text;
 };
 
-type ModelInstanceResponse = record {
+type ModelInstanceJsonResponse = record {
     "json": opt text;
     "err": text;
 };
@@ -78,7 +78,7 @@ service : {
     "check_session": (record { token: text }) -> (BasicResponse);
     "change_password": (record { old_password: text; password: text; password_check: text }) -> (BasicResponse);
 
-    "get_system_telemetry": (record { token: text }) -> (TelemetryResponse);
+    "get_telemetry": (record { token: text }) -> (TelemetryResponse);
 
     "get_trusted_canisters": (record { token: text }) -> (TrustedCanistersResponse);
     "add_trusted_canister": (record { token: text; name: text; canister_id: text }) -> (TrustedCanistersResponse);
@@ -91,10 +91,10 @@ service : {
     "remove_model_field": (record {token: text; model_name: text; field_name: text }) -> (ModelResponse);
     "delete_model": (record { token: text; model_name: text }) -> (BasicResponse);
     
-    "create_model_instance": (record { token: text; json: text; }) -> (ModelInstanceResponse);
-    "update_model_instance": (record { token: text; id: text; json: text; }) -> (ModelInstanceResponse);
-    "get_model_instance": (record { token: text; id: text }) -> (ModelInstanceResponse);
-    "delete_model_instance": (record { token: text; id: text }) -> (BasicResponse);
+    "create_model_instance": (record { token: text; json: text; }) -> (ModelInstanceJsonResponse);
+    "update_model_instance": (record { token: text; json: text; }) -> (ModelInstanceJsonResponse);
+    "get_model_instance": (record { token: text; model_name: text; id: text }) -> (ModelInstanceJsonResponse);
+    "delete_model_instance": (record { token: text; model_name: text; id: text }) -> (BasicResponse);
 
     "wallet_receive": (nat) -> ();
 }

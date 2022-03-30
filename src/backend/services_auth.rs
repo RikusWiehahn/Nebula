@@ -1,5 +1,6 @@
 use crate::helpers::*;
 use crate::main::*;
+use crate::services_telemetry::auto_update_telemetry;
 use crate::types::*;
 use crate::utilities::*;
 use ic_cdk_macros::update;
@@ -13,7 +14,7 @@ use ic_cdk_macros::update;
 //  #    #  ####    #   #    #    #  ####      ####  ######   #       ####  #
 
 #[update]
-pub async fn is_auth_set() -> bool {
+pub async fn is_activated() -> bool {
     let auth_info_res = find_auth_info();
     if auth_info_res.is_err() {
         return false;
@@ -30,7 +31,7 @@ pub async fn is_auth_set() -> bool {
 //   ####  ######   #    ####  #
 
 #[update]
-pub async fn set_auth(
+pub async fn activate(
     Activate {
         password,
         password_check,
@@ -91,6 +92,9 @@ pub async fn set_auth(
         res.err = "Error generating JWT".to_string();
         return res;
     }
+
+    // init telemetry
+    let _ = auto_update_telemetry().await;
 
     res.ok = Some(jwt_res.unwrap());
     return res;

@@ -1,5 +1,5 @@
 use ic_cdk::export::{
-    candid::{CandidType, Deserialize, Nat},
+    candid::{CandidType, Deserialize},
     Principal,
 };
 use serde::Serialize;
@@ -333,4 +333,75 @@ pub struct AddTrustedCanister {
 pub struct RemoveTrustedCanister {
     pub token: String,
     pub canister_id: String,
+}
+
+
+//                                                           
+//  # #    #  ####  #####   ##   #    #  ####  ######  ####  
+//  # ##   # #        #    #  #  ##   # #    # #      #      
+//  # # #  #  ####    #   #    # # #  # #      #####   ####  
+//  # #  # #      #   #   ###### #  # # #      #           # 
+//  # #   ## #    #   #   #    # #   ## #    # #      #    # 
+//  # #    #  ####    #   #    # #    #  ####  ######  ####  
+
+#[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
+pub struct ModelInstanceId {
+    pub id: String,
+}
+
+#[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
+pub struct ModelInstanceRequest {
+    pub token: String,
+    pub model_name: String,
+    pub id: String,
+}
+
+#[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
+pub struct ModelInstanceDataField {
+    pub field_name: String,
+    pub data_type: String,
+    pub json_value: String,
+}
+
+#[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
+pub struct ModelInstance {
+    pub id: String,
+    pub model_name: String,
+    pub data_fields: Vec<ModelInstanceDataField>,    
+}
+
+#[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
+pub struct ModelInstanceResponse {
+    pub ok: Option<ModelInstance>,
+    pub err: String,
+}
+
+impl Default for ModelInstanceResponse {
+    fn default() -> Self {
+        ModelInstanceResponse {
+            ok: None,
+            err: "".to_string(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, CandidType, Deserialize, Serialize)]
+pub struct CreateOrUpdateModelInstanceJson {
+    pub token: String,
+    pub json: String,
+}
+
+#[derive(Clone, Debug, CandidType, Deserialize)]
+pub struct ModelInstanceJsonResponse {
+    pub json: Option<String>,
+    pub err: String,
+}
+
+impl Default for ModelInstanceJsonResponse {
+    fn default() -> Self {
+        ModelInstanceJsonResponse {
+            json: None,
+            err: "".to_string(),
+        }
+    }
 }

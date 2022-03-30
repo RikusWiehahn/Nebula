@@ -19,14 +19,14 @@ export const DeleteModelUtility = (props: { model: Model }) => {
     try {
       const { token } = auth;
       setLoading(true);
-      const delete_res = await backend.deleteModel({
+      const delete_res = await backend.delete_model({
         token,
         model_name: props.model.model_name,
       });
       if (delete_res.err) throw new Error(delete_res.err);
       if (!delete_res.ok) throw new Error("Failed to delete model.");
       SuccessToast(delete_res.ok?.[0] || "");
-      const models_res = await backend.getModels({ token });
+      const models_res = await backend.get_models({ token });
       if (models_res.err) throw new Error(models_res.err);
       if (!models_res.ok) throw new Error("Failed to get models.");
       dispatch(
