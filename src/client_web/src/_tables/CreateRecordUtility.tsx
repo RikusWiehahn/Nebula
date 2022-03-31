@@ -231,7 +231,7 @@ export const CreateRecordUtility = (props: Props) => {
       isLoading={loading}
       onClose={() => setShowModal(false)}
       buttonComponent={
-        <button onClick={() => setShowModal(true)} className="btn-list">
+        <button onClick={() => setShowModal(true)} className="btn-list py-2">
           <RiAddLine className="mr-4" />
           Create new item
         </button>

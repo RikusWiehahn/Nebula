@@ -286,7 +286,7 @@ pub fn convert_json_to_record(json: String) -> Result<Record, String> {
     for field in new_data_fields.iter_mut() {
         let field_name = field.field_name.clone();
         let field_is_present = json_value[&field_name].as_str();
-        if field_is_present != None {
+        if field_is_present == None {
             continue;
         }
         let field_data_type_res = find_model_data_field_type(&model_name, &field_name);

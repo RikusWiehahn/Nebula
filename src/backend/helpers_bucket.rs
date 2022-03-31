@@ -283,7 +283,7 @@ pub async fn find_sub_canister_records_list(
     };
 
     let call_res: Result<(RecordListResponse,), (RejectionCode, String)> =
-        ic_cdk::call(principal, "get_record", (input,)).await;
+        ic_cdk::call(principal, "get_record_list", (input,)).await;
     if call_res.is_err() {
         return Err(format!("{:?}", call_res.err().unwrap()));
     }

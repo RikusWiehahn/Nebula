@@ -117,18 +117,18 @@ export enum DataFieldType {
 }
 
 export const dataFieldTypesList = [
-  { label: "String", value: DataFieldType.STRING, default_value: "" },
-  { label: "Boolean", value: DataFieldType.BOOLEAN, default_value: "false" },
-  { label: "Number", value: DataFieldType.NUMBER, default_value: "0" },
+  { label: "String", value: DataFieldType.STRING, default_value: `` },
+  { label: "Boolean", value: DataFieldType.BOOLEAN, default_value: `false` },
+  { label: "Number", value: DataFieldType.NUMBER, default_value: `0` },
   {
     label: "String Array",
     value: DataFieldType.STRING_ARRAY,
-    default_value: "[]",
+    default_value: `[]`,
   },
   {
     label: "Number Array",
     value: DataFieldType.NUMBER_ARRAY,
-    default_value: "[]",
+    default_value: `[]`,
   },
 ];
 
@@ -160,11 +160,15 @@ export const EMPTY_RECORD = {
 export interface RecordTable {
   model_name: string;
   data_fields: Array<ModelDataFieldType>;
-  records: Array<Record>;
+  records: Array<any>;
+  page: number;
+  page_size: number;
 }
 
 export const EMPTY_RECORD_TABLE = {
   model_name: "",
   data_fields: [],
   records: [],
+  page: 1,
+  page_size: 100,
 };

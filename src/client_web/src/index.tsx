@@ -11,7 +11,7 @@ import { HomeScreen } from "./_home/HomeScreen";
 import { UIModeProvider } from "./config/UIModeProvider";
 import { ProfileScreen } from "./_user/ProfileScreen";
 import { ModelListScreen } from "./_models/ModelListScreen";
-import { ModelTablesScreen } from "./_tables/ModelTablesScreen";
+import { RecordTablesScreen } from "./_tables/RecordTablesScreen";
 
 const App = () => {
   const renderRoutes = () => {
@@ -19,7 +19,7 @@ const App = () => {
       <Routes>
         <Route path={routes.MODEL_TYPES} element={<ModelListScreen />} />
         <Route path={routes.SETTINGS} element={<ProfileScreen />} />
-        <Route path={routes.MODEL_TABLE_LIST} element={<ModelTablesScreen />} />
+        <Route path={routes.MODEL_TABLE_LIST} element={<RecordTablesScreen />} />
         <Route path={routes.HOME} element={<HomeScreen />} />
       </Routes>
     );

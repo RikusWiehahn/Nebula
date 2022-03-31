@@ -419,6 +419,8 @@ pub async fn create_record(
         return res;
     }
     let mut record = record_res.ok().unwrap();
+    ic_cdk::println!("record: {:?}", record);
+    
 
     // generate uuid
     let uuid_res = generate_uuid().await;
