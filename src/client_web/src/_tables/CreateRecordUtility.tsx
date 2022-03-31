@@ -218,7 +218,7 @@ export const CreateRecordUtility = (props: Props) => {
           className="btn-primary mt-4 w-full"
           onClick={createRecord}
         >
-          Create new item
+          Create new record
         </button>
       </div>
     );
@@ -226,14 +226,14 @@ export const CreateRecordUtility = (props: Props) => {
 
   return (
     <ModalWrapper
-      headerLabel="Create a new item"
+      headerLabel="Create a new record"
       showModal={showModal}
       isLoading={loading}
       onClose={() => setShowModal(false)}
       buttonComponent={
         <button onClick={() => setShowModal(true)} className="btn-list py-2">
           <RiAddLine className="mr-4" />
-          Create new item
+          Create new record
         </button>
       }
     >

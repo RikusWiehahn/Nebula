@@ -104,7 +104,7 @@ export const AddDataFieldUtility = (props: { model: Model }) => {
           }}
           type="text"
           autoComplete="off"
-          placeholder={`""`}
+          placeholder={``}
         />
         <button className="btn-primary mt-4 w-full" onClick={addDataField}>
           Add data field

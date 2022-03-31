@@ -277,7 +277,6 @@ pub async fn insert_record(
         data_fields: vec![],
     };
 
-
     // insert data fields
     for data_field in data_fields {
         let model_data_field_opt = model_data_fields.get(&data_field.field_name);
@@ -332,7 +331,6 @@ pub async fn insert_record(
         records.insert(new_record.id.clone(), new_record.clone());
     });
 
-    
     res.ok = Some(new_record.clone());
     return res;
 }
@@ -398,7 +396,7 @@ pub async fn get_record_list(
 
     let mut page_records = vec![];
     for (i, record) in records.iter().enumerate() {
-        if i as f64 <= page * page_size - page_size {
+        if page * page_size - page_size < i as f64 {
             continue;
         }
         if i as f64 > page * page_size {
